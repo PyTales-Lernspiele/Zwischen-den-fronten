@@ -129,7 +129,7 @@
       "geschlecht": "m",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_m_einsam",
@@ -137,7 +137,7 @@
       "geschlecht": "m",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_neutral",
@@ -153,7 +153,7 @@
       "geschlecht": "w",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_erschoepft",
@@ -161,7 +161,7 @@
       "geschlecht": "w",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_angst",
@@ -169,7 +169,7 @@
       "geschlecht": "w",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_einsam",
@@ -177,7 +177,7 @@
       "geschlecht": "w",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_neutral",
@@ -193,7 +193,7 @@
       "geschlecht": "m",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_erschoepft",
@@ -201,7 +201,7 @@
       "geschlecht": "m",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_angst",
@@ -209,7 +209,7 @@
       "geschlecht": "m",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_einsam",
@@ -217,7 +217,7 @@
       "geschlecht": "m",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_neutral",
@@ -233,7 +233,7 @@
       "geschlecht": "w",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_erschoepft",
@@ -249,7 +249,7 @@
       "geschlecht": "w",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_einsam",
