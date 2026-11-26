@@ -1,0 +1,1188 @@
+==============================================================================
+KURZFASSUNG
+==============================================================================
+Aufbau               in Ordnung           8 Dateien, 69 Bloecke
+1 Bestandstafel      in Ordnung           
+2 Pfadprobe          in Ordnung           
+3 Sackgassenprobe    in Ordnung           
+4 Wertetafel         12 Beanstandungen    
+5 Belegprobe         in Ordnung           
+6 Medienprobe        in Ordnung           
+7 Sprachprobe        in Ordnung           
+8 Lesbarkeit         1 Beanstandungen     
+GESAMT: FEHLER - siehe Bericht
+==============================================================================
+
+==============================================================================
+PROBE ALLES - Werkbank zu "Zwischen Front und Heimat"
+==============================================================================
+Ordner: C:\Users\domin\Desktop\renpy-8.5.0-sdk\Zwischen den Fronten Backup Cloud\game
+Zufallssaat: 19140801   Durchgaenge je Lage: 300
+
+==============================================================================
+A  AUFBAU
+==============================================================================
+Datei             Bloecke   Vorgaben    Zustand
+gui.rpy                 3          0 in Ordnung
+script.rpy              4         22 in Ordnung
+herkunft.rpy            7          4 in Ordnung
+kapitel.rpy            22          6 in Ordnung
+dialoge.rpy             5         10 in Ordnung
+figuren.rpy            11         15 in Ordnung
+merkbuch.rpy            7          5 in Ordnung
+minispiele.rpy         10         15 in Ordnung
+
+Ausfuehrungsfolge (init-Rang, dann Datei, dann Stelle):
+   gui:1@-50   dialoge:25@-20   script:1@-20   herkunft:57@-19   kapitel:56@-19
+   kapitel:394@-19   kapitel:468@-19   dialoge:115@-10   herkunft:293@-10   script:214@-10
+   kapitel:567@-9   figuren:66@-8   figuren:171@-8   merkbuch:67@-7   minispiele:68@-6
+   minispiele:159@-6   minispiele:465@-6   dialoge:164@-5   script:345@-5   herkunft:383@-4
+   gui:240@-2   gui:360@-2   dialoge:518@0   dialoge:614@0   figuren:3243@0
+   herkunft:876@0   herkunft:971@0   script:607@0   figuren:549@1   figuren:1351@1
+   herkunft:1089@1   kapitel:615@1   kapitel:1610@1   kapitel:5775@1   merkbuch:199@1
+   herkunft:1920@2   kapitel:1152@2   kapitel:1638@2   kapitel:1835@2   kapitel:1903@2
+   merkbuch:275@2   figuren:282@3   figuren:2216@3   figuren:2409@3   figuren:2690@3
+   figuren:3352@3   kapitel:2046@3   kapitel:2106@3   kapitel:2464@3   kapitel:2855@3
+   kapitel:3543@3   kapitel:4212@3   kapitel:4563@3   kapitel:4925@3   kapitel:5323@3
+   kapitel:5510@3   kapitel:5704@3   figuren:2830@4   merkbuch:379@5   merkbuch:559@5
+   merkbuch:1212@5   merkbuch:1291@6   minispiele:722@7   minispiele:915@7   minispiele:1415@7
+   minispiele:1519@7   minispiele:1571@7   minispiele:2521@8   minispiele:2716@9
+
+Alle gelesenen Bloecke sind durchgelaufen.
+Keine Attrappe musste einspringen.
+
+==============================================================================
+PROBE 1  BESTANDSTAFEL
+==============================================================================
+Soll ist die Zahl der vorgesehenen Ziehungen (KAPITEL_ZIEHUNGEN).
+Frei sind Ereignisse ohne Merkmalsbedingung, gebunden die uebrigen.
+Die Spalte Lage nennt seit Paket 2, Schritt 1 drei Stufen und rechnet
+mit derselben Funktion wie der Bildschirm im Spiel (bestandslage in
+kapitel.rpy): Unterdeckung heisst frei unter Soll, knapp heisst
+weniger als 2 Ereignisse Reserve. Beanstandet wird nur Unterdeckung.
+
+Ereignisse - Kurzer Verlauf
+------------------------------------------------------------------------------
+Jahr   Pfad               Soll   Frei   Gebunden   Lage           Befund
+1914   An der Front          2      4          0   in Ordnung     
+1914   In der Etappe         2      6          0   in Ordnung     
+1914   In der Heimat         2      5          0   in Ordnung     
+1915   An der Front          2      6          0   in Ordnung     
+1915   In der Etappe         2      9          0   in Ordnung     
+1915   In der Heimat         2      6          1   in Ordnung     
+1916   An der Front          3      9          0   in Ordnung     
+1916   In der Etappe         3     10          0   in Ordnung     
+1916   In der Heimat         3      8          1   in Ordnung     
+1917   An der Front          2      9          0   in Ordnung     
+1917   In der Etappe         2     10          0   in Ordnung     
+1917   In der Heimat         2      9          0   in Ordnung     
+1918   An der Front          3      9          0   in Ordnung     
+1918   In der Etappe         3     11          0   in Ordnung     
+1918   In der Heimat         3     12          0   in Ordnung     
+1919   An der Front          1      7          0   in Ordnung     
+1919   In der Etappe         1      7          0   in Ordnung     
+1919   In der Heimat         1      6          0   in Ordnung     
+
+Ereignisse - Langer Verlauf
+------------------------------------------------------------------------------
+Jahr   Pfad               Soll   Frei   Gebunden   Lage           Befund
+1914   An der Front          5      7          0   in Ordnung     
+1914   In der Etappe         5     10          0   in Ordnung     
+1914   In der Heimat         5      6          1   knapp          keine Reserve
+1915   An der Front          5      9          0   in Ordnung     
+1915   In der Etappe         5     15          0   in Ordnung     
+1915   In der Heimat         5      7          4   in Ordnung     
+1916   An der Front          7     13          0   in Ordnung     
+1916   In der Etappe         7     17          0   in Ordnung     
+1916   In der Heimat         7     11          4   in Ordnung     
+1917   An der Front          6     11          2   in Ordnung     
+1917   In der Etappe         6     16          0   in Ordnung     
+1917   In der Heimat         6     10          6   in Ordnung     
+1918   An der Front          7     11          5   in Ordnung     
+1918   In der Etappe         7     15          2   in Ordnung     
+1918   In der Heimat         7     13          4   in Ordnung     
+1919   An der Front          2      7          0   in Ordnung     
+1919   In der Etappe         2      7          0   in Ordnung     
+1919   In der Heimat         2      6          0   in Ordnung     
+
+Einlagen - Kurzer Verlauf  (hoechstens 1 je Kapitel)
+------------------------------------------------------------------------------
+Eine wiederholbare Einlage kann die Zahl allein fuellen. Beanstandet
+wird deshalb nur, wo gar keine Einlage steht oder wo der Bestand die
+vorgesehene Zahl auch mit Wiederholung nicht erreicht.
+Jahr   Pfad               Soll   Frei   wiederholbar   Gebunden   Befund
+1914   An der Front          1      2              1          0   in Ordnung
+1914   In der Etappe         1      2              1          0   in Ordnung
+1914   In der Heimat         1      1              1          0   in Ordnung
+1915   An der Front          1      3              2          0   in Ordnung
+1915   In der Etappe         1      3              2          0   in Ordnung
+1915   In der Heimat         1      2              2          0   in Ordnung
+1916   An der Front          1      2              2          0   in Ordnung
+1916   In der Etappe         1      2              2          0   in Ordnung
+1916   In der Heimat         1      3              2          0   in Ordnung
+1917   An der Front          1      2              2          0   in Ordnung
+1917   In der Etappe         1      2              2          0   in Ordnung
+1917   In der Heimat         1      3              2          0   in Ordnung
+1918   An der Front          1      2              2          0   in Ordnung
+1918   In der Etappe         1      2              2          0   in Ordnung
+1918   In der Heimat         1      3              2          0   in Ordnung
+1919   An der Front          1      1              1          0   in Ordnung
+1919   In der Etappe         1      1              1          0   in Ordnung
+1919   In der Heimat         1      1              1          0   in Ordnung
+
+Einlagen - Langer Verlauf  (hoechstens 2 je Kapitel)
+------------------------------------------------------------------------------
+Eine wiederholbare Einlage kann die Zahl allein fuellen. Beanstandet
+wird deshalb nur, wo gar keine Einlage steht oder wo der Bestand die
+vorgesehene Zahl auch mit Wiederholung nicht erreicht.
+Jahr   Pfad               Soll   Frei   wiederholbar   Gebunden   Befund
+1914   An der Front          2      2              1          0   in Ordnung
+1914   In der Etappe         2      2              1          0   in Ordnung
+1914   In der Heimat         2      1              1          0   in Ordnung
+1915   An der Front          2      3              2          0   in Ordnung
+1915   In der Etappe         2      3              2          0   in Ordnung
+1915   In der Heimat         2      2              2          0   in Ordnung
+1916   An der Front          2      2              2          0   in Ordnung
+1916   In der Etappe         2      2              2          0   in Ordnung
+1916   In der Heimat         2      3              2          0   in Ordnung
+1917   An der Front          2      2              2          0   in Ordnung
+1917   In der Etappe         2      2              2          0   in Ordnung
+1917   In der Heimat         2      3              2          0   in Ordnung
+1918   An der Front          2      2              2          0   in Ordnung
+1918   In der Etappe         2      2              2          0   in Ordnung
+1918   In der Heimat         2      3              2          0   in Ordnung
+1919   An der Front          2      1              1          0   in Ordnung
+1919   In der Etappe         2      1              1          0   in Ordnung
+1919   In der Heimat         2      1              1          0   in Ordnung
+
+Summe der vorgesehenen Ziehungen in den Kriegsjahren: kurz 12, lang 30.
+Zeilen ohne Reserve (Lage 'knapp'): 1. Sie zaehlen nicht als
+Beanstandung, sind aber die naechsten Kandidaten fuer eine Sackgasse.
+
+Traeger des Jahresbogens (KAPITEL_BOGEN)
+------------------------------------------------------------------------------
+Jeder Traeger muss kern=True haben, sonst traegt er im kurzen
+Verlauf nichts. Traeger auf geschlossenen Pfaden zaehlen mit: Sie
+werden falsch, sobald das Paket den Pfad oeffnet.
+
+   Traeger insgesamt: 29
+   keine Beanstandung
+
+Geplante Rueckbezuege (NACHHALL_PLAN): 0 von 14 bestehen noch nicht.
+
+Zusammengefuehrter Inhaltsplan (Nachhall + Ketten)
+------------------------------------------------------------------------------
+Herkunft 'beide' heisst: Die Kennung steht in beiden Plaenen und
+wird trotzdem nur EINMAL gebaut.
+
+Kennung                                  Jahr   Pfad     Herkunft  Zustand      geht hervor aus
+front_1917_verbruederung_nachhall        1917   front    beide     besteht      front_1914_weihnachten (+3)
+front_1917_gerichtsherr                  1917   front    Nachhall  besteht      
+front_1918_abrechnung                    1918   front    Nachhall  besteht      
+heimat_1917_aprilstreik                  1917   heimat   beide     besteht      heimat_1916_arbeitsniederlegung (+1)
+heimat_1918_rat                          1918   heimat   Nachhall  besteht      
+front_1918_liste                         1918   front/etappe beide     besteht      front_1916_zaehlung (+2)
+front_1918_freiwillig_von_1914           1918   front    Nachhall  besteht      
+front_1918_befehl                        1918   front    Nachhall  besteht      
+heimat_1917_hilfsdienst                  1917   heimat   Nachhall  besteht      
+heimat_1918_grippe                       1918   heimat   Nachhall  besteht      
+heimat_1917_ablieferung                  1917   heimat   Nachhall  besteht      
+heimat_1917_akkord                       1917   heimat   Nachhall  besteht      
+heimat_1917_schulspeisung                1917   heimat   Nachhall  besteht      
+lazarett_1918_grippestation              1918   beide    Nachhall  besteht      
+front_nachfrage                          -      front    Kette     besteht      front_kamerad (+1)
+heimat_verfahren                         -      heimat   Kette     besteht      heimat_hamsterfahrt (+1)
+heimat_1917_hinterhaus                   -      heimat   Kette     fehlt        heimat_denunziation (+1)
+heimat_1918_schulbank                    -      heimat   Kette     fehlt        heimat_1916_kinderarbeit (+2)
+front_1918_wiedersehen                   -      front    Kette     fehlt        front_1916_gefangener (+2)
+
+Eintraege insgesamt: 19, davon in beiden Plaenen: 3 (front_1917_verbruederung_nachhall, heimat_1917_aprilstreik, front_1918_liste)
+Noch zu bauen: 3.
+
+==============================================================================
+PROBE 2  PFADPROBE
+==============================================================================
+Je Startpfad und Verlauf 300 Durchgaenge ueber alle sechs Kapitel, also
+600 Durchgaenge je Startpfad. Gezogen wird mit den Funktionen des
+Projekts, gewaehlt wird zufaellig, gespielt wird die Kette aus
+Einstieg, Hauptschleife, Einlage, Post und Kapitelwechsel.
+
+Pfad             Verlauf          Ereignisse   Einlagen     Briefe
+An der Front     Kurzer Verlauf         5702       1544       1575
+                                        9.50       2.57       2.62   je Durchgang
+An der Front     Langer Verlauf         8316       2262       1951
+                                       13.86       3.77       3.25   je Durchgang
+In der Etappe    Kurzer Verlauf         5028       1267       1331
+                                        8.38       2.11       2.22   je Durchgang
+In der Etappe    Langer Verlauf         6199       1567       1258
+                                       10.33       2.61       2.10   je Durchgang
+In der Heimat    Kurzer Verlauf         5697       1565       1548
+                                        9.49       2.61       2.58   je Durchgang
+In der Heimat    Langer Verlauf         9276       2348       2026
+                                       15.46       3.91       3.38   je Durchgang
+
+a) Inhalt auf einem Pfad, den seine pfad-Liste nicht nennt
+------------------------------------------------------------------------------
+   keine Beanstandung
+
+b) Brief, dessen welt nicht briefwelt() entspricht
+------------------------------------------------------------------------------
+   keine Beanstandung
+
+c) variante() und welttext() ohne genauen Pfadschluessel
+------------------------------------------------------------------------------
+   zweig 'ersatz'   : welttext() hat die Fassung der eigenen Welt
+                      genommen statt der des genauen Pfades
+   zweig 'standard' : eine Fassung fuer diesen Pfad fehlt
+   zweig 'leer'     : es gab ueberhaupt keine passende Fassung
+
+   keine Beanstandung
+
+Gegenprobe: das Protokoll im Spiel (variantenersatz_protokoll)
+------------------------------------------------------------------------------
+   Werkbank von aussen: 0 Griffe
+   Spiel von innen:     0 Griffe, 0 Stellen eingetragen
+   Beide Zaehlungen stimmen ueberein.
+
+Post, die nicht zur eigenen Welt passte (postwelt_protokoll)
+------------------------------------------------------------------------------
+   keine Beanstandung
+
+Der persoenliche Faden: Kapitel ohne jede Nebenfigur
+------------------------------------------------------------------------------
+Gezaehlt wird je Jahr und Pfad, in wie vielen Durchgaengen ueberhaupt
+eine Nebenfigur vorkam. Ein Kapitel, das ein Durchgang erreicht hat,
+aber ohne Figur bleibt, ist ein Kapitel ohne Faden.
+
+Ein Jahr ohne jeden Ereignisbestand kann auch keine Post tragen: Post
+wird nur nach einem Ereignis zugestellt. Solche Zeilen zaehlen hier
+nicht mit, sie stehen schon in Probe 1 und Probe 3.
+
+Jahr   Pfad               erreicht  mit Figur   Anteil %   Befund
+1914   An der Front           1200        605       50.4   in Ordnung
+1914   In der Etappe          1200        656       54.7   in Ordnung
+1914   In der Heimat          1200        634       52.8   in Ordnung
+1915   An der Front           1184        849       71.7   in Ordnung
+1915   In der Etappe          1151        685       59.5   in Ordnung
+1915   In der Heimat          1190        669       56.2   in Ordnung
+1916   An der Front           1028        778       75.7   in Ordnung
+1916   In der Etappe           930        687       73.9   in Ordnung
+1916   In der Heimat          1089        862       79.2   in Ordnung
+1917   An der Front            645        378       58.6   in Ordnung
+1917   In der Etappe           503        223       44.3   duenn
+1917   In der Heimat           709        412       58.1   in Ordnung
+1918   An der Front            356        233       65.4   in Ordnung
+1918   In der Etappe           205         98       47.8   duenn
+1918   In der Heimat           404        258       63.9   in Ordnung
+1919   An der Front            195        121       62.1   in Ordnung
+1919   In der Etappe            35         21       60.0   in Ordnung
+1919   In der Heimat           210        123       58.6   in Ordnung
+
+Ketten: Vormerkungen, die nicht mehr eingeloest werden koennen
+------------------------------------------------------------------------------
+Seit Paket 3, Schritt 2 prueft kette_faellig() auch das Jahr. Ein
+vorgemerktes Glied, dessen Jahre alle vorbei sind, bleibt liegen.
+
+   Offene Vormerkungen am Ende: 0 in 3600 Durchgaengen (0.000 je Durchgang)
+   keine Beanstandung
+
+   Aufgeschluesselt nach dem vorgemerkten Glied:
+      keine
+
+Ketten: zweites Glied ohne ein Jahr nach dem ersten
+------------------------------------------------------------------------------
+Das zweite Glied muss mindestens ein Jahr abdecken, das nach dem
+spaetesten Jahr des ersten Glieds liegt. Glieder, die es noch nicht
+gibt, stehen als Fehlstelle im Plan und werden hier uebergangen.
+
+   keine Beanstandung
+
+Nie gezogen (kein Fehler, aber toter Bestand)
+------------------------------------------------------------------------------
+   Ereignis  front_1918_befehl                        front                  1918
+   Ereignis  heimat_1918_grippe                       heimat                 1918
+
+Verschiedene Ereignisse gezogen: 90 von 92. Einlagen: 5 von 5. Briefe: 26 von 26.
+
+==============================================================================
+PROBE 3  SACKGASSENPROBE
+==============================================================================
+Wie endet ein Kapitel? 'Soll' heisst: die vorgesehene Zahl Ziehungen
+ist erreicht. 'Leer' heisst: ereignis_ziehen() lieferte None, der
+Bestand war aufgebraucht. Jede Zeile mit Leer ueber null Prozent ist
+eine Beanstandung, weil das Kapitel dort frueher endet als geplant.
+
+Kapitelabschluesse - Kurzer Verlauf
+------------------------------------------------------------------------------
+Jahr   Pfad               Faelle   Soll %   Leer %   Ende %   Befund
+1914   An der Front          300    100.0      0.0      0.0   in Ordnung
+1914   In der Etappe         300    100.0      0.0      0.0   in Ordnung
+1914   In der Heimat         300    100.0      0.0      0.0   in Ordnung
+1915   An der Front          300     97.7      0.0      2.3   in Ordnung
+1915   In der Etappe         300     98.3      0.0      1.7   in Ordnung
+1915   In der Heimat         300     97.3      0.0      2.7   in Ordnung
+1916   An der Front          293     74.7      0.0     25.3   in Ordnung
+1916   In der Etappe         295     74.9      0.0     25.1   in Ordnung
+1916   In der Heimat         292     73.3      0.0     26.7   in Ordnung
+1917   An der Front          219     57.5      0.0     42.5   in Ordnung
+1917   In der Etappe         221     45.7      0.0     54.3   in Ordnung
+1917   In der Heimat         214     53.7      0.0     46.3   in Ordnung
+1918   An der Front          126     48.4      0.0     51.6   in Ordnung
+1918   In der Etappe         101     21.8      0.0     78.2   in Ordnung
+1918   In der Heimat         115     42.6      0.0     57.4   in Ordnung
+1919   An der Front           61    100.0      0.0      0.0   in Ordnung
+1919   In der Etappe          22    100.0      0.0      0.0   in Ordnung
+1919   In der Heimat          49    100.0      0.0      0.0   in Ordnung
+
+Kapitelabschluesse - Langer Verlauf
+------------------------------------------------------------------------------
+Jahr   Pfad               Faelle   Soll %   Leer %   Ende %   Befund
+1914   An der Front          300     94.7      0.0      5.3   in Ordnung
+1914   In der Etappe         300     88.0      0.0     12.0   in Ordnung
+1914   In der Heimat         300     96.7      0.0      3.3   in Ordnung
+1915   An der Front          284     70.8      0.0     29.2   in Ordnung
+1915   In der Etappe         264     52.3      0.0     47.7   in Ordnung
+1915   In der Heimat         290     71.7      0.0     28.3   in Ordnung
+1916   An der Front          201     22.9      0.0     77.1   in Ordnung
+1916   In der Etappe         138      5.8      0.0     94.2   in Ordnung
+1916   In der Heimat         208     22.1      0.0     77.9   in Ordnung
+1917   An der Front           46      8.7      0.0     91.3   in Ordnung
+1917   In der Etappe           8      0.0      0.0    100.0   in Ordnung
+1917   In der Heimat          46     19.6      0.0     80.4   in Ordnung
+1918   An der Front            4     50.0      0.0     50.0   in Ordnung
+1918   In der Heimat           9     11.1      0.0     88.9   in Ordnung
+1919   An der Front            2    100.0      0.0      0.0   in Ordnung
+1919   In der Heimat           1    100.0      0.0      0.0   in Ordnung
+
+Ueber alle Lagen: 6209 Kapitelabschluesse, davon 0.0 Prozent aus Mangel
+(ereignis_ziehen() lieferte None), 73.2 Prozent nach erreichtem Soll und
+26.8 Prozent durch einen Abbruch oder einen Sprung.
+
+==============================================================================
+PROBE 4  WERTETAFEL
+==============================================================================
+Angegeben ist der Rohwert von 0 bis 12, nicht die Anzeige. Bei
+versorgung und rueckhalt ist ein hoher Wert gut, bei belastung und
+aufmerksamkeit schlecht. Die Stufenspalten rechnen das um: Stufe 0 ist
+immer die gute Lage, Stufe 4 immer die schlechte.
+
+Seit Paket 2, Schritt 3 wird jede Lage mit zwei Wahlstrategien
+gespielt. 'zufall' wuerfelt die Option, 'klug' nimmt die, die den
+derzeit schlechtesten Wert am wenigsten verschlechtert.
+
+BEANSTANDET WIRD:
+  a) zufaellige Wahl: ueberlebt unter 35 oder ueber 70 Prozent
+  b) kluge Wahl:      weniger als 80 Prozent erreichen 1919
+  c) der reine Kalender erreicht allein schon eine Abbruchschwelle
+
+Wer erreicht 1919?
+------------------------------------------------------------------------------
+Pfad             Verlauf            zufall %     klug %    Abstand   Befund
+An der Front     Kurzer Verlauf         20.3       38.7       18.3   >> FEHLER << zufall zu niedrig, klug unter 80
+An der Front     Langer Verlauf          0.7        5.3        4.7   >> FEHLER << zufall zu niedrig, klug unter 80
+In der Etappe    Kurzer Verlauf          7.3        4.3       -3.0   >> FEHLER << zufall zu niedrig, klug unter 80
+In der Etappe    Langer Verlauf          0.0        0.0        0.0   >> FEHLER << zufall zu niedrig, klug unter 80
+In der Heimat    Kurzer Verlauf         16.3       40.0       23.7   >> FEHLER << zufall zu niedrig, klug unter 80
+In der Heimat    Langer Verlauf          0.3       13.3       13.0   >> FEHLER << zufall zu niedrig, klug unter 80
+
+An der Front - Kurzer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      5.3       12      2    17    47    23    11
+belastung      Erschöpfung             0      9.2       12      3     9    15    23    50
+aufmerksamkeit Verdacht                0      6.3       12      8    29    25    14    24
+rueckhalt      Einsamkeit              0      6.4       12     12    26    32    24     6
+
+   Ausgaenge:  verhungert 6.3%   zusammenbruch 42.3%   verhaftet 22.0%   gefallen 9.0%   ueberlebt 20.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 70.7 Prozent
+
+An der Front - Kurzer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  1      6.3       12      4    26    46    23     1
+belastung      Erschöpfung             0      8.2       12      2    10    28    37    23
+aufmerksamkeit Verdacht                0      7.9       12      4    15    25    17    38
+rueckhalt      Einsamkeit              0      5.8       12      8    24    31    28     9
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 17.7%   verhaftet 37.0%   gefallen 6.7%   ueberlebt 38.7%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 54.7 Prozent
+
+An der Front - Langer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      6.6       12     10    33    31    18     7
+belastung      Erschöpfung             0     10.0       12      2     6    14    15    63
+aufmerksamkeit Verdacht                0      7.0       12      9    21    23    18    29
+rueckhalt      Einsamkeit              0      6.6       12     12    28    36    18     6
+
+   Ausgaenge:  verhungert 4.3%   zusammenbruch 59.0%   verhaftet 27.3%   gefallen 8.7%   ueberlebt 0.7%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 90.7 Prozent
+
+An der Front - Langer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  2      6.7       12      8    28    43    22     0
+belastung      Erschöpfung             0      7.6       12      3    13    29    38    18
+aufmerksamkeit Verdacht                0      9.3       12      3     9    14    11    62
+rueckhalt      Einsamkeit              0      7.0       12     15    31    33    17     4
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 12.0%   verhaftet 60.0%   gefallen 22.7%   ueberlebt 5.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 72.0 Prozent
+
+In der Etappe - Kurzer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  2      6.6       12      2    31    52    14     0
+belastung      Erschöpfung             0      8.9       12      2    11    18    28    41
+aufmerksamkeit Verdacht                0      9.5       12      3     6    14    14    63
+rueckhalt      Einsamkeit              0      5.3       12      8    22    29    23    19
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 31.3%   verhaftet 61.3%   gefallen 0.0%   ueberlebt 7.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 92.7 Prozent
+
+In der Etappe - Kurzer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  1      6.8       11      1    34    55    10     0
+belastung      Erschöpfung             1      8.2       12      0     3    27    59    11
+aufmerksamkeit Verdacht                4     11.1       12      0     0     4     3    92
+rueckhalt      Einsamkeit              0      6.1       12     12    23    34    23     8
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 4.3%   verhaftet 91.3%   gefallen 0.0%   ueberlebt 4.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 95.7 Prozent
+
+In der Etappe - Langer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  1      7.9       12     13    48    33     6     0
+belastung      Erschöpfung             0      8.4       12      3    16    18    23    39
+aufmerksamkeit Verdacht                0      9.4       12      3     8    14     9    66
+rueckhalt      Einsamkeit              0      5.5       12     12    23    21    24    20
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 36.0%   verhaftet 64.0%   gefallen 0.0%   ueberlebt 0.0%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 100.0 Prozent
+
+In der Etappe - Langer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  1      7.5       12      7    44    44     5     0
+belastung      Erschöpfung             1      8.3       12      0     4    25    63     8
+aufmerksamkeit Verdacht                7     11.4       12      0     0     1     2    98
+rueckhalt      Einsamkeit              0      5.9       12      9    23    34    26     9
+
+   Ausgaenge:  verhungert 0.0%   zusammenbruch 5.0%   verhaftet 95.0%   gefallen 0.0%   ueberlebt 0.0%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 100.0 Prozent
+
+In der Heimat - Kurzer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      4.9       12      7    18    28    23    23
+belastung      Erschöpfung             0      8.8       12      3    11    19    23    44
+aufmerksamkeit Verdacht                0      7.4       12      3    19    31    17    31
+rueckhalt      Einsamkeit              0      8.6       12     33    34    21     7     4
+
+   Ausgaenge:  verhungert 19.3%   zusammenbruch 34.7%   verhaftet 29.7%   gefallen 0.0%   ueberlebt 16.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 83.7 Prozent
+
+In der Heimat - Kurzer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      7.4       12     11    38    39    10     1
+belastung      Erschöpfung             0      7.8       12      1     9    31    47    12
+aufmerksamkeit Verdacht                0      8.6       12      1    12    24     9    54
+rueckhalt      Einsamkeit              0      6.0       12      9    23    32    28     8
+
+   Ausgaenge:  verhungert 0.7%   zusammenbruch 6.3%   verhaftet 53.0%   gefallen 0.0%   ueberlebt 40.0%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 60.0 Prozent
+
+In der Heimat - Langer Verlauf - Wahl 'zufall'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      4.3       12      7    18    25    17    34
+belastung      Erschöpfung             0      7.6       12      3    22    26    19    30
+aufmerksamkeit Verdacht                0      7.7       12      9    17    18    13    44
+rueckhalt      Einsamkeit              0      8.5       12     33    36    19     8     4
+
+   Ausgaenge:  verhungert 32.3%   zusammenbruch 26.0%   verhaftet 41.3%   gefallen 0.0%   ueberlebt 0.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 99.7 Prozent
+
+In der Heimat - Langer Verlauf - Wahl 'klug'   (300 Durchgaenge)
+------------------------------------------------------------------------------
+Wert           Anzeige           kleinst   Mittel  groesst   Stufen 0 bis 4 in Prozent
+versorgung     Hunger                  0      7.0       12      7    33    45    13     1
+belastung      Erschöpfung             0      7.7       12      3     7    32    45    13
+aufmerksamkeit Verdacht                1     10.1       12      1     8     7     6    78
+rueckhalt      Einsamkeit              0      6.7       12     12    33    27    24     4
+
+   Ausgaenge:  verhungert 0.3%   zusammenbruch 9.0%   verhaftet 77.3%   gefallen 0.0%   ueberlebt 13.3%
+   harte Abbrueche (verhungert, zusammenbruch, verhaftet): 86.7 Prozent
+
+Gegenbewegung: ein Weg zurueck in jedem Kapitel
+------------------------------------------------------------------------------
+Jedes Kapitel braucht auf jedem Pfad mindestens ein ziehbares
+Ereignis mit einer Option, die versorgung oder rueckhalt um 1 hebt
+oder belastung um 1 senkt. Sonst geht es nur noch abwaerts.
+
+Jahr   Pfad              ziehbar    mit Weg   Befund
+1914   An der Front            7          7   in Ordnung
+1914   In der Etappe          10         10   in Ordnung
+1914   In der Heimat           7          7   in Ordnung
+1915   An der Front            9          8   in Ordnung
+1915   In der Etappe          15         15   in Ordnung
+1915   In der Heimat          11         11   in Ordnung
+1916   An der Front           13         11   in Ordnung
+1916   In der Etappe          17         17   in Ordnung
+1916   In der Heimat          15         15   in Ordnung
+1917   An der Front           13         13   in Ordnung
+1917   In der Etappe          16         16   in Ordnung
+1917   In der Heimat          16         16   in Ordnung
+1918   An der Front           16         16   in Ordnung
+1918   In der Etappe          17         17   in Ordnung
+1918   In der Heimat          17         17   in Ordnung
+1919   An der Front            7          6   in Ordnung
+1919   In der Etappe           7          6   in Ordnung
+1919   In der Heimat           6          5   in Ordnung
+
+Einbahnstrassen: alle Optionen verschlechtern denselben Wert
+------------------------------------------------------------------------------
+   keine Beanstandung
+
+Dominierte Optionen: eine Wahl, die keine ist
+------------------------------------------------------------------------------
+Beanstandet wird eine Option, die in allen vier Werten mindestens
+gleich gut und in einem besser ist als eine andere derselben Karte -
+sofern keine der beiden etwas traegt, das in den Zahlen nicht steht
+(Merkmal, Kette, Sprung, Hinweis, Variante).
+
+   keine Beanstandung
+
+Reiner Kalenderverlauf, ohne ein einziges Ereignis
+------------------------------------------------------------------------------
+Nur KAPITEL_WIRKUNG und KAPITEL_WIRKUNG_PFAD, Beginn auf PFAD_BASIS,
+ohne die Abweichung der Herkunft. Das ist die Kontrollrechnung, die in
+kapitel.rpy, Abschnitt 3, als Kommentar steht: Wer die Tabellen dort
+aendert, liest die Endwerte hier ab und traegt sie nach.
+
+Pfad             Jahr      versorgung   belastung  aufmerksamkeit   rueckhalt   Befund
+An der Front     1914               8           2               1           7   Beginn
+                 1915               7           2               1           7   
+                 1916               6           3               2           7   
+                 1917               5           5               3           7   
+                 1918               4           6               3           6   
+                 1919               4           7               1           5   
+
+In der Etappe    1914               8           1               2           6   Beginn
+                 1915               7           1               2           6   
+                 1916               6           2               3           6   
+                 1917               5           3               5           6   
+                 1918               4           4               5           5   
+                 1919               4           5               3           4   
+
+In der Heimat    1914               6           2               1           8   Beginn
+                 1915               5           2               1           8   
+                 1916               4           3               2           8   
+                 1917               2           4               3           8   
+                 1918               2           5               4           7   
+                 1919               2           6               2           6   
+
+
+==============================================================================
+PROBE 5  BELEGPROBE
+==============================================================================
+Jeder Inhalt sagt, worauf er sich stuetzt. Geprueft wird seit Paket 3,
+Schritt 1 nicht mehr nur, OB ein quelle-Feld da ist, sondern auch, ob
+es dem Format entspricht: Kurzbeleg hoechstens 60 Zeichen, art aus der
+Liste QUELLE_ARTEN, Zitat hoechstens 15 Woerter, einordnung genau zwei
+Saetze. Ein Vollbeleg mit 'BELEG FEHLT - zu recherchieren' ist kein Fehler,
+sondern ein offener Auftrag; er wird getrennt gezaehlt.
+
+Tabelle: Kennung, Art, Beleg vorhanden
+------------------------------------------------------------------------------
+Kennung                              Art          Beleg          Befund
+front_1914_marsch                    darstellung  zu suchen      in Ordnung
+front_1914_dorf                      gesetz       zu suchen      in Ordnung
+front_1914_erster_toter              akte         zu suchen      in Ordnung
+front_1914_schanzen                  darstellung  zu suchen      in Ordnung
+front_1914_weihnachten               darstellung  ja             in Ordnung
+front_trommelfeuer                   erinnerung   zu suchen      in Ordnung
+front_feldpost                       statistik    ja             in Ordnung
+front_kamerad                        akte         zu suchen      in Ordnung
+front_nachfrage                      akte         zu suchen      in Ordnung
+front_gas                            darstellung  ja             in Ordnung
+front_laeuse                         darstellung  zu suchen      in Ordnung
+front_beute                          gesetz       zu suchen      in Ordnung
+front_stosstrupp                     akte         zu suchen      in Ordnung
+front_urlaub                         erinnerung   zu suchen      in Ordnung
+front_1916_verdun                    darstellung  ja             in Ordnung
+front_1916_hunger                    statistik    zu suchen      in Ordnung
+front_1916_gefangener                gesetz       ja             in Ordnung
+front_1916_zaehlung                  akte         ja             in Ordnung
+heimat_brotschlange                  gesetz       zu suchen      in Ordnung
+heimat_1914_post                     zeitung      zu suchen      in Ordnung
+heimat_1914_liebesgaben              zeitung      zu suchen      in Ordnung
+heimat_kriegsanleihe                 statistik    ja             in Ordnung
+heimat_todesnachricht                brief        zu suchen      in Ordnung
+heimat_denunziation                  akte         zu suchen      in Ordnung
+heimat_1915_brotkarte                darstellung  ja             in Ordnung
+heimat_unterstuetzung                akte         zu suchen      in Ordnung
+heimat_hamsterfahrt                  zeitung      ja             in Ordnung
+heimat_verfahren                     akte         zu suchen      in Ordnung
+heimat_fabrik                        akte         zu suchen      in Ordnung
+heimat_lazarettzug                   bild         zu suchen      in Ordnung
+heimat_1916_rueben                   darstellung  ja             in Ordnung
+heimat_1916_ernaehrungsamt           darstellung  ja             in Ordnung
+heimat_1916_kohle                    zeitung      zu suchen      in Ordnung
+heimat_1916_zensur                   darstellung  ja             in Ordnung
+heimat_1916_arbeitsniederlegung      gesetz       ja             in Ordnung
+heimat_1916_kinderarbeit             akte         zu suchen      in Ordnung
+front_ruhequartier                   erinnerung   zu suchen      in Ordnung
+heimat_sonntag                       erinnerung   zu suchen      in Ordnung
+einstieg_meldung                     darstellung  ja             in Ordnung
+einstieg_offizier                    gesetz       zu suchen      in Ordnung
+einstieg_etappe                      erinnerung   zu suchen      in Ordnung
+einstieg_abschied                    bild         zu suchen      in Ordnung
+front_1917_verbruederung_nachhall    akte         zu suchen      in Ordnung
+front_1917_gerichtsherr              akte         zu suchen      in Ordnung
+heimat_1917_aprilstreik              zeitung      zu suchen      in Ordnung
+heimat_1917_hilfsdienst              gesetz       ja             in Ordnung
+heimat_1917_ablieferung              gesetz       zu suchen      in Ordnung
+heimat_1917_akkord                   darstellung  zu suchen      in Ordnung
+heimat_1917_schulspeisung            akte         zu suchen      in Ordnung
+front_1917_steckruebe                akte         zu suchen      in Ordnung
+front_1917_geruecht_osten            brief        zu suchen      in Ordnung
+front_1917_winterstellung            brief        zu suchen      in Ordnung
+front_1917_ablosung                  akte         zu suchen      in Ordnung
+heimat_1917_unterseeboot             zeitung      zu suchen      in Ordnung
+heimat_1917_kohlennot                zeitung      zu suchen      in Ordnung
+heimat_1917_metallsammlung           akte         zu suchen      in Ordnung
+front_1918_abrechnung                akte         zu suchen      in Ordnung
+front_1918_liste                     akte         zu suchen      in Ordnung
+front_1918_freiwillig_von_1914       statistik    zu suchen      in Ordnung
+front_1918_befehl                    akte         zu suchen      in Ordnung
+heimat_1918_rat                      darstellung  zu suchen      in Ordnung
+heimat_1918_grippe                   zeitung      zu suchen      in Ordnung
+lazarett_1918_grippestation          erinnerung   zu suchen      in Ordnung
+front_1918_offensive                 darstellung  zu suchen      in Ordnung
+front_1918_kokarde                   darstellung  zu suchen      in Ordnung
+front_1918_waffenstillstand          darstellung  ja             in Ordnung
+heimat_1918_januarstreik             darstellung  zu suchen      in Ordnung
+heimat_1918_grippewelle              zeitung      zu suchen      in Ordnung
+heimat_1918_matrosen                 darstellung  zu suchen      in Ordnung
+heimat_1918_bekanntmachung           akte         zu suchen      in Ordnung
+etappe_1914_ankunft                  akte         zu suchen      in Ordnung
+etappe_bahnhofsdienst                akte         zu suchen      in Ordnung
+etappe_verpflegungsausgabe           akte         zu suchen      in Ordnung
+etappe_verwundetenzug                akte         zu suchen      in Ordnung
+etappe_listen                        akte         zu suchen      in Ordnung
+etappe_fronturlauber                 erinnerung   zu suchen      in Ordnung
+etappe_feldbaeckerei                 akte         zu suchen      in Ordnung
+etappe_munitionslager                akte         zu suchen      in Ordnung
+etappe_fuhrpark                      statistik    zu suchen      in Ordnung
+etappe_1917_nachschubstockung        akte         zu suchen      in Ordnung
+etappe_zensurstelle                  akte         zu suchen      in Ordnung
+etappe_brief_von_daheim              brief        zu suchen      in Ordnung
+etappe_1914_gefangenenlager          akte         zu suchen      in Ordnung
+etappe_gefangenenarbeit              gesetz       ja             in Ordnung
+etappe_1916_verschleppt              gesetz       ja             in Ordnung
+etappe_requisition                   gesetz       ja             in Ordnung
+etappe_1918_grippe                   statistik    zu suchen      in Ordnung
+etappe_1918_raeumung                 akte         zu suchen      in Ordnung
+epilog_1919_heimkehr                 erinnerung   zu suchen      in Ordnung
+epilog_1919_rueckkehrer              darstellung  zu suchen      in Ordnung
+epilog_1919_versorgungsamt           akte         zu suchen      in Ordnung
+epilog_1919_werktor                  gesetz       zu suchen      in Ordnung
+epilog_1919_wahl                     statistik    zu suchen      in Ordnung
+epilog_1919_blockade                 statistik    zu suchen      in Ordnung
+epilog_1919_vertrag                  zeitung      zu suchen      in Ordnung
+epilog_1919_papiere                  akte         zu suchen      in Ordnung
+wirtshaus_wahl                       zeitung      zu suchen      in Ordnung
+rotstift                             darstellung  ja             in Ordnung
+portionen                            darstellung  ja             in Ordnung
+hamsterfahrt                         zeitung      ja             in Ordnung
+tornister                            gesetz       ja             in Ordnung
+versorgungsantrag                    gesetz       zu suchen      in Ordnung
+
+Ereignisse und Einlagen mit quelle-Feld: 102 von 102.
+Davon mit Vollbeleg: 23. Noch zu recherchieren: 79.
+
+Verteilung der Quellenarten:
+   akte            33
+   darstellung     21
+   gesetz          14
+   zeitung         12
+   erinnerung       8
+   statistik        8
+   brief            4
+   bild             2
+
+==============================================================================
+PROBE 6  MEDIENPROBE
+==============================================================================
+Alle Dateipfade, die der Code ueber bild_pfad(), portrait_anzeigen(),
+figur_bild_pfad() oder schrift_waehlen() erwartet. Eine fehlende Datei
+ist kein Fehler: ueberall greift ein sauberer Ersatz. Die Liste sagt,
+was noch abzulegen ist.
+
+Beruecksichtigte Stimmungen: angst, einsam, erschoepft, hungrig, neutral
+
+fonts - 6 erwartet, 0 vorhanden
+------------------------------------------------------------------------------
+   fehlt noch   fonts/dokument.otf
+   fehlt noch   fonts/dokument.ttf
+   fehlt noch   fonts/fliesstext.otf
+   fehlt noch   fonts/fliesstext.ttf
+   fehlt noch   fonts/titel.otf
+   fehlt noch   fonts/titel.ttf
+
+images/figuren - 75 erwartet, 0 vorhanden   (erst gesucht, wenn FIGUREN_ECHTE_BILDER auf True steht)
+------------------------------------------------------------------------------
+   fehlt noch   images/figuren/amtsperson_etappe_angst.png
+   fehlt noch   images/figuren/amtsperson_etappe_einsam.png
+   fehlt noch   images/figuren/amtsperson_etappe_erschoepft.png
+   fehlt noch   images/figuren/amtsperson_etappe_hungrig.png
+   fehlt noch   images/figuren/amtsperson_etappe_neutral.png
+   fehlt noch   images/figuren/amtsperson_front_angst.png
+   fehlt noch   images/figuren/amtsperson_front_einsam.png
+   fehlt noch   images/figuren/amtsperson_front_erschoepft.png
+   fehlt noch   images/figuren/amtsperson_front_hungrig.png
+   fehlt noch   images/figuren/amtsperson_front_neutral.png
+   fehlt noch   images/figuren/amtsperson_heimat_angst.png
+   fehlt noch   images/figuren/amtsperson_heimat_einsam.png
+   fehlt noch   images/figuren/amtsperson_heimat_erschoepft.png
+   fehlt noch   images/figuren/amtsperson_heimat_hungrig.png
+   fehlt noch   images/figuren/amtsperson_heimat_neutral.png
+   fehlt noch   images/figuren/gegenseite_etappe_angst.png
+   fehlt noch   images/figuren/gegenseite_etappe_einsam.png
+   fehlt noch   images/figuren/gegenseite_etappe_erschoepft.png
+   fehlt noch   images/figuren/gegenseite_etappe_hungrig.png
+   fehlt noch   images/figuren/gegenseite_etappe_neutral.png
+   fehlt noch   images/figuren/gegenseite_front_angst.png
+   fehlt noch   images/figuren/gegenseite_front_einsam.png
+   fehlt noch   images/figuren/gegenseite_front_erschoepft.png
+   fehlt noch   images/figuren/gegenseite_front_hungrig.png
+   fehlt noch   images/figuren/gegenseite_front_neutral.png
+   fehlt noch   images/figuren/gegenseite_heimat_angst.png
+   fehlt noch   images/figuren/gegenseite_heimat_einsam.png
+   fehlt noch   images/figuren/gegenseite_heimat_erschoepft.png
+   fehlt noch   images/figuren/gegenseite_heimat_hungrig.png
+   fehlt noch   images/figuren/gegenseite_heimat_neutral.png
+   fehlt noch   images/figuren/kind_etappe_angst.png
+   fehlt noch   images/figuren/kind_etappe_einsam.png
+   fehlt noch   images/figuren/kind_etappe_erschoepft.png
+   fehlt noch   images/figuren/kind_etappe_hungrig.png
+   fehlt noch   images/figuren/kind_etappe_neutral.png
+   fehlt noch   images/figuren/kind_front_angst.png
+   fehlt noch   images/figuren/kind_front_einsam.png
+   fehlt noch   images/figuren/kind_front_erschoepft.png
+   fehlt noch   images/figuren/kind_front_hungrig.png
+   fehlt noch   images/figuren/kind_front_neutral.png
+   fehlt noch   images/figuren/kind_heimat_angst.png
+   fehlt noch   images/figuren/kind_heimat_einsam.png
+   fehlt noch   images/figuren/kind_heimat_erschoepft.png
+   fehlt noch   images/figuren/kind_heimat_hungrig.png
+   fehlt noch   images/figuren/kind_heimat_neutral.png
+   fehlt noch   images/figuren/kundige_etappe_angst.png
+   fehlt noch   images/figuren/kundige_etappe_einsam.png
+   fehlt noch   images/figuren/kundige_etappe_erschoepft.png
+   fehlt noch   images/figuren/kundige_etappe_hungrig.png
+   fehlt noch   images/figuren/kundige_etappe_neutral.png
+   fehlt noch   images/figuren/kundige_front_angst.png
+   fehlt noch   images/figuren/kundige_front_einsam.png
+   fehlt noch   images/figuren/kundige_front_erschoepft.png
+   fehlt noch   images/figuren/kundige_front_hungrig.png
+   fehlt noch   images/figuren/kundige_front_neutral.png
+   fehlt noch   images/figuren/kundige_heimat_angst.png
+   fehlt noch   images/figuren/kundige_heimat_einsam.png
+   fehlt noch   images/figuren/kundige_heimat_erschoepft.png
+   fehlt noch   images/figuren/kundige_heimat_hungrig.png
+   fehlt noch   images/figuren/kundige_heimat_neutral.png
+   fehlt noch   images/figuren/naechste_etappe_angst.png
+   fehlt noch   images/figuren/naechste_etappe_einsam.png
+   fehlt noch   images/figuren/naechste_etappe_erschoepft.png
+   fehlt noch   images/figuren/naechste_etappe_hungrig.png
+   fehlt noch   images/figuren/naechste_etappe_neutral.png
+   fehlt noch   images/figuren/naechste_front_angst.png
+   fehlt noch   images/figuren/naechste_front_einsam.png
+   fehlt noch   images/figuren/naechste_front_erschoepft.png
+   fehlt noch   images/figuren/naechste_front_hungrig.png
+   fehlt noch   images/figuren/naechste_front_neutral.png
+   fehlt noch   images/figuren/naechste_heimat_angst.png
+   fehlt noch   images/figuren/naechste_heimat_einsam.png
+   fehlt noch   images/figuren/naechste_heimat_erschoepft.png
+   fehlt noch   images/figuren/naechste_heimat_hungrig.png
+   fehlt noch   images/figuren/naechste_heimat_neutral.png
+
+images/karten - 195 erwartet, 6 vorhanden
+------------------------------------------------------------------------------
+   fehlt noch   images/karten/einstieg_abschied_1.png
+   fehlt noch   images/karten/einstieg_abschied_2.png
+   fehlt noch   images/karten/einstieg_etappe_1.png
+   fehlt noch   images/karten/einstieg_etappe_2.png
+   fehlt noch   images/karten/einstieg_meldung_1.png
+   fehlt noch   images/karten/einstieg_meldung_2.png
+   fehlt noch   images/karten/einstieg_offizier_1.png
+   fehlt noch   images/karten/einstieg_offizier_2.png
+   fehlt noch   images/karten/epilog_1919_blockade_1.png
+   fehlt noch   images/karten/epilog_1919_blockade_2.png
+   fehlt noch   images/karten/epilog_1919_heimkehr_1.png
+   fehlt noch   images/karten/epilog_1919_heimkehr_2.png
+   fehlt noch   images/karten/epilog_1919_papiere_1.png
+   fehlt noch   images/karten/epilog_1919_papiere_2.png
+   fehlt noch   images/karten/epilog_1919_rueckkehrer_1.png
+   fehlt noch   images/karten/epilog_1919_rueckkehrer_2.png
+   fehlt noch   images/karten/epilog_1919_versorgungsamt_1.png
+   fehlt noch   images/karten/epilog_1919_versorgungsamt_2.png
+   fehlt noch   images/karten/epilog_1919_vertrag_1.png
+   fehlt noch   images/karten/epilog_1919_vertrag_2.png
+   fehlt noch   images/karten/epilog_1919_wahl_1.png
+   fehlt noch   images/karten/epilog_1919_wahl_2.png
+   fehlt noch   images/karten/epilog_1919_werktor_1.png
+   fehlt noch   images/karten/epilog_1919_werktor_2.png
+   fehlt noch   images/karten/etappe_1914_ankunft_1.png
+   fehlt noch   images/karten/etappe_1914_ankunft_2.png
+   fehlt noch   images/karten/etappe_1914_gefangenenlager_1.png
+   fehlt noch   images/karten/etappe_1914_gefangenenlager_2.png
+   fehlt noch   images/karten/etappe_1916_verschleppt_1.png
+   fehlt noch   images/karten/etappe_1916_verschleppt_2.png
+   fehlt noch   images/karten/etappe_1917_nachschubstockung_1.png
+   fehlt noch   images/karten/etappe_1917_nachschubstockung_2.png
+   fehlt noch   images/karten/etappe_1918_grippe_1.png
+   fehlt noch   images/karten/etappe_1918_grippe_2.png
+   fehlt noch   images/karten/etappe_1918_raeumung_1.png
+   fehlt noch   images/karten/etappe_1918_raeumung_2.png
+   fehlt noch   images/karten/etappe_bahnhofsdienst_1.png
+   fehlt noch   images/karten/etappe_bahnhofsdienst_2.png
+   fehlt noch   images/karten/etappe_brief_von_daheim_1.png
+   fehlt noch   images/karten/etappe_brief_von_daheim_2.png
+   fehlt noch   images/karten/etappe_feldbaeckerei_1.png
+   fehlt noch   images/karten/etappe_feldbaeckerei_2.png
+   fehlt noch   images/karten/etappe_fronturlauber_1.png
+   fehlt noch   images/karten/etappe_fronturlauber_2.png
+   fehlt noch   images/karten/etappe_fuhrpark_1.png
+   fehlt noch   images/karten/etappe_fuhrpark_2.png
+   fehlt noch   images/karten/etappe_gefangenenarbeit_1.png
+   fehlt noch   images/karten/etappe_gefangenenarbeit_2.png
+   fehlt noch   images/karten/etappe_listen_1.png
+   fehlt noch   images/karten/etappe_listen_2.png
+   fehlt noch   images/karten/etappe_munitionslager_1.png
+   fehlt noch   images/karten/etappe_munitionslager_2.png
+   fehlt noch   images/karten/etappe_requisition_1.png
+   fehlt noch   images/karten/etappe_requisition_2.png
+   fehlt noch   images/karten/etappe_verpflegungsausgabe_1.png
+   fehlt noch   images/karten/etappe_verpflegungsausgabe_2.png
+   fehlt noch   images/karten/etappe_verwundetenzug_1.png
+   fehlt noch   images/karten/etappe_verwundetenzug_2.png
+   fehlt noch   images/karten/etappe_zensurstelle_1.png
+   fehlt noch   images/karten/etappe_zensurstelle_2.png
+   vorhanden    images/karten/front_1914_dorf_1.png
+   vorhanden    images/karten/front_1914_dorf_2.png
+   vorhanden    images/karten/front_1914_erster_toter_1.png
+   vorhanden    images/karten/front_1914_erster_toter_2.png
+   vorhanden    images/karten/front_1914_marsch_1.png
+   vorhanden    images/karten/front_1914_marsch_2.png
+   fehlt noch   images/karten/front_1914_schanzen_1.png
+   fehlt noch   images/karten/front_1914_schanzen_2.png
+   fehlt noch   images/karten/front_1914_weihnachten_1.png
+   fehlt noch   images/karten/front_1914_weihnachten_2.png
+   fehlt noch   images/karten/front_1916_gefangener_1.png
+   fehlt noch   images/karten/front_1916_gefangener_2.png
+   fehlt noch   images/karten/front_1916_hunger_1.png
+   fehlt noch   images/karten/front_1916_hunger_2.png
+   fehlt noch   images/karten/front_1916_verdun_1.png
+   fehlt noch   images/karten/front_1916_verdun_2.png
+   fehlt noch   images/karten/front_1916_zaehlung_1.png
+   fehlt noch   images/karten/front_1916_zaehlung_2.png
+   fehlt noch   images/karten/front_1917_ablosung_1.png
+   fehlt noch   images/karten/front_1917_ablosung_2.png
+   fehlt noch   images/karten/front_1917_gerichtsherr_1.png
+   fehlt noch   images/karten/front_1917_gerichtsherr_2.png
+   fehlt noch   images/karten/front_1917_geruecht_osten_1.png
+   fehlt noch   images/karten/front_1917_geruecht_osten_2.png
+   fehlt noch   images/karten/front_1917_steckruebe_1.png
+   fehlt noch   images/karten/front_1917_steckruebe_2.png
+   fehlt noch   images/karten/front_1917_verbruederung_nachhall_1.png
+   fehlt noch   images/karten/front_1917_verbruederung_nachhall_2.png
+   fehlt noch   images/karten/front_1917_winterstellung_1.png
+   fehlt noch   images/karten/front_1917_winterstellung_2.png
+   fehlt noch   images/karten/front_1918_abrechnung_1.png
+   fehlt noch   images/karten/front_1918_abrechnung_2.png
+   fehlt noch   images/karten/front_1918_befehl_1.png
+   fehlt noch   images/karten/front_1918_befehl_2.png
+   fehlt noch   images/karten/front_1918_freiwillig_von_1914_1.png
+   fehlt noch   images/karten/front_1918_freiwillig_von_1914_2.png
+   fehlt noch   images/karten/front_1918_kokarde_1.png
+   fehlt noch   images/karten/front_1918_kokarde_2.png
+   fehlt noch   images/karten/front_1918_liste_1.png
+   fehlt noch   images/karten/front_1918_liste_2.png
+   fehlt noch   images/karten/front_1918_offensive_1.png
+   fehlt noch   images/karten/front_1918_offensive_2.png
+   fehlt noch   images/karten/front_1918_waffenstillstand_1.png
+   fehlt noch   images/karten/front_1918_waffenstillstand_2.png
+   fehlt noch   images/karten/front_beute_1.png
+   fehlt noch   images/karten/front_beute_2.png
+   fehlt noch   images/karten/front_feldpost_1.png
+   fehlt noch   images/karten/front_feldpost_2.png
+   fehlt noch   images/karten/front_gas_1.png
+   fehlt noch   images/karten/front_gas_2.png
+   fehlt noch   images/karten/front_kamerad_1.png
+   fehlt noch   images/karten/front_kamerad_2.png
+   fehlt noch   images/karten/front_laeuse_1.png
+   fehlt noch   images/karten/front_laeuse_2.png
+   fehlt noch   images/karten/front_nachfrage_1.png
+   fehlt noch   images/karten/front_nachfrage_2.png
+   fehlt noch   images/karten/front_ruhequartier_1.png
+   fehlt noch   images/karten/front_ruhequartier_2.png
+   fehlt noch   images/karten/front_stosstrupp_1.png
+   fehlt noch   images/karten/front_stosstrupp_2.png
+   fehlt noch   images/karten/front_trommelfeuer_1.png
+   fehlt noch   images/karten/front_trommelfeuer_2.png
+   fehlt noch   images/karten/front_urlaub_1.png
+   fehlt noch   images/karten/front_urlaub_2.png
+   fehlt noch   images/karten/heimat_1914_liebesgaben_1.png
+   fehlt noch   images/karten/heimat_1914_liebesgaben_2.png
+   fehlt noch   images/karten/heimat_1914_post_1.png
+   fehlt noch   images/karten/heimat_1914_post_2.png
+   fehlt noch   images/karten/heimat_1915_brotkarte_1.png
+   fehlt noch   images/karten/heimat_1915_brotkarte_2.png
+   fehlt noch   images/karten/heimat_1916_arbeitsniederlegung_1.png
+   fehlt noch   images/karten/heimat_1916_arbeitsniederlegung_2.png
+   fehlt noch   images/karten/heimat_1916_ernaehrungsamt_1.png
+   fehlt noch   images/karten/heimat_1916_ernaehrungsamt_2.png
+   fehlt noch   images/karten/heimat_1916_kinderarbeit_1.png
+   fehlt noch   images/karten/heimat_1916_kinderarbeit_2.png
+   fehlt noch   images/karten/heimat_1916_kohle_1.png
+   fehlt noch   images/karten/heimat_1916_kohle_2.png
+   fehlt noch   images/karten/heimat_1916_rueben_1.png
+   fehlt noch   images/karten/heimat_1916_rueben_2.png
+   fehlt noch   images/karten/heimat_1916_zensur_1.png
+   fehlt noch   images/karten/heimat_1916_zensur_2.png
+   fehlt noch   images/karten/heimat_1917_ablieferung_1.png
+   fehlt noch   images/karten/heimat_1917_ablieferung_2.png
+   fehlt noch   images/karten/heimat_1917_akkord_1.png
+   fehlt noch   images/karten/heimat_1917_akkord_2.png
+   fehlt noch   images/karten/heimat_1917_aprilstreik_1.png
+   fehlt noch   images/karten/heimat_1917_aprilstreik_2.png
+   fehlt noch   images/karten/heimat_1917_hilfsdienst_1.png
+   fehlt noch   images/karten/heimat_1917_hilfsdienst_2.png
+   fehlt noch   images/karten/heimat_1917_kohlennot_1.png
+   fehlt noch   images/karten/heimat_1917_kohlennot_2.png
+   fehlt noch   images/karten/heimat_1917_metallsammlung_1.png
+   fehlt noch   images/karten/heimat_1917_metallsammlung_2.png
+   fehlt noch   images/karten/heimat_1917_schulspeisung_1.png
+   fehlt noch   images/karten/heimat_1917_schulspeisung_2.png
+   fehlt noch   images/karten/heimat_1917_unterseeboot_1.png
+   fehlt noch   images/karten/heimat_1917_unterseeboot_2.png
+   fehlt noch   images/karten/heimat_1918_bekanntmachung_1.png
+   fehlt noch   images/karten/heimat_1918_bekanntmachung_2.png
+   fehlt noch   images/karten/heimat_1918_grippe_1.png
+   fehlt noch   images/karten/heimat_1918_grippe_2.png
+   fehlt noch   images/karten/heimat_1918_grippewelle_1.png
+   fehlt noch   images/karten/heimat_1918_grippewelle_2.png
+   fehlt noch   images/karten/heimat_1918_januarstreik_1.png
+   fehlt noch   images/karten/heimat_1918_januarstreik_2.png
+   fehlt noch   images/karten/heimat_1918_matrosen_1.png
+   fehlt noch   images/karten/heimat_1918_matrosen_2.png
+   fehlt noch   images/karten/heimat_1918_rat_1.png
+   fehlt noch   images/karten/heimat_1918_rat_2.png
+   fehlt noch   images/karten/heimat_brotschlange_1.png
+   fehlt noch   images/karten/heimat_brotschlange_2.png
+   fehlt noch   images/karten/heimat_denunziation_1.png
+   fehlt noch   images/karten/heimat_denunziation_2.png
+   fehlt noch   images/karten/heimat_fabrik_1.png
+   fehlt noch   images/karten/heimat_fabrik_2.png
+   fehlt noch   images/karten/heimat_hamsterfahrt_1.png
+   fehlt noch   images/karten/heimat_hamsterfahrt_2.png
+   fehlt noch   images/karten/heimat_kriegsanleihe_1.png
+   fehlt noch   images/karten/heimat_kriegsanleihe_2.png
+   fehlt noch   images/karten/heimat_lazarettzug_1.png
+   fehlt noch   images/karten/heimat_lazarettzug_2.png
+   fehlt noch   images/karten/heimat_sonntag_1.png
+   fehlt noch   images/karten/heimat_sonntag_2.png
+   fehlt noch   images/karten/heimat_todesnachricht_1.png
+   fehlt noch   images/karten/heimat_todesnachricht_2.png
+   fehlt noch   images/karten/heimat_unterstuetzung_1.png
+   fehlt noch   images/karten/heimat_unterstuetzung_2.png
+   fehlt noch   images/karten/heimat_verfahren_1.png
+   fehlt noch   images/karten/heimat_verfahren_2.png
+   fehlt noch   images/karten/lazarett_1918_grippestation_1.png
+   fehlt noch   images/karten/lazarett_1918_grippestation_2.png
+   fehlt noch   images/karten/wirtshaus_wahl_1.png
+   fehlt noch   images/karten/wirtshaus_wahl_2.png
+   fehlt noch   images/karten/wirtshaus_wahl_3.png
+
+images - 1 erwartet, 1 vorhanden
+------------------------------------------------------------------------------
+   vorhanden    images/platzhalter.png
+
+images/portraits - 48 erwartet, 0 vorhanden
+------------------------------------------------------------------------------
+   fehlt noch   images/portraits/adel_m.png
+   fehlt noch   images/portraits/adel_m_angst.png
+   fehlt noch   images/portraits/adel_m_einsam.png
+   fehlt noch   images/portraits/adel_m_erschoepft.png
+   fehlt noch   images/portraits/adel_m_hungrig.png
+   fehlt noch   images/portraits/adel_m_neutral.png
+   fehlt noch   images/portraits/adel_w.png
+   fehlt noch   images/portraits/adel_w_angst.png
+   fehlt noch   images/portraits/adel_w_einsam.png
+   fehlt noch   images/portraits/adel_w_erschoepft.png
+   fehlt noch   images/portraits/adel_w_hungrig.png
+   fehlt noch   images/portraits/adel_w_neutral.png
+   fehlt noch   images/portraits/arbeiterschaft_m.png
+   fehlt noch   images/portraits/arbeiterschaft_m_angst.png
+   fehlt noch   images/portraits/arbeiterschaft_m_einsam.png
+   fehlt noch   images/portraits/arbeiterschaft_m_erschoepft.png
+   fehlt noch   images/portraits/arbeiterschaft_m_hungrig.png
+   fehlt noch   images/portraits/arbeiterschaft_m_neutral.png
+   fehlt noch   images/portraits/arbeiterschaft_w.png
+   fehlt noch   images/portraits/arbeiterschaft_w_angst.png
+   fehlt noch   images/portraits/arbeiterschaft_w_einsam.png
+   fehlt noch   images/portraits/arbeiterschaft_w_erschoepft.png
+   fehlt noch   images/portraits/arbeiterschaft_w_hungrig.png
+   fehlt noch   images/portraits/arbeiterschaft_w_neutral.png
+   fehlt noch   images/portraits/buergertum_m.png
+   fehlt noch   images/portraits/buergertum_m_angst.png
+   fehlt noch   images/portraits/buergertum_m_einsam.png
+   fehlt noch   images/portraits/buergertum_m_erschoepft.png
+   fehlt noch   images/portraits/buergertum_m_hungrig.png
+   fehlt noch   images/portraits/buergertum_m_neutral.png
+   fehlt noch   images/portraits/buergertum_w.png
+   fehlt noch   images/portraits/buergertum_w_angst.png
+   fehlt noch   images/portraits/buergertum_w_einsam.png
+   fehlt noch   images/portraits/buergertum_w_erschoepft.png
+   fehlt noch   images/portraits/buergertum_w_hungrig.png
+   fehlt noch   images/portraits/buergertum_w_neutral.png
+   fehlt noch   images/portraits/landbevoelkerung_m.png
+   fehlt noch   images/portraits/landbevoelkerung_m_angst.png
+   fehlt noch   images/portraits/landbevoelkerung_m_einsam.png
+   fehlt noch   images/portraits/landbevoelkerung_m_erschoepft.png
+   fehlt noch   images/portraits/landbevoelkerung_m_hungrig.png
+   fehlt noch   images/portraits/landbevoelkerung_m_neutral.png
+   fehlt noch   images/portraits/landbevoelkerung_w.png
+   fehlt noch   images/portraits/landbevoelkerung_w_angst.png
+   fehlt noch   images/portraits/landbevoelkerung_w_einsam.png
+   fehlt noch   images/portraits/landbevoelkerung_w_erschoepft.png
+   fehlt noch   images/portraits/landbevoelkerung_w_hungrig.png
+   fehlt noch   images/portraits/landbevoelkerung_w_neutral.png
+
+Vorhanden, aber von keiner Stelle im Code erwartet
+------------------------------------------------------------------------------
+   audio/stummer_morgen.mp3
+   images/karten/front_beginn_1.png
+   images/karten/front_beginn_2.png
+
+In BILD_MASSE angelegt, aber von keiner Stelle abgerufen
+------------------------------------------------------------------------------
+   personen       Anzeigemass (500, 1000)
+   orte           Anzeigemass (1920, 1080)
+   dokumente      Anzeigemass (720, 480)
+
+Schriften: SCHRIFT_FLIESS=DejaVuSans.ttf  SCHRIFT_TITEL=DejaVuSans.ttf  SCHRIFT_DOKUMENT=DejaVuSans.ttf
+Erwartet insgesamt: 325 Pfade, davon 7 vorhanden, 318 noch abzulegen.
+
+==============================================================================
+PROBE 7  SPRACHPROBE
+==============================================================================
+TABU_BEGRIFFE und PRUEF_BEGRIFFE ueber Ereignisse, Szenen, Kapitel-
+und Endtexte, Briefe, Schicksalsmeldungen und Einlagen, dazu die
+Wertungswoerter und die Zwei-Saetze-Regel der Einordnungen.
+Geprueft in 15 Lagen (Herkunft, Pfad, Zusatzmerkmal).
+
+   keine Beanstandung
+
+Zwei-Saetze-Regel der Einordnungen
+------------------------------------------------------------------------------
+   in Ordnung   rotstift       front          2 Saetze, 469 Zeichen
+   in Ordnung   rotstift       etappe         2 Saetze, 237 Zeichen
+   in Ordnung   rotstift       heimat         2 Saetze, 384 Zeichen
+   in Ordnung   portionen      front          2 Saetze, 312 Zeichen
+   in Ordnung   portionen      etappe         2 Saetze, 175 Zeichen
+   in Ordnung   portionen      heimat         2 Saetze, 392 Zeichen
+   in Ordnung   hamsterfahrt   heimat         2 Saetze, 413 Zeichen
+   in Ordnung   tornister      front          2 Saetze, 359 Zeichen
+   in Ordnung   tornister      etappe         2 Saetze, 155 Zeichen
+   in Ordnung   versorgungsantrag front          2 Saetze, 204 Zeichen
+   in Ordnung   versorgungsantrag etappe         2 Saetze, 204 Zeichen
+   in Ordnung   versorgungsantrag heimat         2 Saetze, 198 Zeichen
+
+==============================================================================
+PROBE 8  LESBARKEIT
+==============================================================================
+Sprachmass Klasse 8: durchschnittlich hoechstens 13 Woerter je Satz,
+kein Satz ueber 20 Woerter, hoechstens ein Nebensatz je Satz.
+Beanstandet wird ein Durchschnitt ueber 13 oder ein Satz ueber 20.
+Diese Probe misst nur. Repariert wird in den Inhaltspaketen.
+
+Satzlaenge je Textart
+------------------------------------------------------------------------------
+Art            Saetze  Woerter    Schnitt   ueber 20 verschachtelt   Befund
+Ereignis         1613    13869        8.6          0          3   in Ordnung
+Szene             479     3231        6.7          0          2   in Ordnung
+Kapitel            73      632        8.7          0          0   in Ordnung
+Ende              152     1401        9.2          0          3   in Ordnung
+Brief             596     4693        7.9          0          5   in Ordnung
+Schicksal         408     3300        8.1          0          0   in Ordnung
+Einlage           206     1635        7.9         12          0   >> FEHLER << 12 zu lange Saetze
+Merkbuch          131      834        6.4          0          0   in Ordnung
+
+GESAMT           3658    29595        8.1         12         13
+
+Die zehn laengsten Saetze
+------------------------------------------------------------------------------
+    37 Woerter  Einlage    Einlage portionen
+        Am 22 Februar 1915 gab Berlin als erste deutsche Stadt Brotkarten aus, zunächst zwei Kilogramm Brot je Woche und Kopf; ab dem 1 März 1915 galt die Brotrationierung im ganzen Reich, und die Mengen wurden bald gekürzt.
+    31 Woerter  Einlage    Einlage rotstift
+        Verboten war vor allem, was dem Gegner nützen konnte, also Standort, Truppenteil, Verluste und geplante Bewegungen, während Klagen über Essen und Vorgesetzte meist durchgingen und in den Stimmungsberichten der Überwachungsstellen landeten.
+    31 Woerter  Einlage    Einlage rotstift
+        Klagen über Hunger und Anstehen waren nicht verboten, galten aber als schädlich für die Stimmung der Truppe, weshalb Behörden und Zeitungen immer wieder darum baten, aufmunternd an die Front zu schreiben.
+    30 Woerter  Einlage    Einlage tornister
+        Angaben zum vollen Marschgepäck eines Infanteristen liegen bei 25 bis 30 Kilogramm, und auf dem Vormarsch im August 1914 lagen die Straßengräben in Belgien und Nordfrankreich voll mit weggeworfener Ausrüstung.
+    30 Woerter  Einlage    Einlage hamsterfahrt
+        Der Kauf bewirtschafteter Lebensmittel beim Bauern und ihre Ausfuhr aus dem Landkreis waren verboten; Polizei und Gendarmerie kontrollierten Bahnhöfe und Züge und beschlagnahmten ohne Vergütung, was ohne Erlaubnis mitgeführt wurde.
+    28 Woerter  Einlage    Einlage rotstift
+        Die deutsche Feldpost beförderte zwischen 1914 und 1918 schätzungsweise 28,7 Milliarden Briefe und Karten; geprüft wurde stichprobenweise, bis 1916 durch den nächsten Vorgesetzten, danach durch eigens eingerichtete Zensurstellen.
+    27 Woerter  Einlage    Einlage portionen
+        Verpflegt wurde an der Front nicht der Einzelne, sondern die Gruppe: Die Feldküche kam meist bei Dunkelheit nach vorn, und was sie brachte, wurde im Graben aufgeteilt.
+    27 Woerter  Einlage    Einlage portionen
+        Im Februar 1917 deckte die amtliche Zuteilung im Durchschnitt noch etwa 1000 Kilokalorien am Tag und damit weniger als die Hälfte dessen, was ein erwachsener Mensch braucht.
+    24 Woerter  Einlage    Einlage hamsterfahrt
+        Gefahren sind trotzdem Hunderttausende, vor allem seit dem Steckrübenwinter 1916/17, und in manchen Städten beteiligten sich die Gemeinden sogar an der Organisation solcher Fahrten.
+    23 Woerter  Einlage    Einlage rotstift
+        Auch der Postverkehr im Inland wurde stichprobenweise überwacht, und aus dem Gelesenen fertigten die Überwachungsstellen regelmäßige Berichte über die Stimmung der Bevölkerung an.
+
+Saetze mit mehr als einem Nebensatz (Naeherung)
+------------------------------------------------------------------------------
+   3 Nebensaetze  Brief      Brief h_kind_fabrik
+        Du schreibst, dass niemand sicher ist, dass es aber besser sei, wo es etwas zu essen gibt.
+   2 Nebensaetze  Szene      merkbuch_vier_adressen
+        Frag mich, bevor du dich irgendwo anstellst, das spart dir zwei Stunden.
+   2 Nebensaetze  Szene      alltag_1915_gegenseite
+        Die Frau aus dem Vorderhaus steht im Hof, wenn du gehst, und steht dort, wenn du wiederkommst.
+   2 Nebensaetze  Ereignis   heimat_verfahren
+        Der Beamte erklärt, das Verfahren könne eingestellt werden, wenn du bei anderen Angaben behilflich seist.
+   2 Nebensaetze  Ereignis   front_nachfrage
+        Das ist weniger, als du befürchtet hast, und mehr, als du verkraftest.
+   2 Nebensaetze  Ereignis   einstieg_abschied
+        Erst in der Küche merkst du, dass deine Hände zittern, und du weißt nicht, seit wann.
+   2 Nebensaetze  Ende       Nachklang kamerad_gedeckt
+        Er hat es hinübergeschafft und fragt, ob er zurückkommen kann, jetzt, wo niemand mehr sucht.
+   2 Nebensaetze  Ende       Ausgang weitergelebt
+        Später wirst du gefragt, wie es gewesen ist, und du merkst, dass die Antwort nicht in einen Satz passt.
+   2 Nebensaetze  Ende       Ausgang nicht_angekommen
+        Du widersprichst nicht, weil es die Einzigen sind, die überhaupt fragen.
+   2 Nebensaetze  Brief      Brief h_kundige_haft
+        Du schreibst sechs Zeilen zurück, in denen fast nichts steht: das Wetter, das Haus, der Hof.
+   ... und 3 weitere
+
+==============================================================================
+UMFANG DER PRUEFUNG
+==============================================================================
+Aufbau                       69  init-Bloecke ausgefuehrt
+1 Bestandstafel             101  Kapitel mal Pfad mal Verlauf
+2 Pfadprobe               73902  protokollierte Inhalte
+3 Sackgassenprobe          6209  Kapitelabschluesse
+4 Wertetafel               3808  Durchgaenge und Kalenderlaeufe
+5 Belegprobe                102  Ereignisse und Einlagen
+6 Medienprobe               325  erwartete Dateipfade
+7 Sprachprobe             29595  angesehene Textstellen
+8 Lesbarkeit               3658  gemessene Saetze

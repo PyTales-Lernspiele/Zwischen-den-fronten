@@ -1,0 +1,7 @@
+Dieses Paket gibt es nicht mehr einzeln.
+
+Sein Inhalt ist jetzt SCHRITT 3 von Paket 7.
+Nimm die Datei paket07.txt.
+
+Warum: groessere Pakete, damit Claude Code laenger am Stueck
+arbeiten kann. Die Uebersicht steht in PAKETPLAN.md.
