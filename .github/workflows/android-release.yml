@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.0.0)"
+        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.1.0)"
         required: false
         default: ""
       version_code:
-        description: "Numerischer versionCode (optional, Standard 10000)"
+        description: "Numerischer versionCode (optional, Standard 10100)"
         required: false
         default: ""
   push:
@@ -76,7 +76,7 @@ jobs:
             VERSION_NAME="${GITHUB_REF#refs/tags/v}"
           fi
           if [ -z "$VERSION_NAME" ]; then
-            VERSION_NAME="1.0.0"
+            VERSION_NAME="1.1.0"
           fi
 
           echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
@@ -186,10 +186,16 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           SIGNING_MODE="${{ steps.signing.outputs.mode }}"
+          WEBP_COUNT=$(find content/media -name '*.webp' | wc -l | tr -d ' ')
           NOTES=$(cat <<EOF
           ## Zwischen den Fronten — Android-Auslieferung (${TAG})
 
-          Historisches Zwei-Entscheidungs-Lernspiel (Alltag 1914–1919, 8. Klasse Oberschule).
+          Historisches Zwei-Entscheidungs-Lernspiel (Alltag 1914–1919, 8. Klasse Oberschule) — optimiert für das **Querformat** auf Android-Smartphones und Schul-Tablets.
+
+          ### Highlights
+          - **Querformat-Erlebnis (\`sensorLandscape\`):** Zweispaltige Buch-Bühne (links gerahmte 16:9-Illustration, rechts Erzählkarte & Entscheidungen), sehr schlanke einzeilige Kopfleiste (ein- und ausklappbar) sowie ruhige Erklär-Overlays ohne Seitenverschiebung.
+          - **Aufgeräumte Archivpapier-Ästhetik:** Harmonische Buchdruck-Typografie passend zu den Stil-A-Illustrationen, ruhiges Einstellungs-Fenster (Schriftgröße, Ton, Animationen, Unterrichts-Direktwahl), ohne Analysemodus und Entwickler-Vorschau.
+          - **Bildwelt (AP 5b):** Enthält **${WEBP_COUNT} von 63** Stil-A-Kernbildern (alle 8 Basis-Portraits komplett + erste Live-Emotions-Serien + \`schauplatz_brotschlange\`).
 
           ### Enthaltene Dateien
           - **\`.apk\`**: Direkte Installation / Sideloading auf Android-Tablets und -Smartphones (Android 7.0+ / API 24+).
@@ -199,7 +205,6 @@ jobs:
           ### Hinweise
           - **Signierungsstatus:** \`${SIGNING_MODE}\` (bei \`test-signiert\` eignet sich die APK für direkte Tests/Schul-Tablets; für Play Store bitte die vier Repository-Secrets \`ZDF_KEYSTORE_BASE64\`, \`ZDF_KEYSTORE_PASSWORD\`, \`ZDF_KEY_ALIAS\`, \`ZDF_KEY_PASSWORD\` hinterlegen — siehe \`docs/ANDROID_AUSLIEFERUNG.md\`).
           - **Offline & Datenschutz:** Die App läuft vollständig offline ohne Tracking und ohne gefährliche Berechtigungen.
-          - **Bildwelt (AP 5b):** Enthält die ersten 8 Stil-A-Kernbilder; die übrigen 55 Stufe-1-Bilder werden unabhängig nachgezogen und fließen automatisch in künftige Builds ein.
           EOF
           )
 

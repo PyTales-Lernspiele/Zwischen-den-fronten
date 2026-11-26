@@ -6,9 +6,9 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Responsive Layout-Klassen für alle drei Zielplattformen:
- * - [KOMPAKT]: Android-Hochformat / schmale Fenster (< 600 dp)
- * - [MITTEL]: Tablets / mittelgroße Querformat-Fenster (600 bis < 960 dp)
- * - [BREIT]: Desktop, WebApp im Querformat und Beamer (>= 960 dp)
+ * - [KOMPAKT]: Schmale Fenster (< 600 dp)
+ * - [MITTEL]: Smartphones im Querformat (ca. 720–930 × 360–430 dp) & kompakte Tablets (600 bis < 960 dp)
+ * - [BREIT]: Schul-Tablets im Querformat, Desktop, WebApp und Beamer (>= 960 dp)
  */
 enum class LayoutKlasse(
     val code: String,
@@ -22,6 +22,9 @@ enum class LayoutKlasse(
         const val BREAKPOINT_MITTEL_DP: Float = 600f
         const val BREAKPOINT_BREIT_DP: Float = 960f
 
+        /** Schwelle unterhalb derer ein Querformat-Display als flach gilt (Smartphone-Querformat). */
+        const val SCHWELLE_FLACHE_HOEHE_DP: Float = 500f
+
         fun vonBreiteDp(breiteDp: Float): LayoutKlasse = when {
             breiteDp < BREAKPOINT_MITTEL_DP -> KOMPAKT
             breiteDp < BREAKPOINT_BREIT_DP -> MITTEL
@@ -33,8 +36,8 @@ enum class LayoutKlasse(
 }
 
 /**
- * Abgeleitete Abstände, Spaltenzahlen und Touch-Mindestgrößen für die aktuelle [LayoutKlasse]
- * und [Schriftgroesse].
+ * Abgeleitete Abstände, Spaltenzahlen und Touch-Mindestgrößen für die aktuelle [LayoutKlasse],
+ * [Schriftgroesse] und Bildschirmhöhe (optimiert für breite, aber flache Querformat-Displays).
  */
 @Immutable
 data class LayoutMetrik(
@@ -46,22 +49,27 @@ data class LayoutMetrik(
     val werteSpalten: Int,
     val kopfNebeneinander: Boolean,
     val optionenNebeneinander: Boolean,
+    val zweispaltigeBuehne: Boolean,
+    val kompakteHoehe: Boolean,
     val portraitGroesse: Dp,
     val segmentHoehe: Dp,
     val minTouchHoehe: Dp,
 )
 
 /**
- * Berechnet konsistente Layout-Metriken für eine Kombination aus [LayoutKlasse] und [Schriftgroesse].
+ * Berechnet konsistente, Landscape-First-optimierte Layout-Metriken für eine Kombination aus
+ * [LayoutKlasse], [Schriftgroesse] und optionaler verfügbarer Bildschirmhöhe ([hoeheDp]).
  */
 fun layoutMetrikFuer(
     klasse: LayoutKlasse,
     schriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
+    hoeheDp: Float? = null,
 ): LayoutMetrik {
+    val flacheHoehe = hoeheDp != null && hoeheDp < LayoutKlasse.SCHWELLE_FLACHE_HOEHE_DP
     val segmentHoehe = when (schriftgroesse) {
-        Schriftgroesse.KLEIN -> 7.dp
-        Schriftgroesse.MITTEL -> 8.dp
-        Schriftgroesse.GROSS -> 10.dp
+        Schriftgroesse.KLEIN -> 6.dp
+        Schriftgroesse.MITTEL -> if (flacheHoehe) 6.dp else 7.dp
+        Schriftgroesse.GROSS -> 9.dp
     }
     return when (klasse) {
         LayoutKlasse.KOMPAKT -> LayoutMetrik(
@@ -73,35 +81,41 @@ fun layoutMetrikFuer(
             werteSpalten = 2,
             kopfNebeneinander = false,
             optionenNebeneinander = false,
-            portraitGroesse = 52.dp,
+            zweispaltigeBuehne = false,
+            kompakteHoehe = flacheHoehe,
+            portraitGroesse = 44.dp,
             segmentHoehe = segmentHoehe,
             minTouchHoehe = 48.dp,
         )
 
         LayoutKlasse.MITTEL -> LayoutMetrik(
             klasse = klasse,
-            aussenAbstand = 20.dp,
-            elementAbstand = 14.dp,
-            kartenInnenAbstand = 18.dp,
-            maxInhaltsBreite = 880.dp,
+            aussenAbstand = if (flacheHoehe) 12.dp else 18.dp,
+            elementAbstand = if (flacheHoehe) 10.dp else 14.dp,
+            kartenInnenAbstand = if (flacheHoehe) 14.dp else 18.dp,
+            maxInhaltsBreite = 940.dp,
             werteSpalten = 4,
             kopfNebeneinander = true,
             optionenNebeneinander = schriftgroesse != Schriftgroesse.GROSS,
-            portraitGroesse = 64.dp,
+            zweispaltigeBuehne = true,
+            kompakteHoehe = flacheHoehe,
+            portraitGroesse = if (flacheHoehe) 42.dp else 48.dp,
             segmentHoehe = segmentHoehe,
             minTouchHoehe = 48.dp,
         )
 
         LayoutKlasse.BREIT -> LayoutMetrik(
             klasse = klasse,
-            aussenAbstand = 28.dp,
-            elementAbstand = 18.dp,
-            kartenInnenAbstand = 24.dp,
-            maxInhaltsBreite = 1120.dp,
+            aussenAbstand = if (flacheHoehe) 16.dp else 28.dp,
+            elementAbstand = if (flacheHoehe) 12.dp else 18.dp,
+            kartenInnenAbstand = if (flacheHoehe) 16.dp else 22.dp,
+            maxInhaltsBreite = 1160.dp,
             werteSpalten = 4,
             kopfNebeneinander = true,
             optionenNebeneinander = true,
-            portraitGroesse = 74.dp,
+            zweispaltigeBuehne = true,
+            kompakteHoehe = flacheHoehe,
+            portraitGroesse = if (flacheHoehe) 44.dp else 52.dp,
             segmentHoehe = segmentHoehe,
             minTouchHoehe = 48.dp,
         )

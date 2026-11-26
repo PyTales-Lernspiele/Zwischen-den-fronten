@@ -1,15 +1,18 @@
 package de.pytales.zdf
 
+import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
+import de.pytales.zdf.engine.GameState
 import de.pytales.zdf.engine.KotlinRandomSource
+import de.pytales.zdf.engine.TextResolver
+import de.pytales.zdf.model.Ereignis
 import de.pytales.zdf.model.Geschlecht
 import de.pytales.zdf.model.Kartentyp
 import de.pytales.zdf.model.Pfad
 import de.pytales.zdf.model.SpielModus
 import de.pytales.zdf.model.Stimmung
 import de.pytales.zdf.model.WertSchluessel
-import de.pytales.zdf.ui.DemoBeispiele
 import de.pytales.zdf.ui.state.UiStateMapper
 import kotlin.random.Random
 import kotlin.test.Test
@@ -96,7 +99,7 @@ class UiStateMapperTest {
                 state = engine.waehlePerson(state, herkunft.id, geschlecht, 18, direktwahlPfad = Pfad.HEIMAT)
 
                 for (stimmung in Stimmung.entries) {
-                    val simuliert = DemoBeispiele.stimmungSimulieren(engine, state, stimmung)
+                    val simuliert = stimmungSimulieren(engine, state, stimmung)
                     val ui = UiStateMapper.mapLiveEmotion(engine, simuliert)
 
                     assertEquals(stimmung, ui.stimmung)
@@ -123,7 +126,7 @@ class UiStateMapperTest {
 
         val leerNeutral = UiStateMapper.mapLiveEmotion(
             engine,
-            DemoBeispiele.stimmungSimulieren(engine, engine.neuesSpiel(), Stimmung.NEUTRAL),
+            stimmungSimulieren(engine, engine.neuesSpiel(), Stimmung.NEUTRAL),
         )
         assertEquals(Stimmung.NEUTRAL, leerNeutral.stimmung)
         assertEquals("portrait_unbekannt_neutral", leerNeutral.portraitId)
@@ -135,7 +138,7 @@ class UiStateMapperTest {
         assertEquals(5, kopfzeilen.size, "Alle 5 Kartentypen müssen eigene Dokumentköpfe besitzen.")
 
         for (typ in Kartentyp.entries) {
-            val liste = DemoBeispiele.ereignisseFuerTyp(content, typ)
+            val liste = ereignisseFuerTyp(content, typ)
             assertTrue(liste.isNotEmpty(), "Kein reales Ereignis für Kartentyp $typ gefunden.")
         }
 
@@ -176,9 +179,9 @@ class UiStateMapperTest {
         }
         assertTrue(zaehlerMitHinweis > 0, "Erwartet reale Ereignisse mit optionalem Hinweis-Stempel.")
 
-        // Komplette Demo-Entscheidung inklusive Ausgangs-Mapping prüfen
+        // Komplette Entscheidung inklusive Ausgangs-Mapping prüfen
         val marsch = content.ereignisById.getValue("front_1914_marsch")
-        val start = DemoBeispiele.startZustand(engine, "arbeiterschaft", Geschlecht.MAENNLICH, marsch)
+        val start = testStartZustand(engine, "arbeiterschaft", Geschlecht.MAENNLICH, marsch)
         val nachWahl = engine.waehleOption(start, 0)
         val ausgangPhase = nachWahl.phase as? GamePhase.EreignisAusgang
         assertNotNull(ausgangPhase)
@@ -186,5 +189,99 @@ class UiStateMapperTest {
         assertEquals("front_1914_marsch", ausgangUi.ereignisId)
         assertEquals(marsch.optionen[0].titel, ausgangUi.gewaehlterTitel)
         assertTrue(ausgangUi.ausgangsText.isNotBlank())
+    }
+
+    private fun ereignisseFuerTyp(content: GameContent, typ: Kartentyp): List<Ereignis> =
+        content.ereignisse.ereignisse.filter { it.kartentyp == typ }
+
+    private fun testStartZustand(
+        engine: GameEngine,
+        herkunftId: String,
+        geschlecht: Geschlecht,
+        ereignis: Ereignis,
+    ): GameState {
+        val zielPfad = ereignis.pfade.firstOrNull() ?: Pfad.FRONT
+        var state = engine.herkunftWahlOeffnen(
+            engine.neuesSpiel(modus = SpielModus.KURZ, direktwahlAktiv = true),
+            modus = SpielModus.KURZ,
+            direktwahlAktiv = true,
+        )
+        state = engine.waehlePerson(
+            state = state,
+            herkunftId = herkunftId,
+            geschlecht = geschlecht,
+            alter = 18,
+            direktwahlPfad = zielPfad,
+        )
+        val jahr = ereignis.jahre.firstOrNull() ?: state.jahr
+        val aufgeloesterText = TextResolver.aufloesen(
+            fassung = ereignis.text,
+            jahr = jahr,
+            pfad = zielPfad,
+            merkmale = state.merkmale,
+            textPrioritaet = engine.content.merkmale.textPrioritaet,
+        )
+        return state.copy(
+            jahr = jahr,
+            pfad = zielPfad,
+            person = state.person?.copy(pfad = zielPfad),
+            stimmungUeberschreibung = ereignis.stimmung,
+            phase = GamePhase.EreignisAnzeige(
+                ereignis = ereignis,
+                aufgeloesterText = aufgeloesterText,
+            ),
+        )
+    }
+
+    private fun stimmungSimulieren(
+        engine: GameEngine,
+        state: GameState,
+        zielStimmung: Stimmung,
+    ): GameState {
+        val zielWerte = when (zielStimmung) {
+            Stimmung.NEUTRAL -> mapOf(
+                WertSchluessel.VERSORGUNG to 10,
+                WertSchluessel.BELASTUNG to 2,
+                WertSchluessel.AUFMERKSAMKEIT to 1,
+                WertSchluessel.RUECKHALT to 10,
+            )
+
+            Stimmung.HUNGRIG -> mapOf(
+                WertSchluessel.VERSORGUNG to 4,
+                WertSchluessel.BELASTUNG to 3,
+                WertSchluessel.AUFMERKSAMKEIT to 2,
+                WertSchluessel.RUECKHALT to 8,
+            )
+
+            Stimmung.ERSCHOEPFT -> mapOf(
+                WertSchluessel.VERSORGUNG to 8,
+                WertSchluessel.BELASTUNG to 9,
+                WertSchluessel.AUFMERKSAMKEIT to 2,
+                WertSchluessel.RUECKHALT to 8,
+            )
+
+            Stimmung.ANGST -> mapOf(
+                WertSchluessel.VERSORGUNG to 8,
+                WertSchluessel.BELASTUNG to 3,
+                WertSchluessel.AUFMERKSAMKEIT to 9,
+                WertSchluessel.RUECKHALT to 8,
+            )
+
+            Stimmung.EINSAM -> mapOf(
+                WertSchluessel.VERSORGUNG to 8,
+                WertSchluessel.BELASTUNG to 3,
+                WertSchluessel.AUFMERKSAMKEIT to 2,
+                WertSchluessel.RUECKHALT to 3,
+            )
+        }
+        val delta = WertSchluessel.entries.associateWith { schluessel ->
+            (zielWerte[schluessel] ?: 0) - (state.werte[schluessel] ?: 0)
+        }
+        val (neueWerte, effektiv) = engine.metrics.werteAnwenden(state.werte, delta)
+        return state.copy(
+            werte = neueWerte,
+            letzteAenderungen = effektiv,
+            stimmungUeberschreibung = null,
+        )
     }
 }

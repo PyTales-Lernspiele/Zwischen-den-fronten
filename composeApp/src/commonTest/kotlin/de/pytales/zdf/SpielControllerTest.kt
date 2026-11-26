@@ -28,7 +28,7 @@ class SpielControllerTest {
     private val content = loadTestGameContent()
 
     @Test
-    fun startmenueEinstellungenOnboardingUndUiVorschau() {
+    fun startmenueEinstellungenGrundsaetzeUndKopfleisteEinklappen() {
         val controller = SpielController(content, KotlinRandomSource(Random(1914)))
 
         val start = controller.aktuellerZustand
@@ -36,22 +36,20 @@ class SpielControllerTest {
         assertEquals(SpielModus.KURZ, start.gameState.modus)
         assertFalse(start.gameState.direktwahlAktiv)
         assertEquals(Schriftgroesse.MITTEL, start.schriftgroesse)
-        assertFalse(start.analyseModus)
         assertFalse(start.reduzierteAnimationen)
         assertFalse(start.audioAktiv)
         assertFalse(start.audioZustand.spieltGerade)
-        assertFalse(start.zeigeUiVorschau)
+        assertFalse(start.kopfleisteEingeklappt)
+        assertFalse(start.einstellungenOffen)
+        assertFalse(start.grundsaetzeOffen)
         assertTrue(start.aufgeklappteGrundsaetze.isEmpty())
 
-        // Modus, Schriftgröße, Analysemodus, reduzierte Animationen, Audio & Direktwahl umschalten
+        // Modus, Schriftgröße, reduzierte Animationen, Audio, Kopfleiste & Direktwahl umschalten
         assertTrue(controller.waehleModus(SpielModus.LANG))
         assertEquals(SpielModus.LANG, controller.aktuellerZustand.gameState.modus)
 
         controller.setzeSchriftgroesse(Schriftgroesse.GROSS)
         assertEquals(Schriftgroesse.GROSS, controller.aktuellerZustand.schriftgroesse)
-
-        controller.toggleAnalyseModus()
-        assertTrue(controller.aktuellerZustand.analyseModus)
 
         controller.toggleReduzierteAnimationen()
         assertTrue(controller.aktuellerZustand.reduzierteAnimationen)
@@ -66,8 +64,24 @@ class SpielControllerTest {
         controller.setzeAudioLautstaerke(0.9f)
         assertEquals(0.35f, controller.aktuellerZustand.audioLautstaerke)
 
+        controller.toggleKopfleisteEingeklappt()
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
+        controller.setzeKopfleisteEingeklappt(false)
+        assertFalse(controller.aktuellerZustand.kopfleisteEingeklappt)
+        controller.toggleKopfleisteEingeklappt()
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
+
         assertTrue(controller.setzeDirektwahlAktiv(true))
         assertTrue(controller.aktuellerZustand.gameState.direktwahlAktiv)
+
+        // Einstellungs- und Grundsätze-Dialog im Startmenü öffnen und schließen
+        controller.einstellungenOeffnen()
+        assertTrue(controller.aktuellerZustand.einstellungenOffen)
+        assertTrue(controller.einstellungenSchliessen())
+        assertFalse(controller.aktuellerZustand.einstellungenOffen)
+
+        assertTrue(controller.grundsaetzeOeffnen())
+        assertTrue(controller.aktuellerZustand.grundsaetzeOffen)
 
         // Alle 3 Onboarding-Grundsätze lassen sich auf- und wieder zuklappen
         val grundsaetze = content.konfiguration.onboarding.grundsaetze
@@ -79,18 +93,16 @@ class SpielControllerTest {
         assertTrue(controller.toggleOnboardingGrundsatz(grundsaetze.first().id))
         assertFalse(grundsaetze.first().id in controller.aktuellerZustand.aufgeklappteGrundsaetze)
         assertFalse(controller.toggleOnboardingGrundsatz("unbekannter_grundsatz"))
+        assertTrue(controller.grundsaetzeSchliessen())
+        assertFalse(controller.aktuellerZustand.grundsaetzeOffen)
 
-        // AP-3-Komponenten-Vorschau im Startmenü öffnen und schließen
-        assertTrue(controller.uiVorschauOeffnen())
-        assertTrue(controller.aktuellerZustand.zeigeUiVorschau)
-        assertTrue(controller.uiVorschauSchliessen())
-        assertFalse(controller.aktuellerZustand.zeigeUiVorschau)
-
-        // Nach Start in HerkunftWahl darf UI-Vorschau nicht mehr geöffnet werden
+        // Nach Start in HerkunftWahl darf Grundsätze-Dialog nicht mehr geöffnet werden, Einstellungen schon
         assertTrue(controller.durchgangBeginnen())
         assertIs<GamePhase.HerkunftWahl>(controller.aktuellerZustand.gameState.phase)
-        assertFalse(controller.uiVorschauOeffnen())
-        assertFalse(controller.aktuellerZustand.zeigeUiVorschau)
+        assertFalse(controller.grundsaetzeOeffnen())
+        controller.einstellungenOeffnen()
+        assertTrue(controller.aktuellerZustand.einstellungenOffen)
+        assertTrue(controller.einstellungenSchliessen())
     }
 
     @Test
@@ -164,9 +176,9 @@ class SpielControllerTest {
                     content = content,
                     random = KotlinRandomSource(Random(2000 + index * 100 + seedOffset)),
                     initialSchriftgroesse = Schriftgroesse.GROSS,
-                    initialAnalyseModus = true,
                     initialReduzierteAnimationen = true,
                     initialAudioAktiv = true,
+                    initialKopfleisteEingeklappt = true,
                 )
                 assertTrue(controller.waehleModus(modus))
                 assertTrue(controller.setzeDirektwahlAktiv(true))
@@ -223,7 +235,7 @@ class SpielControllerTest {
             assertTrue(fertig.neuerDurchgang())
             assertIs<GamePhase.Start>(fertig.aktuellerZustand.gameState.phase)
             assertEquals(Schriftgroesse.GROSS, fertig.aktuellerZustand.schriftgroesse)
-            assertTrue(fertig.aktuellerZustand.analyseModus)
+            assertTrue(fertig.aktuellerZustand.kopfleisteEingeklappt)
             assertTrue(fertig.aktuellerZustand.reduzierteAnimationen)
             assertTrue(fertig.aktuellerZustand.audioAktiv)
             assertEquals(modus, fertig.aktuellerZustand.gameState.modus)
@@ -482,25 +494,30 @@ class SpielControllerTest {
     }
 
     @Test
-    fun zurueckTasteSchliesstErklaerKartenUndWahrtKeinZurueckLeitplanke() {
+    fun zurueckTasteSchliesstDialogeUndErklaerKartenUndWahrtKeinZurueckLeitplanke() {
         val controller = SpielController(
             content = content,
             random = KotlinRandomSource(Random(701)),
             initialSchriftgroesse = Schriftgroesse.GROSS,
-            initialAnalyseModus = true,
             initialReduzierteAnimationen = true,
             initialAudioAktiv = true,
+            initialKopfleisteEingeklappt = true,
         )
 
         // 1. Im Startmenü ohne Überlagerungen greift System-Zurück
         assertFalse(controller.aktuellerZustand.sollZurueckAbfangen)
         assertEquals(ZurueckErgebnis.SYSTEM_STANDARD, controller.verarbeiteZurueckTaste())
 
-        // 2. Geöffnete UI-Vorschau schließt sich über Zurück sauber
-        assertTrue(controller.uiVorschauOeffnen())
+        // 2. Geöffnete Einstellungen und Grundsätze schließen sich über Zurück sauber
+        controller.einstellungenOeffnen()
         assertTrue(controller.aktuellerZustand.sollZurueckAbfangen)
-        assertEquals(ZurueckErgebnis.UI_VORSCHAU_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
-        assertFalse(controller.aktuellerZustand.zeigeUiVorschau)
+        assertEquals(ZurueckErgebnis.DIALOG_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.einstellungenOffen)
+
+        assertTrue(controller.grundsaetzeOeffnen())
+        assertTrue(controller.aktuellerZustand.sollZurueckAbfangen)
+        assertEquals(ZurueckErgebnis.DIALOG_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.grundsaetzeOffen)
 
         // 3. Laufenden Durchgang starten bis in ein Ereignis
         assertTrue(controller.waehleModus(SpielModus.LANG))
@@ -529,7 +546,13 @@ class SpielControllerTest {
         assertFalse(controller.aktuellerZustand.emotionDetailsOffen)
         assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
 
-        // 6. Ohne offene Erklärkarte öffnet Zurück die ruhige Sicherheitsabfrage (kein Zurück zur letzten Karte!)
+        // 6. Geöffnete Einstellungen im laufenden Durchgang schließen sich vor der Sicherheitsabfrage
+        controller.einstellungenOeffnen()
+        assertEquals(ZurueckErgebnis.DIALOG_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.einstellungenOffen)
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+
+        // 7. Ohne offene Überlagerung öffnet Zurück die ruhige Sicherheitsabfrage (kein Zurück zur letzten Karte!)
         assertFalse(controller.durchgangNachBestaetigungVerlassen(), "Verlassen darf ohne offene Abfrage nicht greifen.")
         assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
         assertTrue(controller.aktuellerZustand.verlassenDialogOffen)
@@ -540,13 +563,13 @@ class SpielControllerTest {
         assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
         assertEquals(ereignisPhase, controller.aktuellerZustand.gameState.phase)
 
-        // 7. Ausdrücklich bestätigtes Verlassen kehrt sauber ins Startmenü zurück & bewahrt Einstellungen
+        // 8. Ausdrücklich bestätigtes Verlassen kehrt sauber ins Startmenü zurück & bewahrt Einstellungen
         assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
         assertTrue(controller.durchgangNachBestaetigungVerlassen())
         assertIs<GamePhase.Start>(controller.aktuellerZustand.gameState.phase)
         assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
         assertEquals(Schriftgroesse.GROSS, controller.aktuellerZustand.schriftgroesse)
-        assertTrue(controller.aktuellerZustand.analyseModus)
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
         assertTrue(controller.aktuellerZustand.reduzierteAnimationen)
         assertTrue(controller.aktuellerZustand.audioAktiv)
         assertEquals(SpielModus.LANG, controller.aktuellerZustand.gameState.modus)

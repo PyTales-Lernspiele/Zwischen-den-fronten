@@ -38,7 +38,6 @@ class LebenslaufExportTest {
             gameState = gameState,
             phase = phase,
             mitProtokoll = true,
-            analyseModus = true,
         )
 
         // Dateiname & Titel
@@ -62,9 +61,6 @@ class LebenslaufExportTest {
         assertTrue(text.contains("ENTSCHEIDUNGSPROTOKOLL"))
         assertTrue(text.contains("BEFINDENSSTAND AM ENDE (1919"))
         assertTrue(text.contains("Gesprächsimpuls:"))
-        if (ausgang.lehrplan.isNotBlank()) {
-            assertTrue(text.contains("Lehrplanbezug:"))
-        }
 
         // Druck-HTML ist ein vollständiges, eigenständiges A4-Druckdokument
         val html = dokument.druckHtml
@@ -85,11 +81,9 @@ class LebenslaufExportTest {
             gameState = gameState,
             phase = phase,
             mitProtokoll = false,
-            analyseModus = false,
         )
         assertFalse(ohneProtokoll.klartext.contains("ENTSCHEIDUNGSPROTOKOLL"))
         assertFalse(ohneProtokoll.druckHtml.contains("<table class=\"protokoll\">"))
-        assertFalse(ohneProtokoll.klartext.contains("Lehrplanbezug:"))
     }
 
     @Test
@@ -112,7 +106,6 @@ class LebenslaufExportTest {
             gameState = state.copy(jahr = 1916, phase = phase),
             phase = phase,
             mitProtokoll = true,
-            analyseModus = false,
         )
 
         assertTrue(dokument.dateinameBasis.endsWith("_1914_1916"))

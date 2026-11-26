@@ -2,12 +2,9 @@ package de.pytales.zdf.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,43 +26,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
-import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
 import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
-import de.pytales.zdf.ui.theme.LayoutKlasse
-import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
- * Jahresrückblick (`GamePhase.KapitelAbschluss`):
- * fasst das durchlebte Kriegsjahr zusammen, stellt die historische Leitfrage & den Kipppunkt
- * ([KapitelBogen]) für den gespielten Pfad heraus und führt in das nächste Jahr (bis Epilog 1919).
+ * Jahresrückblick (`GamePhase.KapitelAbschluss`) im ruhigen Buchdruck-Querformat:
+ * links der historische Jahresrückblick samt persönlichem Befindenszitat,
+ * rechts Leitfrage, Kipppunkt des Pfades und Übergang ins nächste Jahr.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun KapitelAbschlussScreen(
     engine: GameEngine,
     uiState: SpielUiState,
     phase: GamePhase.KapitelAbschluss,
     onNaechstesKapitel: () -> Unit,
-    onSchriftgroesseChange: (Schriftgroesse) -> Unit,
-    onAnalyseModusToggle: () -> Unit,
-    onAudioToggle: () -> Unit = {},
+    onAudioToggle: () -> Unit,
+    onEinstellungenOeffnen: () -> Unit,
+    onKopfleisteToggle: () -> Unit,
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
-    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
+    onEmotionDetailsOffenChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val layoutKlasse = ArchivTheme.layoutKlasse
+    val kompakt = metrik.kompakteHoehe
+    val zeigeRandLeiste = uiState.kopfleisteEingeklappt && metrik.kopfNebeneinander
     val gameState = uiState.gameState
 
     val abschlussUi = remember(engine, phase, gameState.pfad, gameState.werte) {
@@ -77,200 +72,184 @@ fun KapitelAbschlussScreen(
         )
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(farben.papier),
+    SpielBuehnenRahmen(
+        engine = engine,
+        uiState = uiState,
+        onAudioToggle = onAudioToggle,
+        onEinstellungenOeffnen = onEinstellungenOeffnen,
+        onKopfleisteToggle = onKopfleisteToggle,
+        onWertErklaerungChange = onWertErklaerungChange,
+        onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
+        modifier = modifier,
     ) {
-        SpielKopfLeiste(
-            engine = engine,
-            uiState = uiState,
-            onSchriftgroesseChange = onSchriftgroesseChange,
-            onAnalyseModusToggle = onAnalyseModusToggle,
-            onAudioToggle = onAudioToggle,
-            onWertErklaerungChange = onWertErklaerungChange,
-            onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
-        )
-
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             contentAlignment = Alignment.TopCenter,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .archivInhaltsSafeArea()
+                    .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
                     .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
-                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                    .padding(
+                        horizontal = metrik.aussenAbstand,
+                        vertical = if (kompakt) 8.dp else 16.dp,
+                    ),
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = farben.papierHell,
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(1.dp, farben.linie),
-                    shadowElevation = 1.dp,
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
+                    shadowElevation = 2.dp,
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(3.dp)
+                                .height(2.5.dp)
                                 .background(farben.tinte),
                         )
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(metrik.kartenInnenAbstand),
-                            verticalArrangement = Arrangement.spacedBy(14.dp),
-                        ) {
-                            // Kopfzeile
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
+                        val linkeSpalte: @Composable (Modifier) -> Unit = { mod ->
+                            Column(
+                                modifier = mod,
+                                verticalArrangement = Arrangement.spacedBy(if (kompakt) 9.dp else 12.dp),
                             ) {
-                                ArchivStempel(
-                                    text = "JAHRESRÜCKBLICK · ${abschlussUi.jahr}",
-                                    farbe = farben.tinte,
-                                    hintergrund = farben.papierDunkel,
-                                )
-                                Text(
-                                    text = "${abschlussUi.zeitraum} · ${abschlussUi.pfadMarke}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = farben.tinteMatt,
-                                )
-                            }
-
-                            Text(
-                                text = abschlussUi.ueberschrift,
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = farben.tinte,
-                                modifier = Modifier.archivUeberschrift(),
-                            )
-
-                            if (abschlussUi.stichworte.isNotEmpty()) {
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    abschlussUi.stichworte.forEach { stichwort ->
-                                        ArchivStempel(
-                                            text = stichwort,
-                                            farbe = farben.tinteMatt,
-                                            hintergrund = farben.papier,
-                                        )
-                                    }
+                                    Text(
+                                        text = "Jahresrückblick ${abschlussUi.jahr}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontFamily = FontFamily.Serif,
+                                        color = farben.akzent,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Text(
+                                        text = "${abschlussUi.zeitraum} · ${abschlussUi.pfadMarke}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = farben.tinteMatt,
+                                    )
                                 }
-                            }
 
-                            ArchivTrennlinie(farbe = farben.linieFein)
-
-                            // Historischer Jahresrückblick
-                            if (abschlussUi.rueckblick != null) {
                                 Text(
-                                    text = abschlussUi.rueckblick,
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    text = abschlussUi.ueberschrift,
+                                    style = if (kompakt) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium,
                                     color = farben.tinte,
+                                    modifier = Modifier.archivUeberschrift(),
                                 )
-                            }
 
-                            // Leitfrage & Kipppunkt (KapitelBogen)
-                            val kartenNebeneinander = layoutKlasse != LayoutKlasse.KOMPAKT &&
-                                uiState.schriftgroesse != Schriftgroesse.GROSS
+                                if (abschlussUi.stichworte.isNotEmpty()) {
+                                    Text(
+                                        text = abschlussUi.stichworte.joinToString("  ·  "),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = farben.tinteMatt,
+                                    )
+                                }
 
-                            if (kartenNebeneinander) {
+                                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
+
+                                if (abschlussUi.rueckblick != null) {
+                                    Text(
+                                        text = abschlussUi.rueckblick,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = farben.tinte,
+                                    )
+                                }
+
+                                // Ruhiges persönliches Jahresende-Zitat
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(IntrinsicSize.Min),
-                                    horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                                        .height(IntrinsicSize.Min)
+                                        .padding(top = 2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    BogenHinweisKarte(
-                                        marke = "HISTORISCHE LEITFRAGE",
-                                        text = abschlussUi.leitfrage,
-                                        hervorgehoben = false,
+                                    Box(
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                    )
-                                    BogenHinweisKarte(
-                                        marke = "WAS IN ${abschlussUi.jahr} KIPPT (${abschlussUi.pfadMarke.uppercase()})",
-                                        text = abschlussUi.kipppunkt,
-                                        hervorgehoben = true,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                    )
-                                }
-                            } else {
-                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    BogenHinweisKarte(
-                                        marke = "HISTORISCHE LEITFRAGE",
-                                        text = abschlussUi.leitfrage,
-                                        hervorgehoben = false,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                    BogenHinweisKarte(
-                                        marke = "WAS IN ${abschlussUi.jahr} KIPPT (${abschlussUi.pfadMarke.uppercase()})",
-                                        text = abschlussUi.kipppunkt,
-                                        hervorgehoben = true,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
-                            }
-
-                            // Persönlicher Stand am Jahresende
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(farben.papier, RoundedCornerShape(3.dp))
-                                    .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Text(
-                                        text = "DEINE LAGE AM ENDE DES JAHRES ${abschlussUi.jahr}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = farben.tinteMatt,
+                                            .width(2.dp)
+                                            .fillMaxHeight()
+                                            .background(farben.linie),
                                     )
                                     Text(
                                         text = "„${abschlussUi.zustandssatz}“",
                                         style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = FontFamily.Serif,
                                         fontStyle = FontStyle.Italic,
-                                        color = farben.tinte,
+                                        color = farben.tinteMatt,
+                                        modifier = Modifier.weight(1f),
                                     )
                                 }
                             }
+                        }
 
-                            ArchivTrennlinie(farbe = farben.linieFein)
+                        val rechteSpalte: @Composable (Modifier) -> Unit = { mod ->
+                            Column(
+                                modifier = mod,
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                BogenHinweisNotiz(
+                                    titel = "Historische Leitfrage",
+                                    text = abschlussUi.leitfrage,
+                                    hervorgehoben = false,
+                                )
 
-                            ArchivPrimaerKnopf(
-                                label = abschlussUi.weiterLabel,
-                                onClick = onNaechstesKapitel,
-                                modifier = if (layoutKlasse == LayoutKlasse.KOMPAKT) {
-                                    Modifier.fillMaxWidth()
-                                } else {
-                                    Modifier
-                                },
-                            )
+                                BogenHinweisNotiz(
+                                    titel = "Was ${abschlussUi.jahr} kippt · ${abschlussUi.pfadMarke}",
+                                    text = abschlussUi.kipppunkt,
+                                    hervorgehoben = true,
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                ArchivPrimaerKnopf(
+                                    label = abschlussUi.weiterLabel,
+                                    onClick = onNaechstesKapitel,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
+
+                        if (metrik.zweispaltigeBuehne) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(metrik.kartenInnenAbstand),
+                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 18.dp else 26.dp),
+                                verticalAlignment = Alignment.Top,
+                            ) {
+                                linkeSpalte(Modifier.weight(0.54f))
+                                rechteSpalte(Modifier.weight(0.46f))
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(metrik.kartenInnenAbstand),
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
+                            ) {
+                                linkeSpalte(Modifier.fillMaxWidth())
+                                ArchivTrennlinie()
+                                rechteSpalte(Modifier.fillMaxWidth())
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
 }
 
 @Composable
-private fun BogenHinweisKarte(
-    marke: String,
+private fun BogenHinweisNotiz(
+    titel: String,
     text: String,
     hervorgehoben: Boolean,
     modifier: Modifier = Modifier,
@@ -280,9 +259,12 @@ private fun BogenHinweisKarte(
 
     Row(
         modifier = modifier
+            .fillMaxWidth()
             .semantics(mergeDescendants = true) {}
-            .border(1.dp, if (hervorgehoben) farben.akzent.copy(alpha = 0.55f) else farben.linieFein, RoundedCornerShape(3.dp))
-            .background(if (hervorgehoben) farben.papierDunkel.copy(alpha = 0.52f) else farben.papier, RoundedCornerShape(3.dp))
+            .background(
+                if (hervorgehoben) farben.papierDunkel.copy(alpha = 0.48f) else farben.papier.copy(alpha = 0.65f),
+                RoundedCornerShape(5.dp),
+            )
             .height(IntrinsicSize.Min),
     ) {
         Box(
@@ -294,14 +276,15 @@ private fun BogenHinweisKarte(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = marke,
-                style = MaterialTheme.typography.labelSmall,
+                text = titel,
+                style = MaterialTheme.typography.labelMedium,
+                fontFamily = FontFamily.Serif,
                 color = if (hervorgehoben) farben.akzent else farben.tinteMatt,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = text,

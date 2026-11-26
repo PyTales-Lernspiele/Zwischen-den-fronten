@@ -3,19 +3,20 @@ package de.pytales.zdf.ui.screens
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,8 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
@@ -40,15 +41,13 @@ import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
-import de.pytales.zdf.ui.theme.LayoutKlasse
-import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
- * Durchgängiger Ereignis-Bildschirm für `GamePhase.EreignisAnzeige` und `GamePhase.EreignisAusgang`:
- * verbindet [SpielKopfLeiste] (`BefindensLeiste` + `LiveEmotionsKachel` mit AP-5-Portrait-Loader),
- * [SzenenbildRahmen] (mit automatischem Stufe-2→Stufe-1→Platzhalter-Loader),
- * [EntscheidungsKarte] (alle 5 Kartentypen, genau 2 Entscheidungen) und [EreignisAusgangKarte]
- * mit ruhigen, abschaltbaren Kartenwechseln (`ArchivUebergaenge`).
+ * Landscape-First-Ereignisbühne für `GamePhase.EreignisAnzeige` und `GamePhase.EreignisAusgang`:
+ * - Oben: schlanke, ein-/ausklappbare Kopfleiste via [SpielBuehnenRahmen]
+ * - Im Querformat (`MITTEL` & `BREIT`): zweispaltige Buch-Bühne — links bleibt die
+ *   stimmungsvoll gerahmte 16:9-Illustration samt ruhiger Orts-/Jahresangabe und Befindens-Notiz
+ *   ruhig sichtbar, rechts stehen Erzählkarte, die beiden Entscheidungen und der Ausgang.
  */
 @Composable
 fun EreignisScreen(
@@ -56,21 +55,19 @@ fun EreignisScreen(
     uiState: SpielUiState,
     onOptionWaehlen: (Int) -> Unit,
     onWeiterNachAusgang: () -> Unit,
-    onSchriftgroesseChange: (Schriftgroesse) -> Unit,
-    onAnalyseModusToggle: () -> Unit,
-    onAudioToggle: () -> Unit = {},
+    onAudioToggle: () -> Unit,
+    onEinstellungenOeffnen: () -> Unit,
+    onKopfleisteToggle: () -> Unit,
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
-    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
+    onEmotionDetailsOffenChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val gameState = uiState.gameState
     val phase = gameState.phase
-    val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val layoutKlasse = ArchivTheme.layoutKlasse
     val reduziert = ArchivTheme.reduzierteAnimationen
     val uebergangsProfil = remember(reduziert) { ArchivUebergaenge.profilFuer(reduziert) }
-    val scrollState = rememberScrollState()
+    val zeigeRandLeiste = uiState.kopfleisteEingeklappt && metrik.kopfNebeneinander
 
     val ereignis = when (phase) {
         is GamePhase.EreignisAnzeige -> phase.ereignis
@@ -123,117 +120,144 @@ fun EreignisScreen(
         engine.zustandssatz(gameState)
     }
 
-    // Beim Wechsel auf ein neues Ereignis ruhig nach oben scrollen
-    LaunchedEffect(ereignis.id) {
-        scrollState.scrollTo(0)
+    val kapitelHinweis = remember(engine.content, gameState) {
+        UiStateMapper.mapKopfKapitelTitel(engine.content, gameState)
     }
 
-    // Im Hochformat nach Wahl einer Option zur neuen Ausgangskarte scrollen (mit Respekt für reduzierte Animationen)
-    LaunchedEffect(phase is GamePhase.EreignisAusgang, layoutKlasse, uebergangsProfil.sanftScrollen) {
-        if (phase is GamePhase.EreignisAusgang && layoutKlasse != LayoutKlasse.BREIT) {
+    val rechterScroll = rememberScrollState()
+    val einzelScroll = rememberScrollState()
+
+    // Beim Wechsel auf ein neues Ereignis ruhig nach oben scrollen
+    LaunchedEffect(ereignis.id) {
+        rechterScroll.scrollTo(0)
+        einzelScroll.scrollTo(0)
+    }
+
+    // Nach Wahl einer Option sanft zur Ausgangskarte scrollen (mit Respekt für reduzierte Animationen)
+    LaunchedEffect(phase is GamePhase.EreignisAusgang, metrik.zweispaltigeBuehne, uebergangsProfil.sanftScrollen) {
+        if (phase is GamePhase.EreignisAusgang) {
+            val zielScroll = if (metrik.zweispaltigeBuehne) rechterScroll else einzelScroll
             if (uebergangsProfil.sanftScrollen) {
-                scrollState.animateScrollTo(scrollState.maxValue)
+                zielScroll.animateScrollTo(zielScroll.maxValue)
             } else {
-                scrollState.scrollTo(scrollState.maxValue)
+                zielScroll.scrollTo(zielScroll.maxValue)
             }
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(farben.papier),
+    SpielBuehnenRahmen(
+        engine = engine,
+        uiState = uiState,
+        onAudioToggle = onAudioToggle,
+        onEinstellungenOeffnen = onEinstellungenOeffnen,
+        onKopfleisteToggle = onKopfleisteToggle,
+        onWertErklaerungChange = onWertErklaerungChange,
+        onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
+        modifier = modifier,
     ) {
-        SpielKopfLeiste(
-            engine = engine,
-            uiState = uiState,
-            onSchriftgroesseChange = onSchriftgroesseChange,
-            onAnalyseModusToggle = onAnalyseModusToggle,
-            onAudioToggle = onAudioToggle,
-            onWertErklaerungChange = onWertErklaerungChange,
-            onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(scrollState),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            AnimatedContent(
-                targetState = ereignis.id,
-                transitionSpec = { ArchivUebergaenge.phasenTransitionSpec(reduziert) },
-                label = "ereignisKartenWechsel",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .archivInhaltsSafeArea()
-                    .widthIn(max = metrik.maxInhaltsBreite),
-            ) { _ ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
-                        .archivFokusGruppe(),
-                    verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+        AnimatedContent(
+            targetState = ereignis.id,
+            transitionSpec = { ArchivUebergaenge.phasenTransitionSpec(reduziert) },
+            label = "ereignisKartenWechsel",
+            modifier = Modifier.fillMaxSize(),
+        ) { _ ->
+            if (metrik.zweispaltigeBuehne) {
+                // Echte zweispaltige Querformat-Bühne: links ruhendes 16:9-Motiv, rechts Erzählkarte
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
-                    val buehneNebeneinander = layoutKlasse == LayoutKlasse.BREIT
-
-                    if (buehneNebeneinander) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-                            verticalAlignment = Alignment.Top,
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
+                            .widthIn(max = metrik.maxInhaltsBreite)
+                            .padding(
+                                horizontal = metrik.aussenAbstand,
+                                vertical = if (metrik.kompakteHoehe) 8.dp else 14.dp,
+                            )
+                            .archivFokusGruppe(),
+                        horizontalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 12.dp else 18.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        // Linke Bildspalte (bleibt beim Lesen rechts ruhig stehen, bei Bedarf selbst scrollbar)
+                        Column(
+                            modifier = Modifier
+                                .weight(0.43f)
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Column(
-                                modifier = Modifier.weight(0.42f),
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                SzenenbildRahmen(
-                                    szenenbild = kartenUi.szenenbild,
-                                    analyseModus = uiState.analyseModus,
+                            SzenenbildRahmen(szenenbild = kartenUi.szenenbild)
+
+                            if (!kapitelHinweis.isNullOrBlank()) {
+                                Text(
+                                    text = kapitelHinweis,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ArchivTheme.farben.tinteMatt,
+                                    modifier = Modifier.padding(horizontal = 4.dp),
                                 )
-                                BefindensNotizBox(zustandssatz = zustandssatz)
                             }
 
-                            Column(
-                                modifier = Modifier.weight(0.58f),
-                                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-                            ) {
-                                EntscheidungsKarte(
-                                    karte = kartenUi,
-                                    ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
-                                    optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                                    analyseModus = uiState.analyseModus,
-                                    onOptionWaehlen = onOptionWaehlen,
-                                )
+                            BefindensNotizFluestern(zustandssatz = zustandssatz)
+                        }
 
-                                AnimatedVisibility(
-                                    visible = ausgangUi != null,
-                                    enter = ArchivUebergaenge.aufklappEnter(reduziert),
-                                    exit = ArchivUebergaenge.aufklappExit(reduziert),
-                                ) {
-                                    if (ausgangUi != null) {
-                                        EreignisAusgangKarte(
-                                            ausgang = ausgangUi,
-                                            weiterLabel = weiterLabel,
-                                            onWeiter = onWeiterNachAusgang,
-                                        )
-                                    }
+                        // Rechte Erzähl- & Entscheidungsspalte (unabhängig ruhig scrollbar)
+                        Column(
+                            modifier = Modifier
+                                .weight(0.57f)
+                                .fillMaxHeight()
+                                .verticalScroll(rechterScroll),
+                            verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                        ) {
+                            EntscheidungsKarte(
+                                karte = kartenUi,
+                                ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
+                                optionenAktiv = phase is GamePhase.EreignisAnzeige,
+                                onOptionWaehlen = onOptionWaehlen,
+                            )
+
+                            AnimatedVisibility(
+                                visible = ausgangUi != null,
+                                enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                                exit = ArchivUebergaenge.aufklappExit(reduziert),
+                            ) {
+                                if (ausgangUi != null) {
+                                    EreignisAusgangKarte(
+                                        ausgang = ausgangUi,
+                                        weiterLabel = weiterLabel,
+                                        onWeiter = onWeiterNachAusgang,
+                                    )
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
-                    } else {
-                        SzenenbildRahmen(
-                            szenenbild = kartenUi.szenenbild,
-                            analyseModus = uiState.analyseModus,
-                        )
+                    }
+                }
+            } else {
+                // Schmale Fenster (< 600 dp): sauberer vertikaler Lesefluss
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(einzelScroll),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .archivInhaltsSafeArea()
+                            .widthIn(max = metrik.maxInhaltsBreite)
+                            .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                            .archivFokusGruppe(),
+                        verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                    ) {
+                        SzenenbildRahmen(szenenbild = kartenUi.szenenbild)
 
                         EntscheidungsKarte(
                             karte = kartenUi,
                             ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
                             optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                            analyseModus = uiState.analyseModus,
                             onOptionWaehlen = onOptionWaehlen,
                         )
 
@@ -251,41 +275,45 @@ fun EreignisScreen(
                             }
                         }
 
-                        BefindensNotizBox(zustandssatz = zustandssatz)
-                    }
+                        BefindensNotizFluestern(zustandssatz = zustandssatz)
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
         }
     }
 }
 
+/**
+ * Sehr ruhige, ungerahmte Befindens-Randnotiz mit feiner linker Linie statt grauer Box.
+ */
 @Composable
-private fun BefindensNotizBox(
+private fun BefindensNotizFluestern(
     zustandssatz: String,
 ) {
     val farben = ArchivTheme.farben
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .semantics(mergeDescendants = true) {}
-            .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
-            .background(farben.papierHell.copy(alpha = 0.72f), RoundedCornerShape(3.dp))
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text = "Aktuelle Lage",
-            style = MaterialTheme.typography.labelSmall,
-            color = farben.tinteMatt,
-            fontWeight = FontWeight.SemiBold,
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(farben.akzentMatt.copy(alpha = 0.65f)),
         )
         Text(
             text = "„$zustandssatz“",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Serif,
             fontStyle = FontStyle.Italic,
-            color = farben.tinte,
+            color = farben.tinteMatt,
+            modifier = Modifier.weight(1f),
         )
     }
 }
