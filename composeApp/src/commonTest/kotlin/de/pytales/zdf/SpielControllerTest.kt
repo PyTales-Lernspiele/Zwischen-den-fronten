@@ -599,6 +599,88 @@ class SpielControllerTest {
         assertEquals(abschluss, controller.aktuellerZustand.gameState.phase)
     }
 
+    @Test
+    fun grundmusikEffekteUndMasterStummschaltungSindSauberGekoppelt() {
+        val controller = SpielController(content, KotlinRandomSource(Random(808)))
+
+        // Standard: alles stumm
+        assertFalse(controller.aktuellerZustand.audioAktiv)
+        assertFalse(controller.aktuellerZustand.effekteAktiv)
+        assertFalse(controller.aktuellerZustand.audioZustand.spieltGerade)
+        assertFalse(controller.aktuellerZustand.audioZustand.hatAktivenTon)
+
+        // Kopfleisten-Ton-Button aktiviert Grundmusik + Klick-/Papiergeräusche gemeinsam
+        controller.toggleAudioAktiv()
+        assertTrue(controller.aktuellerZustand.audioAktiv)
+        assertTrue(controller.aktuellerZustand.effekteAktiv)
+        assertTrue(controller.aktuellerZustand.audioZustand.spieltGerade)
+        assertTrue(controller.aktuellerZustand.audioZustand.effekteAktiv)
+
+        // In den Einstellungen lassen sich Grundmusik und Klickgeräusche getrennt schalten
+        controller.toggleGrundmusik()
+        assertFalse(controller.aktuellerZustand.audioAktiv)
+        assertTrue(controller.aktuellerZustand.effekteAktiv)
+        assertFalse(controller.aktuellerZustand.audioZustand.spieltGerade)
+        assertTrue(controller.aktuellerZustand.audioZustand.hatAktivenTon)
+
+        // Haupt-Stummschalter (Kopfleiste) schaltet sofort ALLES stumm — auch wenn nur Effekte an waren
+        controller.toggleAudioAktiv()
+        assertFalse(controller.aktuellerZustand.audioAktiv)
+        assertFalse(controller.aktuellerZustand.effekteAktiv)
+        assertFalse(controller.aktuellerZustand.audioZustand.hatAktivenTon)
+
+        // Nur Effekte wieder einschalten und über kompletten Durchgang + Neustart erhalten
+        controller.setzeEffekteAktiv(true)
+        assertTrue(controller.aktuellerZustand.effekteAktiv)
+        controller.setzeDirektwahlAktiv(true)
+        controller.durchgangBeginnen()
+        controller.waehlePerson("landbevoelkerung", Geschlecht.WEIBLICH, 18, direktwahlPfad = Pfad.HEIMAT)
+        spieleBisAbschlussMitUiPruefung(controller, riskant = false)
+        assertTrue(controller.neuerDurchgang())
+        assertFalse(controller.aktuellerZustand.audioAktiv)
+        assertTrue(controller.aktuellerZustand.effekteAktiv)
+    }
+
+    @Test
+    fun herkunftWahlZweiSchritteUndStandardKopfleisteFuerFlacheDisplays() {
+        val controller = SpielController(content, KotlinRandomSource(Random(809)))
+
+        // 1. Automatische Kopfleisten-Voreinstellung für flache Smartphone-Querformat-Displays
+        assertFalse(controller.aktuellerZustand.kopfleisteEingeklappt)
+        controller.uebernehmeStandardKopfleisteFuerDisplay(kompakteHoehe = true)
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
+        controller.uebernehmeStandardKopfleisteFuerDisplay(kompakteHoehe = false)
+        assertFalse(controller.aktuellerZustand.kopfleisteEingeklappt)
+
+        // Nach manuellem Umschalten bleibt die Nutzerwahl stabil
+        controller.toggleKopfleisteEingeklappt()
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
+        controller.uebernehmeStandardKopfleisteFuerDisplay(kompakteHoehe = false)
+        assertTrue(controller.aktuellerZustand.kopfleisteEingeklappt)
+
+        // 2. Ruhiger 2-Schritt-Wechsel innerhalb von HerkunftWahl (vor Spielbeginn)
+        assertTrue(controller.durchgangBeginnen())
+        assertEquals(1, controller.aktuellerZustand.herkunftEntwurf.schritt)
+        assertFalse(controller.geheZuHerkunftSchritt(2), "Ohne gewählte Herkunft kein Wechsel zu Schritt 2.")
+
+        assertTrue(controller.waehleHerkunftEntwurf("buergertum"))
+        assertTrue(controller.geheZuHerkunftSchritt(2))
+        assertEquals(2, controller.aktuellerZustand.herkunftEntwurf.schritt)
+
+        // Zurück-Wechsel von Schritt 2 zu Schritt 1 vor Spielbeginn bewahrt die Herkunftswahl
+        assertEquals(ZurueckErgebnis.HERKUNFT_SCHRITT_ZURUECK, controller.verarbeiteZurueckTaste())
+        assertEquals(1, controller.aktuellerZustand.herkunftEntwurf.schritt)
+        assertEquals("buergertum", controller.aktuellerZustand.herkunftEntwurf.herkunftId)
+
+        // Nach Bestätigung der Figur gilt strikt „Kein Zurück“ (Sicherheitsabfrage)
+        assertTrue(controller.geheZuHerkunftSchritt(2))
+        assertTrue(controller.waehleGeschlechtEntwurf(Geschlecht.WEIBLICH))
+        assertTrue(controller.waehleAlterEntwurf(18))
+        assertTrue(controller.bestaetigePerson())
+        assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
+        assertTrue(controller.aktuellerZustand.verlassenDialogOffen)
+    }
+
     // -------------------------------------------------------------------------
     // Hilfsfunktionen für durchgängige Controller- & UI-Mapping-Tests
     // -------------------------------------------------------------------------

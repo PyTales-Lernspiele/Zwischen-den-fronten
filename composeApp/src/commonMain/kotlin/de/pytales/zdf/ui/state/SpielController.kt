@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Zwischenstand der Auswahl auf dem Bildschirm `HerkunftWahl`, bevor die Figur
- * verbindlich erzeugt wird (gestraffter 2–3-Klick-Einstieg).
+ * verbindlich erzeugt wird (ruhiger 2-Schritt-Einstieg: Schritt 1 Herkunft, Schritt 2 Figur).
  */
 @Immutable
 data class HerkunftEntwurf(
@@ -29,7 +29,11 @@ data class HerkunftEntwurf(
     val geschlecht: Geschlecht? = null,
     val alter: Int? = null,
     val direktwahlPfad: Pfad? = null,
+    val schritt: Int = 1,
 ) {
+    val kannZuSchrittZwei: Boolean
+        get() = herkunftId != null
+
     fun istVollstaendig(direktwahlAktiv: Boolean): Boolean =
         herkunftId != null &&
             geschlecht != null &&
@@ -42,6 +46,8 @@ data class HerkunftEntwurf(
  *
  * Setzt die pädagogische Leitplanke „Kein Zurück“ auch auf Android konsequent durch:
  * Es wird niemals zu einer vorherigen Karte oder Entscheidung zurückgesprungen.
+ * Einzig innerhalb der Figuren-Erstellung vor Spielbeginn darf von Schritt 2 zu Schritt 1
+ * gewechselt werden.
  */
 enum class ZurueckErgebnis {
     /** Ein offener Dialog (Sicherheitsabfrage, Einstellungen oder Grundsätze) wurde ruhig geschlossen. */
@@ -49,6 +55,9 @@ enum class ZurueckErgebnis {
 
     /** Eine geöffnete Befindens- oder Figuren-Erklärkarte wurde geschlossen. */
     ERKLAERKARTE_GESCHLOSSEN,
+
+    /** Vor Spielbeginn innerhalb der Figuren-Erstellung von Schritt 2 zu Schritt 1 gewechselt. */
+    HERKUNFT_SCHRITT_ZURUECK,
 
     /** Eine ruhige Sicherheitsabfrage zum Verlassen des Durchgangs wurde geöffnet. */
     SICHERHEITSABFRAGE_GEOEFFNET,
@@ -66,6 +75,7 @@ data class SpielUiState(
     val schriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
     val reduzierteAnimationen: Boolean = false,
     val audioAktiv: Boolean = false,
+    val effekteAktiv: Boolean = false,
     val audioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
     val kopfleisteEingeklappt: Boolean = false,
     val einstellungenOffen: Boolean = false,
@@ -113,6 +123,7 @@ data class SpielUiState(
             gameState = gameState,
             audioAktiv = audioAktiv,
             lautstaerke = audioLautstaerke,
+            effekteAktiv = effekteAktiv,
         )
 }
 
@@ -120,7 +131,7 @@ data class SpielUiState(
  * Testbarer, plattformunabhängiger Spiel-Controller rund um [GameEngine] und [GameState].
  *
  * Setzt die pädagogischen Leitplanken strikt durch:
- * - **Kein Zurück:** Alle Spielschritte laufen ausschließlich vorwärts durch die [GamePhase]-Kette.
+ * - **Kein Zurück:** Ab Figuren-Bestätigung laufen alle Spielschritte ausschließlich vorwärts.
  * - **Kein Speichern/Laden:** Ein Durchgang wird von Anfang bis Ende in einem Zug gespielt.
  * - **Genau zwei Entscheidungen:** Nur die zwei Optionen (Index 0 oder 1) des aktuellen Ereignisses sind wählbar.
  * - **Robuste Phasen-Prüfung:** Doppelklicks oder phasenfremde Aufrufe werden sicher ignoriert (`false`),
@@ -131,6 +142,7 @@ class SpielController(
     initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
     initialReduzierteAnimationen: Boolean = false,
     initialAudioAktiv: Boolean = false,
+    initialEffekteAktiv: Boolean = initialAudioAktiv,
     initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
     initialKopfleisteEingeklappt: Boolean = false,
 ) {
@@ -140,6 +152,7 @@ class SpielController(
         initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
         initialReduzierteAnimationen: Boolean = false,
         initialAudioAktiv: Boolean = false,
+        initialEffekteAktiv: Boolean = initialAudioAktiv,
         initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
         initialKopfleisteEingeklappt: Boolean = false,
     ) : this(
@@ -147,6 +160,7 @@ class SpielController(
         initialSchriftgroesse = initialSchriftgroesse,
         initialReduzierteAnimationen = initialReduzierteAnimationen,
         initialAudioAktiv = initialAudioAktiv,
+        initialEffekteAktiv = initialEffekteAktiv,
         initialAudioLautstaerke = initialAudioLautstaerke,
         initialKopfleisteEingeklappt = initialKopfleisteEingeklappt,
     )
@@ -154,12 +168,15 @@ class SpielController(
     val content: GameContent
         get() = engine.content
 
+    private var kopfleisteManuellGeaendert: Boolean = initialKopfleisteEingeklappt
+
     private val _uiState = MutableStateFlow(
         SpielUiState(
             gameState = engine.neuesSpiel(),
             schriftgroesse = initialSchriftgroesse,
             reduzierteAnimationen = initialReduzierteAnimationen,
             audioAktiv = initialAudioAktiv,
+            effekteAktiv = initialEffekteAktiv,
             audioLautstaerke = AudioRegelwerk.begrenzeLautstaerke(initialAudioLautstaerke),
             kopfleisteEingeklappt = initialKopfleisteEingeklappt,
         ),
@@ -186,12 +203,48 @@ class SpielController(
         _uiState.update { it.copy(reduzierteAnimationen = !it.reduzierteAnimationen) }
     }
 
+    /**
+     * Schaltet ausschließlich die Grundmusik ein oder aus (Einstellungen).
+     */
     fun setzeAudioAktiv(aktiv: Boolean) {
         _uiState.update { it.copy(audioAktiv = aktiv) }
     }
 
-    fun toggleAudioAktiv() {
+    /**
+     * Schaltet ausschließlich die Grundmusik um (Einstellungen).
+     */
+    fun toggleGrundmusik() {
         _uiState.update { it.copy(audioAktiv = !it.audioAktiv) }
+    }
+
+    /**
+     * Schaltet ausschließlich Klick- & Papiergeräusche ein oder aus (Einstellungen).
+     */
+    fun setzeEffekteAktiv(aktiv: Boolean) {
+        _uiState.update { it.copy(effekteAktiv = aktiv) }
+    }
+
+    /**
+     * Schaltet ausschließlich Klick- & Papiergeräusche um (Einstellungen).
+     */
+    fun toggleEffekteAktiv() {
+        _uiState.update { it.copy(effekteAktiv = !it.effekteAktiv) }
+    }
+
+    /**
+     * Haupt-Stummschalter (Kopfleiste / Startbildschirm):
+     * - Ist Grundmusik oder Effektton aktiv, wird sofort **alles** stummgeschaltet.
+     * - Ist alles stumm, werden Grundmusik und dezente Klick-/Papiergeräusche aktiviert.
+     */
+    fun toggleAudioAktiv() {
+        _uiState.update { aktuell ->
+            val irgendwasAn = aktuell.audioAktiv || aktuell.effekteAktiv
+            if (irgendwasAn) {
+                aktuell.copy(audioAktiv = false, effekteAktiv = false)
+            } else {
+                aktuell.copy(audioAktiv = true, effekteAktiv = true)
+            }
+        }
     }
 
     fun setzeAudioLautstaerke(lautstaerke: Float) {
@@ -199,11 +252,25 @@ class SpielController(
         _uiState.update { it.copy(audioLautstaerke = begrenzt) }
     }
 
+    /**
+     * Setzt die Standard-Einklappung der Kopfleiste passend zur Bildschirmhöhe
+     * (auf flachen Smartphone-Querformat-Displays standardmäßig eingeklappt), solange
+     * die Nutzerin / der Nutzer die Kopfleiste noch nicht manuell umgeschaltet hat.
+     */
+    fun uebernehmeStandardKopfleisteFuerDisplay(kompakteHoehe: Boolean) {
+        if (kopfleisteManuellGeaendert) return
+        _uiState.update {
+            if (it.kopfleisteEingeklappt == kompakteHoehe) it else it.copy(kopfleisteEingeklappt = kompakteHoehe)
+        }
+    }
+
     fun setzeKopfleisteEingeklappt(eingeklappt: Boolean) {
+        kopfleisteManuellGeaendert = true
         _uiState.update { it.copy(kopfleisteEingeklappt = eingeklappt) }
     }
 
     fun toggleKopfleisteEingeklappt() {
+        kopfleisteManuellGeaendert = true
         _uiState.update { it.copy(kopfleisteEingeklappt = !it.kopfleisteEingeklappt) }
     }
 
@@ -279,9 +346,10 @@ class SpielController(
      * „Kein Zurück“-Leitplanke:
      * 1. Offene Sicherheitsabfrage, Einstellungen oder Grundsätze ruhig schließen.
      * 2. Geöffnete Befindens- oder Figuren-Erklärkarte schließen.
-     * 3. Während eines laufenden oder abgeschlossenen Durchgangs niemals rückwärts navigieren,
+     * 3. Vor Spielbeginn innerhalb von `HerkunftWahl` Schritt 2 ruhig zu Schritt 1 wechseln.
+     * 4. Während eines laufenden oder abgeschlossenen Durchgangs niemals rückwärts navigieren,
      *    sondern eine ruhige Sicherheitsabfrage öffnen.
-     * 4. Im Startmenü ohne Überlagerungen greift das normale System-Zurück.
+     * 5. Im Startmenü ohne Überlagerungen greift das normale System-Zurück.
      */
     fun verarbeiteZurueckTaste(): ZurueckErgebnis {
         val aktuell = _uiState.value
@@ -307,6 +375,13 @@ class SpielController(
                     emotionDetailsOffen = false,
                 )
                 ZurueckErgebnis.ERKLAERKARTE_GESCHLOSSEN
+            }
+
+            aktuell.gameState.phase is GamePhase.HerkunftWahl && aktuell.herkunftEntwurf.schritt == 2 -> {
+                _uiState.value = aktuell.copy(
+                    herkunftEntwurf = aktuell.herkunftEntwurf.copy(schritt = 1),
+                )
+                ZurueckErgebnis.HERKUNFT_SCHRITT_ZURUECK
             }
 
             aktuell.gameState.phase is GamePhase.Start -> ZurueckErgebnis.SYSTEM_STANDARD
@@ -418,7 +493,7 @@ class SpielController(
     }
 
     // -------------------------------------------------------------------------
-    // Gestraffter Einstieg: Herkunft, Musterung & Erwerbswahl
+    // Ruhiger 2-Schritt-Einstieg: Herkunft (Schritt 1), Figur (Schritt 2), Musterung & Erwerbswahl
     // -------------------------------------------------------------------------
 
     fun waehleHerkunftEntwurf(herkunftId: String): Boolean {
@@ -427,6 +502,21 @@ class SpielController(
         if (herkunftId !in content.herkunftById) return false
         _uiState.value = aktuell.copy(
             herkunftEntwurf = aktuell.herkunftEntwurf.copy(herkunftId = herkunftId),
+        )
+        return true
+    }
+
+    /**
+     * Wechselt vor Spielbeginn innerhalb von `HerkunftWahl` ruhig zwischen
+     * Schritt 1 (soziale Herkunft) und Schritt 2 (Geschlecht, Jahrgang & Aufbruch).
+     */
+    fun geheZuHerkunftSchritt(schritt: Int): Boolean {
+        val aktuell = _uiState.value
+        if (aktuell.gameState.phase !is GamePhase.HerkunftWahl) return false
+        if (schritt != 1 && schritt != 2) return false
+        if (schritt == 2 && !aktuell.herkunftEntwurf.kannZuSchrittZwei) return false
+        _uiState.value = aktuell.copy(
+            herkunftEntwurf = aktuell.herkunftEntwurf.copy(schritt = schritt),
         )
         return true
     }
@@ -628,7 +718,7 @@ class SpielController(
     /**
      * Startet nach abgeschlossenem Durchgang (regulär 1919 oder nach Auffangnetz) einen
      * frischen Durchgang im Startmenü. Globale Unterrichts- und Zugänglichkeits-Einstellungen
-     * (`schriftgroesse`, `reduzierteAnimationen`, `audioAktiv`, `audioLautstaerke`,
+     * (`schriftgroesse`, `reduzierteAnimationen`, `audioAktiv`, `effekteAktiv`, `audioLautstaerke`,
      * `kopfleisteEingeklappt`, gewählter `modus` und `direktwahlAktiv`) bleiben erhalten.
      */
     fun neuerDurchgang(): Boolean {

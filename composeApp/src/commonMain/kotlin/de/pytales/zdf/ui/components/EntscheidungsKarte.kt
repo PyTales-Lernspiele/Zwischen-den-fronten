@@ -1,27 +1,29 @@
 package de.pytales.zdf.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,13 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -50,27 +46,26 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.model.Kartentyp
 import de.pytales.zdf.ui.state.EntscheidungsKarteUiState
 import de.pytales.zdf.ui.state.EntscheidungsOptionUiState
 import de.pytales.zdf.ui.state.EreignisAusgangUiState
 import de.pytales.zdf.ui.state.QuelleUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
-import de.pytales.zdf.ui.theme.ArchivUebergaenge
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
- * Entscheidungskarte im ruhigen Buchdruck- & Archiv-Stil für alle 5 historischen Kartentypen:
- * - [Kartentyp.KARTE]: klassisches Archivpapier-Blatt
- * - [Kartentyp.FELDPOST]: Feldpostbrief mit feinem Poststempel und linker Falzlinie
- * - [Kartentyp.LEBENSMITTEL]: Bezugskarte mit dezent perforiertem Markenrand
- * - [Kartentyp.ZEITUNG]: Tagesblatt-Meldung mit doppeltem Zeitungskopf und Serifen-Satz
- * - [Kartentyp.AMTLICH]: Amtliche Verfügung mit feinem Doppelrahmen
- *
- * Enthält stets exakt zwei gleichwertige Entscheidungs-Schaltflächen sowie eine
- * schlichte, unaufdringlich aufklappbare „Historische Quelle“.
+ * Offene Buchseiten-Ansicht für die Entscheidungsphase (`GamePhase.EreignisAnzeige`):
+ * - Bewusst **ohne Kasten-in-Kasten-Rahmen** — die Typografie ruht unmittelbar auf dem warmen
+ *   Archivpapier wie auf einer aufgeschlagenen Buchseite.
+ * - Klarer typspezifischer Titel (Alltagsbericht, Feldpostbrief, Lebensmittelkarte, Tagesblatt,
+ *   Amtliche Verfügung), unaufdringlicher Link „Quelle“ (öffnet ein ruhiges Quellen-Overlay),
+ *   ruhiger Erzähltext und exakt **zwei klar getrennte Entscheidungs-Buttons**.
  */
 @Composable
 fun EntscheidungsKarte(
@@ -82,310 +77,80 @@ fun EntscheidungsKarte(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val kompakt = metrik.kompakteHoehe
+    var quelleOffen by remember(karte.ereignisId) { mutableStateOf(false) }
 
-    val papierFlaeche = when (karte.kartentyp) {
-        Kartentyp.KARTE,
-        Kartentyp.FELDPOST,
-        Kartentyp.AMTLICH,
-        -> farben.papierHell
-
-        Kartentyp.LEBENSMITTEL,
-        Kartentyp.ZEITUNG,
-        -> farben.papierHell.copy(alpha = 0.92f)
-    }
-
-    val rahmenFarbe = when (karte.kartentyp) {
-        Kartentyp.AMTLICH -> farben.linie.copy(alpha = 0.85f)
-        Kartentyp.LEBENSMITTEL -> Color.Transparent
-        else -> farben.linieFein.copy(alpha = 0.82f)
-    }
-
-    val gestrichelterRandModifier = if (karte.kartentyp == Kartentyp.LEBENSMITTEL) {
-        Modifier.drawBehind {
-            val strich = 1.25.dp.toPx()
-            drawRoundRect(
-                color = farben.linie.copy(alpha = 0.78f),
-                topLeft = Offset(strich / 2f, strich / 2f),
-                size = Size(size.width - strich, size.height - strich),
-                cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx()),
-                style = Stroke(
-                    width = strich,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(9f, 6f), 0f),
-                ),
-            )
-        }
-    } else {
-        Modifier
-    }
-
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(gestrichelterRandModifier),
-        color = papierFlaeche,
-        shape = RoundedCornerShape(6.dp),
-        border = if (karte.kartentyp == Kartentyp.LEBENSMITTEL) {
-            null
-        } else {
-            BorderStroke(if (karte.kartentyp == Kartentyp.AMTLICH) 1.dp else 0.75.dp, rahmenFarbe)
-        },
-        shadowElevation = 2.dp,
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 16.dp),
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Typspezifischer, ruhiger Buchdruck-Kopf
-            KartenKopfNachTyp(karte = karte)
-
-            // Hauptkörper: Erzähltext + zwei klare Entscheidungen + schlichte Quelle
+        // Ruhiger offener Buchseiten-Kopf: klarer Titel links, dezenter Link „Quelle“ rechts
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = metrik.kartenInnenAbstand,
-                        vertical = if (metrik.kompakteHoehe) 12.dp else 16.dp,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 12.dp else 14.dp),
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                KartenTextNachTyp(
-                    kartentyp = karte.kartentyp,
-                    text = karte.text,
-                )
-
-                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
-
-                EntscheidungsOptionenGruppe(
-                    optionen = karte.optionen,
-                    ausgewaehlteOptionIndex = ausgewaehlteOptionIndex,
-                    aktiv = optionenAktiv,
-                    nebeneinanderErlaubt = metrik.optionenNebeneinander,
-                    onOptionWaehlen = onOptionWaehlen,
-                )
-
-                QuellenEinordnungBox(
-                    quelle = karte.quelle,
-                    ereignisId = karte.ereignisId,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
-    val farben = ArchivTheme.farben
-    val innen = ArchivTheme.metrik.kartenInnenAbstand
-    val kompakt = ArchivTheme.metrik.kompakteHoehe
-
-    when (karte.kartentyp) {
-        Kartentyp.KARTE -> {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(2.5.dp)
-                        .background(farben.akzent.copy(alpha = 0.85f)),
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = innen, vertical = if (kompakt) 7.dp else 9.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = karte.kartentypBezeichnung,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.akzent,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = karte.aktenzeichen,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = farben.tinteMatt,
-                    )
-                }
-                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.6f))
-            }
-        }
-
-        Kartentyp.FELDPOST -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(farben.papier.copy(alpha = 0.45f)),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = innen, vertical = if (kompakt) 7.dp else 9.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                        Text(
-                            text = "Feldpostbrief",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontFamily = FontFamily.Serif,
-                            color = farben.tinte,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = karte.aktenzeichen,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-                    FeldpostStempel(jahr = karte.jahr)
-                }
-                ArchivTrennlinie(farbe = farben.akzentMatt.copy(alpha = 0.45f))
-            }
-        }
-
-        Kartentyp.LEBENSMITTEL -> {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(farben.papierDunkel.copy(alpha = 0.55f))
-                        .padding(horizontal = innen, vertical = if (kompakt) 7.dp else 9.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(1.dp),
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(
-                            text = "Reichs-Lebensmittelkarte",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontFamily = FontFamily.Serif,
-                            color = farben.tinte,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = karte.aktenzeichen,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.clearAndSetSemantics {},
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        listOf("I", "II", "III").forEach { abschnitt ->
-                            Text(
-                                text = abschnitt,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontFamily = FontFamily.Serif,
-                                color = farben.tinteMatt,
-                                modifier = Modifier
-                                    .background(farben.papierHell.copy(alpha = 0.85f), RoundedCornerShape(3.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp),
-                            )
-                        }
-                    }
-                }
-                ArchivTrennlinie(farbe = farben.linieFein)
-            }
-        }
-
-        Kartentyp.ZEITUNG -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = innen, vertical = if (kompakt) 8.dp else 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                ArchivTrennlinie(farbe = farben.tinte.copy(alpha = 0.72f), doppelt = true)
                 Text(
-                    text = "Tagesblatt · Meldung",
-                    style = MaterialTheme.typography.titleLarge,
+                    text = offenerKartenTitel(karte.kartentyp),
+                    style = if (kompakt) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
                     fontFamily = FontFamily.Serif,
-                    color = farben.tinte,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    color = if (karte.kartentyp == Kartentyp.KARTE) farben.akzent else farben.tinte,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.archivUeberschrift(),
                 )
-                Text(
-                    text = "${karte.aktenzeichen} · ${karte.pfadMarke}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = farben.tinteMatt,
-                    textAlign = TextAlign.Center,
-                )
-                ArchivTrennlinie(farbe = farben.tinte.copy(alpha = 0.72f), doppelt = true)
-            }
-        }
-
-        Kartentyp.AMTLICH -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(farben.papierDunkel.copy(alpha = 0.42f)),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = innen, vertical = if (kompakt) 7.dp else 9.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Amtliche Verfügung",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.tinte,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .weight(1f)
-                            .archivUeberschrift(),
-                    )
-                    Text(
-                        text = karte.aktenzeichen,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = farben.tinteMatt,
+                if (karte.kartentyp == Kartentyp.ZEITUNG || karte.kartentyp == Kartentyp.AMTLICH) {
+                    ArchivTrennlinie(
+                        farbe = farben.tinte.copy(alpha = 0.42f),
+                        doppelt = true,
                     )
                 }
-                ArchivTrennlinie(farbe = farben.tinte.copy(alpha = 0.55f), doppelt = true)
             }
-        }
-    }
-}
 
-@Composable
-private fun FeldpostStempel(jahr: Int) {
-    val farben = ArchivTheme.farben
-    Box(
-        modifier = Modifier
-            .size(38.dp)
-            .clearAndSetSemantics {},
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(modifier = Modifier.matchParentSize()) {
-            val radius = size.minDimension / 2f - 1.5.dp.toPx()
-            drawCircle(
-                color = farben.akzentMatt.copy(alpha = 0.65f),
-                radius = radius,
-                style = Stroke(width = 1.dp.toPx()),
-            )
-            drawCircle(
-                color = farben.akzentMatt.copy(alpha = 0.38f),
-                radius = radius - 2.5.dp.toPx(),
-                style = Stroke(width = 0.75.dp.toPx()),
+            QuellenLink(
+                onClick = { quelleOffen = true },
             )
         }
-        Text(
-            text = jahr.toString(),
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = FontFamily.Serif,
-            color = farben.akzent,
-            fontWeight = FontWeight.Bold,
+
+        // Ruhiger Erzähltext direkt auf dem Archivpapier
+        KartenTextOffen(
+            kartentyp = karte.kartentyp,
+            text = karte.text,
+        )
+
+        // Exakt zwei klar getrennte, gleichwertige Entscheidungs-Buttons
+        EntscheidungsOptionenGruppe(
+            optionen = karte.optionen,
+            ausgewaehlteOptionIndex = ausgewaehlteOptionIndex,
+            aktiv = optionenAktiv,
+            nebeneinanderErlaubt = false,
+            onOptionWaehlen = onOptionWaehlen,
+        )
+    }
+
+    if (quelleOffen) {
+        QuelleOverlayDialog(
+            quelle = karte.quelle,
+            onSchliessen = { quelleOffen = false },
         )
     }
 }
 
+private fun offenerKartenTitel(kartentyp: Kartentyp): String = when (kartentyp) {
+    Kartentyp.KARTE -> "Alltagsbericht"
+    Kartentyp.FELDPOST -> "Feldpostbrief"
+    Kartentyp.LEBENSMITTEL -> "Lebensmittelkarte"
+    Kartentyp.ZEITUNG -> "Tagesblatt"
+    Kartentyp.AMTLICH -> "Amtliche Verfügung"
+}
+
 @Composable
-private fun KartenTextNachTyp(
+private fun KartenTextOffen(
     kartentyp: Kartentyp,
     text: String,
 ) {
@@ -425,7 +190,7 @@ private fun KartenTextNachTyp(
                     modifier = Modifier
                         .width(2.dp)
                         .fillMaxHeight()
-                        .background(farben.tinte.copy(alpha = 0.55f)),
+                        .background(farben.tinte.copy(alpha = 0.45f)),
                 )
                 Text(
                     text = text,
@@ -448,9 +213,7 @@ private fun KartenTextNachTyp(
 }
 
 /**
- * Genau zwei gleichwertige Entscheidungs-Schaltflächen (ohne Richtig/Falsch-Hierarchie).
- * Passt sich automatisch an die tatsächliche Kartenbreite an: nebeneinander ab ~460 dp
- * Kartenbreite (Tablets/Desktop), darunter ruhig und gut lesbar gestapelt.
+ * Genau zwei klar getrennte, gleichwertige Entscheidungs-Schaltflächen (ohne Richtig/Falsch-Hierarchie).
  */
 @Composable
 fun EntscheidungsOptionenGruppe(
@@ -461,51 +224,26 @@ fun EntscheidungsOptionenGruppe(
     onOptionWaehlen: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val abstand = if (ArchivTheme.metrik.kompakteHoehe) 8.dp else 10.dp
+    val abstand = if (ArchivTheme.metrik.kompakteHoehe) 10.dp else 12.dp
 
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val zeigeNebeneinander = nebeneinanderErlaubt && optionen.size == 2 && maxWidth >= 460.dp
-
-        if (zeigeNebeneinander) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(abstand),
-            ) {
-                optionen.forEach { option ->
-                    EntscheidungsOptionButton(
-                        option = option,
-                        istAusgewaehlt = ausgewaehlteOptionIndex == option.index,
-                        aktiv = aktiv,
-                        onClick = { onOptionWaehlen(option.index) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                    )
-                }
-            }
-        } else {
-            Column(
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(abstand),
+    ) {
+        optionen.forEach { option ->
+            EntscheidungsOptionButton(
+                option = option,
+                istAusgewaehlt = ausgewaehlteOptionIndex == option.index,
+                aktiv = aktiv,
+                onClick = { onOptionWaehlen(option.index) },
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(abstand),
-            ) {
-                optionen.forEach { option ->
-                    EntscheidungsOptionButton(
-                        option = option,
-                        istAusgewaehlt = ausgewaehlteOptionIndex == option.index,
-                        aktiv = aktiv,
-                        onClick = { onOptionWaehlen(option.index) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
+            )
         }
     }
 }
 
 /**
- * Einzelne gleichwertige Entscheidungs-Schaltfläche im ruhigen Buchdruck-Papierstil.
+ * Einzelner klar abgesetzter, ruhiger Entscheidungs-Button auf warmem Archivpapier.
  */
 @Composable
 fun EntscheidungsOptionButton(
@@ -518,14 +256,14 @@ fun EntscheidungsOptionButton(
     val farben = ArchivTheme.farben
     val kompakt = ArchivTheme.metrik.kompakteHoehe
     val flaeche = when {
-        istAusgewaehlt -> farben.papierDunkel.copy(alpha = 0.85f)
-        !aktiv -> farben.papier.copy(alpha = 0.52f)
-        else -> farben.papier
+        istAusgewaehlt -> farben.papierDunkel.copy(alpha = 0.78f)
+        !aktiv -> farben.papierHell.copy(alpha = 0.55f)
+        else -> farben.papierHell
     }
     val rahmen = when {
         istAusgewaehlt -> farben.akzent
-        !aktiv -> farben.linieFein.copy(alpha = 0.55f)
-        else -> farben.linieFein
+        !aktiv -> farben.linieFein.copy(alpha = 0.5f)
+        else -> farben.linieFein.copy(alpha = 0.9f)
     }
     val semantik = buildString {
         append("Entscheidung ${option.index + 1}: ${option.titel}. ")
@@ -537,7 +275,7 @@ fun EntscheidungsOptionButton(
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = if (kompakt) 58.dp else 68.dp)
+            .defaultMinSize(minHeight = if (kompakt) 56.dp else 64.dp)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
             .clickable(enabled = aktiv, onClick = onClick)
@@ -553,14 +291,14 @@ fun EntscheidungsOptionButton(
             },
         color = flaeche,
         shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(if (istAusgewaehlt) 1.5.dp else 0.9.dp, rahmen),
+        border = BorderStroke(if (istAusgewaehlt) 1.4.dp else 0.75.dp, rahmen),
+        shadowElevation = if (aktiv) 1.dp else 0.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min),
         ) {
-            // Dezente linke Akzentlinie bei Auswahl oder warm ruhende Kante
             Box(
                 modifier = Modifier
                     .width(if (istAusgewaehlt) 3.5.dp else 2.5.dp)
@@ -568,7 +306,7 @@ fun EntscheidungsOptionButton(
                     .background(
                         when {
                             istAusgewaehlt -> farben.akzent
-                            aktiv -> farben.akzentMatt.copy(alpha = 0.45f)
+                            aktiv -> farben.akzentMatt.copy(alpha = 0.52f)
                             else -> Color.Transparent
                         },
                     ),
@@ -578,10 +316,10 @@ fun EntscheidungsOptionButton(
                 modifier = Modifier
                     .weight(1f)
                     .padding(
-                        horizontal = if (kompakt) 12.dp else 14.dp,
-                        vertical = if (kompakt) 9.dp else 11.dp,
+                        horizontal = if (kompakt) 13.dp else 16.dp,
+                        vertical = if (kompakt) 10.dp else 12.dp,
                     ),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -624,116 +362,165 @@ fun EntscheidungsOptionButton(
 }
 
 /**
- * Schlichte, unaufdringlich aufklappbare „Historische Quelle“ am Fuß jeder Ereigniskarte.
+ * Dezenter, unaufdringlicher Link „Quelle“ (≥ 48 dp Touch-Ziel), der das ruhige
+ * Quellen-Overlay öffnet, ohne die Buchseite nach unten aufzublähen.
  */
 @Composable
-fun QuellenEinordnungBox(
-    quelle: QuelleUiState,
-    ereignisId: String,
+fun QuellenLink(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val reduziert = ArchivTheme.reduzierteAnimationen
-    var aufgeklappt by remember(ereignisId) { mutableStateOf(false) }
+    val spieleEffekt = LocalSoundEffektSpielen.current
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
+    Row(
+        modifier = modifier
+            .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
+            .clip(RoundedCornerShape(5.dp))
+            .archivFokusRahmen(eckRadius = 5.dp, aufDunkel = false)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onClick()
+            }
+            .clearAndSetSemantics {
+                role = Role.Button
+                contentDescription = "Historische Quelle ansehen"
+            }
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        QuelleBuchIcon(
+            farbe = farben.tinteMatt,
+            groesse = 14.dp,
+        )
+        Text(
+            text = "Quelle",
+            style = MaterialTheme.typography.labelMedium,
+            color = farben.tinteMatt,
+        )
+    }
+}
+
+/**
+ * Ruhiges Quellen-Overlay (Vollbeleg, Quellenart, quellenkritische Einordnung & Vertiefung).
+ */
+@Composable
+fun QuelleOverlayDialog(
+    quelle: QuelleUiState,
+    onSchliessen: () -> Unit,
+) {
+    val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
+
+    Dialog(
+        onDismissRequest = onSchliessen,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = metrik.minTouchHoehe)
-                .clip(RoundedCornerShape(5.dp))
-                .archivFokusRahmen(eckRadius = 5.dp, aufDunkel = false)
-                .clickable { aufgeklappt = !aufgeklappt }
-                .clearAndSetSemantics {
-                    role = Role.Button
-                    selected = aufgeklappt
-                    stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
-                    contentDescription = if (aufgeklappt) {
-                        "Historische Quelle zuklappen"
-                    } else {
-                        "Historische Quelle aufklappen"
-                    }
-                }
-                .padding(horizontal = 4.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .archivEscapeAktion(aktiv = true, onEscape = onSchliessen),
+            contentAlignment = Alignment.Center,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
-            ) {
-                QuelleBuchIcon(
-                    farbe = if (aufgeklappt) farben.akzent else farben.tinteMatt,
-                    groesse = 15.dp,
-                )
-                Text(
-                    text = "Historische Quelle",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (aufgeklappt) farben.akzent else farben.tinteMatt,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            ChevronIcon(
-                nachOben = aufgeklappt,
-                farbe = farben.tinteMatt,
-                groesse = 15.dp,
-            )
-        }
-
-        AnimatedVisibility(
-            visible = aufgeklappt,
-            enter = ArchivUebergaenge.aufklappEnter(reduziert),
-            exit = ArchivUebergaenge.aufklappExit(reduziert),
-        ) {
-            Row(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .background(farben.papier.copy(alpha = 0.68f), RoundedCornerShape(5.dp)),
+                    .widthIn(max = 540.dp)
+                    .archivFokusGruppe(),
+                color = farben.papierHell,
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(0.75.dp, farben.linieFein),
+                shadowElevation = 8.dp,
             ) {
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .fillMaxHeight()
-                        .background(farben.linie),
-                )
                 Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                 ) {
-                    Text(
-                        text = "${quelle.artLabel} · ${quelle.kurz}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.tinte,
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.5.dp)
+                            .background(farben.akzent),
                     )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = quelle.artLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontFamily = FontFamily.Serif,
+                                color = farben.akzent,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
+                                    .clickable {
+                                        spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                        onSchliessen()
+                                    }
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = "Historische Quelle schließen"
+                                    },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                SchliessenIcon(farbe = farben.tinteMatt, groesse = 18.dp)
+                            }
+                        }
 
-                    if (quelle.voll != null) {
                         Text(
-                            text = quelle.voll,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontStyle = FontStyle.Italic,
-                            color = farben.tinteMatt,
+                            text = quelle.kurz,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontFamily = FontFamily.Serif,
+                            color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
                         )
-                    }
 
-                    Text(
-                        text = quelle.einordnung,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = farben.tinte,
-                    )
+                        if (quelle.voll != null) {
+                            Text(
+                                text = quelle.voll,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = FontStyle.Italic,
+                                color = farben.tinteMatt,
+                            )
+                        }
 
-                    if (quelle.vertiefung != null) {
+                        ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
+
                         Text(
-                            text = quelle.vertiefung,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinteMatt,
+                            text = quelle.einordnung,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = farben.tinte,
                         )
+
+                        if (quelle.vertiefung != null) {
+                            Text(
+                                text = quelle.vertiefung,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = farben.tinteMatt,
+                            )
+                        }
                     }
                 }
             }
@@ -742,9 +529,10 @@ fun QuellenEinordnungBox(
 }
 
 /**
- * Ruhige Ausgangs-Karte nach einer getroffenen Entscheidung:
- * zeigt die gewählte Entscheidung, den Erzähl-Ausgang, spürbare Wertewirkungen (`+1`/`-1`)
- * und die klare Fortfahren-Schaltfläche.
+ * Ruhige, offene Ausgangs-Ansicht nach einer getroffenen Entscheidung (`GamePhase.EreignisAusgang`):
+ * Ersetzt die Entscheidungs-Buttons vollständig auf der rechten Buchseite — auf einen Blick
+ * ohne Scroll-Chaos lesbar: gewählte Entscheidung als Kopfzeile, Ausgangstext, kompakte
+ * Werte-Veränderung und prominenter „Weiter“-Button.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -753,56 +541,61 @@ fun EreignisAusgangKarte(
     weiterLabel: String,
     onWeiter: () -> Unit,
     modifier: Modifier = Modifier,
+    quelle: QuelleUiState? = null,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val kompakt = metrik.kompakteHoehe
+    var quelleOffen by remember(ausgang.ereignisId) { mutableStateOf(false) }
 
-    Surface(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .archivLiveHinweis(),
-        color = farben.papierHell,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.75.dp, farben.linieFein),
-        shadowElevation = 2.dp,
+        verticalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 16.dp),
     ) {
+        // Gewählte Entscheidung kurz als ruhige Kopfzeile (+ optionaler Quelle-Link)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .fillMaxHeight()
-                    .background(farben.tinte),
-            )
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(
-                        horizontal = metrik.kartenInnenAbstand,
-                        vertical = if (metrik.kompakteHoehe) 12.dp else 16.dp,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
+                    text = "Gewählt",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = farben.tinteMatt,
+                )
+                Text(
                     text = ausgang.gewaehlterTitel,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (kompakt) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
                     fontFamily = FontFamily.Serif,
                     color = farben.akzent,
                     modifier = Modifier.archivUeberschrift(),
                 )
+            }
 
-                Text(
-                    text = ausgang.ausgangsText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = farben.tinte,
-                )
+            if (quelle != null) {
+                QuellenLink(onClick = { quelleOffen = true })
+            }
+        }
 
+        // Ausgangstext offen auf dem warmen Archivpapier
+        Text(
+            text = ausgang.ausgangsText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = farben.tinte,
+        )
+
+        // Kompakte Werte-Veränderung (+1 / -1) & optionale Prägung
+        if (ausgang.wirkungen.isNotEmpty() || ausgang.neueMerkmaleNamen.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (ausgang.wirkungen.isNotEmpty()) {
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         ausgang.wirkungen.forEach { wirkung ->
@@ -828,34 +621,42 @@ fun EreignisAusgangKarte(
                         color = farben.tinteMatt,
                     )
                 }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Surface(
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
-                        .clip(RoundedCornerShape(6.dp))
-                        .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                        .clickable(onClick = onWeiter)
-                        .semantics {
-                            role = Role.Button
-                            contentDescription = weiterLabel
-                        },
-                    color = farben.tinte,
-                    shape = RoundedCornerShape(6.dp),
-                ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = weiterLabel,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = farben.papierHell,
-                        )
-                    }
-                }
             }
         }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Prominenter „Weiter“-Button
+        Surface(
+            modifier = Modifier
+                .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
+                .clip(RoundedCornerShape(6.dp))
+                .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
+                .clickable(onClick = onWeiter)
+                .semantics {
+                    role = Role.Button
+                    contentDescription = weiterLabel
+                },
+            color = farben.tinte,
+            shape = RoundedCornerShape(6.dp),
+        ) {
+            Box(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = weiterLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = farben.papierHell,
+                )
+            }
+        }
+    }
+
+    if (quelleOffen && quelle != null) {
+        QuelleOverlayDialog(
+            quelle = quelle,
+            onSchliessen = { quelleOffen = false },
+        )
     }
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
@@ -52,11 +53,12 @@ import de.pytales.zdf.ui.state.ErwerbOptionUiState
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
  * Erwerbswahl im August 1914 (`GamePhase.ErwerbWahl`) für Figuren in der Heimat:
- * übersichtliches Querformat-Raster ohne Stempel-Flut, mit historischen Einordnungshinweisen
- * und ruhiger Bestätigungsleiste am unteren Rand.
+ * luftiges 2-Spalten-Raster ohne innere graue Boxen und ohne extra Rahmen um die
+ * Bestätigungszeile.
  */
 @Composable
 fun ErwerbWahlScreen(
@@ -76,12 +78,13 @@ fun ErwerbWahlScreen(
     val metrik = ArchivTheme.metrik
     val kompakt = metrik.kompakteHoehe
     val zweispaltig = metrik.zweispaltigeBuehne
-    val zeigeRandLeiste = uiState.kopfleisteEingeklappt && metrik.kopfNebeneinander
+    val spieleEffekt = LocalSoundEffektSpielen.current
 
     val optionenUi = remember(engine, uiState.gameState, phase.optionen) {
         UiStateMapper.mapErwerbOptionen(engine, uiState.gameState, phase.optionen)
     }
     val ausgewaehlt = optionenUi.firstOrNull { it.id == uiState.ausgewaehlterErwerbId }
+    val topAbstand = if (uiState.kopfleisteEingeklappt) 34.dp else if (kompakt) 10.dp else 18.dp
 
     SpielBuehnenRahmen(
         engine = engine,
@@ -97,45 +100,29 @@ fun ErwerbWahlScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            contentAlignment = Alignment.TopCenter,
+            contentAlignment = Alignment.Center,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
-                    .widthIn(max = metrik.maxInhaltsBreite)
+                    .archivInhaltsSafeArea()
+                    .widthIn(max = 940.dp)
                     .padding(
-                        horizontal = metrik.aussenAbstand,
-                        vertical = if (kompakt) 8.dp else 14.dp,
+                        start = metrik.aussenAbstand,
+                        end = metrik.aussenAbstand,
+                        top = topAbstand,
+                        bottom = if (kompakt) 12.dp else 20.dp,
                     )
                     .archivFokusGruppe(),
-                verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+                verticalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 16.dp),
             ) {
-                // Schlichte Einordnung ohne Kastenrahmen
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        Text(
-                            text = "Wovon lebst du, während der Krieg beginnt?",
-                            style = if (kompakt) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
-                            color = farben.tinte,
-                            modifier = Modifier.archivUeberschrift(),
-                        )
-                        Text(
-                            text = "Viele Stellen verändern sich im August 1914. Wähle deine Aufgabe in der Heimat.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-                }
+                Text(
+                    text = "Wovon lebst du im August 1914?",
+                    style = if (kompakt) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium,
+                    color = farben.tinte,
+                    modifier = Modifier.archivUeberschrift(),
+                )
 
-                // Verfügbare Erwerbslagen (2-spaltiges Querformat-Raster)
                 if (zweispaltig) {
                     optionenUi.chunked(2).forEach { paar ->
                         Row(
@@ -149,7 +136,10 @@ fun ErwerbWahlScreen(
                                     option = option,
                                     ausgewaehlt = option.id == uiState.ausgewaehlterErwerbId,
                                     kompakt = kompakt,
-                                    onClick = { onErwerbMarkieren(option.id) },
+                                    onClick = {
+                                        spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                        onErwerbMarkieren(option.id)
+                                    },
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
@@ -167,55 +157,50 @@ fun ErwerbWahlScreen(
                                 option = option,
                                 ausgewaehlt = option.id == uiState.ausgewaehlterErwerbId,
                                 kompakt = kompakt,
-                                onClick = { onErwerbMarkieren(option.id) },
+                                onClick = {
+                                    spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                    onErwerbMarkieren(option.id)
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
                 }
 
-                // Ruhige Bestätigungszeile (Schutz vor Fehltippen bei „kein Zurück“)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(0.75.dp, if (ausgewaehlt != null) farben.akzent.copy(alpha = 0.65f) else farben.linieFein),
-                    shadowElevation = 1.dp,
+                // Schlichte offene Bestätigungszeile direkt auf dem Archivpapier (kein Kasten)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
+                    Text(
+                        text = if (ausgewaehlt != null) {
+                            "${ausgewaehlt.titel} · ${ausgewaehlt.berufsBezeichnung}"
+                        } else {
+                            "Wähle deine Aufgabe in der Heimat."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (ausgewaehlt != null) farben.tinte else farben.tinteMatt,
+                        fontWeight = if (ausgewaehlt != null) FontWeight.Medium else FontWeight.Normal,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = metrik.kartenInnenAbstand, vertical = if (kompakt) 10.dp else 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = if (ausgewaehlt != null) {
-                                "Ausgewählt: ${ausgewaehlt.titel} (${ausgewaehlt.berufsBezeichnung})"
-                            } else {
-                                "Tippe eine Tätigkeit an, um sie für den Durchgang festzulegen."
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (ausgewaehlt != null) farben.tinte else farben.tinteMatt,
-                            fontWeight = if (ausgewaehlt != null) FontWeight.SemiBold else FontWeight.Normal,
-                            modifier = Modifier
-                                .weight(1f)
-                                .archivLiveHinweis(),
-                        )
-                        ArchivPrimaerKnopf(
-                            label = if (ausgewaehlt != null) {
-                                "Als ${ausgewaehlt.berufsBezeichnung} beginnen"
-                            } else {
-                                "Tätigkeit festlegen"
-                            },
-                            akzentStil = ausgewaehlt != null,
-                            aktiviert = ausgewaehlt != null,
-                            onClick = onBestaetigen,
-                        )
-                    }
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                            .archivLiveHinweis(),
+                    )
+                    ArchivPrimaerKnopf(
+                        label = if (ausgewaehlt != null) {
+                            "Als ${ausgewaehlt.berufsBezeichnung} beginnen"
+                        } else {
+                            "Tätigkeit festlegen"
+                        },
+                        akzentStil = ausgewaehlt != null,
+                        aktiviert = ausgewaehlt != null,
+                        klickEffekt = SoundEffekt.ENTSCHEIDUNG,
+                        onClick = onBestaetigen,
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
@@ -230,12 +215,12 @@ private fun ErwerbKarte(
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
-    val flaeche = if (ausgewaehlt) farben.papierHell else farben.papierHell.copy(alpha = 0.72f)
+    val flaeche = if (ausgewaehlt) farben.papierHell else farben.papierHell.copy(alpha = 0.58f)
     val rahmen = if (ausgewaehlt) farben.akzent else farben.linieFein.copy(alpha = 0.85f)
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = if (kompakt) 112.dp else 132.dp)
+            .defaultMinSize(minHeight = if (kompakt) 96.dp else 118.dp)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
             .clickable(onClick = onClick)
@@ -254,7 +239,7 @@ private fun ErwerbKarte(
         color = flaeche,
         shape = RoundedCornerShape(6.dp),
         border = BorderStroke(if (ausgewaehlt) 1.4.dp else 0.75.dp, rahmen),
-        shadowElevation = if (ausgewaehlt) 2.dp else 0.dp,
+        shadowElevation = if (ausgewaehlt) 1.dp else 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -270,8 +255,8 @@ private fun ErwerbKarte(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = if (kompakt) 12.dp else 14.dp, vertical = if (kompakt) 10.dp else 12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                    .padding(horizontal = if (kompakt) 13.dp else 15.dp, vertical = if (kompakt) 10.dp else 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -293,34 +278,21 @@ private fun ErwerbKarte(
                     }
                 }
 
-                Text(
-                    text = option.zusatz,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = farben.tinteMatt,
-                )
-
                 if (option.hinweisStempel != null && option.hinweisText != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min)
-                            .background(farben.papier.copy(alpha = 0.75f), RoundedCornerShape(4.dp)),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(2.5.dp)
-                                .fillMaxHeight()
-                                .background(farben.akzent),
-                        )
-                        Text(
-                            text = "${option.hinweisStempel}: ${option.hinweisText}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinte,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 9.dp, vertical = 6.dp),
-                        )
-                    }
+                    Text(
+                        text = "${option.hinweisStempel} · ${option.hinweisText}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontStyle = FontStyle.Italic,
+                        color = farben.akzent,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                } else {
+                    Text(
+                        text = option.zusatz,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = farben.tinteMatt,
+                    )
                 }
 
                 Text(
@@ -329,13 +301,15 @@ private fun ErwerbKarte(
                     color = farben.tinte,
                 )
 
-                Text(
-                    text = option.folge,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = FontFamily.Serif,
-                    fontStyle = FontStyle.Italic,
-                    color = farben.tinteMatt,
-                )
+                if (!kompakt) {
+                    Text(
+                        text = option.folge,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Serif,
+                        fontStyle = FontStyle.Italic,
+                        color = farben.tinteMatt,
+                    )
+                }
             }
         }
     }

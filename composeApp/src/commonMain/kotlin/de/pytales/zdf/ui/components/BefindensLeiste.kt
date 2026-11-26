@@ -36,12 +36,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.state.WertKachelUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
- * Schlanke, einzeilige Befindensleiste mit allen 4 Befindenswerten
+ * Flache, luftige Befindensleiste mit allen 4 Befindenswerten
  * (*Hunger, Erschöpfung, Verdacht, Einsamkeit*):
  * - 5-Segment-Balken (*voll = gut* über `ValueMetrics`)
  * - Stufenfarben (`stufenHell` auf dunkler Kopfleiste, `stufen` auf hellem Papier)
@@ -65,12 +67,12 @@ fun BefindensLeiste(
         modifier = modifier
             .fillMaxWidth()
             .archivFokusGruppe(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         zeilen.forEach { zeile ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(if (schlank) 6.dp else 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (schlank) 10.dp else 14.dp),
             ) {
                 zeile.forEach { wert ->
                     WertKachel(
@@ -91,8 +93,8 @@ fun BefindensLeiste(
 }
 
 /**
- * Einzelne tipp-/klickbare Kachel eines Befindenswerts mit 5-Segment-Balken und Delta-Hinweis.
- * Im schlanken Querformat-Modus (~48–52 dp hoch) bleibt sie luftig und sofort erfassbar.
+ * Einzelner flacher, luftiger Befindenswert ohne schweren Kastenrahmen:
+ * zeigt Bezeichnung, kompaktes Delta und den 5-Segment-Balken klar auf einen Blick.
  */
 @Composable
 fun WertKachel(
@@ -105,21 +107,20 @@ fun WertKachel(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val stufenFarbe = if (aufDunkel) farben.stufenFarbeHell(wert.stufe) else farben.stufenFarbe(wert.stufe)
     val leereSegmentFarbe = if (aufDunkel) farben.segmentDunkel else farben.segmentLeer
-    val flaeche = when {
+    val hintergrund = when {
         aufDunkel && istAusgewaehlt -> farben.dunkelHell
-        aufDunkel -> farben.dunkelHell.copy(alpha = 0.72f)
+        aufDunkel -> Color.Transparent
         istAusgewaehlt -> farben.papierDunkel
-        else -> farben.papierHell
+        else -> Color.Transparent
     }
-    val rahmenFarbe = when {
-        istAusgewaehlt -> stufenFarbe
-        wert.istKritisch && aufDunkel -> stufenFarbe.copy(alpha = 0.45f)
-        aufDunkel -> farben.segmentDunkel.copy(alpha = 0.75f)
-        else -> farben.linieFein
+    val titelFarbe = if (aufDunkel) {
+        if (wert.istKritisch) stufenFarbe else farben.textHell
+    } else {
+        farben.tinte
     }
-    val titelFarbe = if (aufDunkel) farben.textHell else farben.tinte
 
     val beschreibung = buildString {
         append("${wert.bezeichnung}: ${wert.stufenName}, ")
@@ -131,78 +132,62 @@ fun WertKachel(
         append(if (istAusgewaehlt) "Erklärkarte schließen." else "Tippen für Erklärung.")
     }
 
-    Surface(
+    Column(
         modifier = modifier
             .defaultMinSize(minHeight = metrik.minTouchHoehe)
-            .clip(RoundedCornerShape(6.dp))
-            .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = aufDunkel)
-            .clickable(onClick = onClick)
+            .clip(RoundedCornerShape(5.dp))
+            .background(hintergrund)
+            .archivFokusRahmen(eckRadius = 5.dp, aufDunkel = aufDunkel)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onClick()
+            }
             .clearAndSetSemantics {
                 role = Role.Button
                 selected = istAusgewaehlt
                 stateDescription = if (istAusgewaehlt) "Erklärung geöffnet" else "Erklärung geschlossen"
                 contentDescription = beschreibung
-            },
-        color = flaeche,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(
-            width = if (istAusgewaehlt) 1.25.dp else 0.75.dp,
-            color = rahmenFarbe,
-        ),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = if (schlank) 8.dp else 10.dp,
-                    vertical = if (schlank) 5.dp else 7.dp,
-                ),
-            verticalArrangement = Arrangement.spacedBy(if (schlank) 4.dp else 5.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = wert.bezeichnung,
-                    style = if (schlank) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
-                    color = titelFarbe,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-
-                if (wert.aenderungsText != null) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    WertDeltaBadge(
-                        text = wert.aenderungsText,
-                        schlechter = wert.aenderungIstSchlechter,
-                        aufDunkel = aufDunkel,
-                    )
-                }
             }
-
-            FuenfSegmentBalken(
-                gefuellteSegmente = wert.gefuellteSegmente,
-                segmenteGesamt = wert.segmenteGesamt,
-                aktiveFarbe = stufenFarbe,
-                leereFarbe = leereSegmentFarbe,
-                segmentHoehe = if (schlank) 5.5.dp else metrik.segmentHoehe,
+            .padding(
+                horizontal = if (schlank) 6.dp else 8.dp,
+                vertical = if (schlank) 6.dp else 7.dp,
+            ),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = wert.bezeichnung,
+                style = MaterialTheme.typography.labelMedium,
+                color = titelFarbe,
+                fontWeight = if (wert.istKritisch || istAusgewaehlt) FontWeight.SemiBold else FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
 
-            if (!schlank) {
-                Text(
-                    text = wert.stufenName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = stufenFarbe,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+            if (wert.aenderungsText != null) {
+                Spacer(modifier = Modifier.width(4.dp))
+                WertDeltaBadge(
+                    text = wert.aenderungsText,
+                    schlechter = wert.aenderungIstSchlechter,
+                    aufDunkel = aufDunkel,
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        FuenfSegmentBalken(
+            gefuellteSegmente = wert.gefuellteSegmente,
+            segmenteGesamt = wert.segmenteGesamt,
+            aktiveFarbe = stufenFarbe,
+            leereFarbe = leereSegmentFarbe,
+            segmentHoehe = if (schlank) 5.dp else 6.dp,
+        )
     }
 }
 
@@ -214,21 +199,14 @@ private fun WertDeltaBadge(
 ) {
     val farben = ArchivTheme.farben
     val akzentFarbe = farben.deltaFarbe(schlechter = schlechter, aufDunkel = aufDunkel)
-    val hintergrund = akzentFarbe.copy(alpha = if (aufDunkel) 0.18f else 0.12f)
 
-    Box(
-        modifier = Modifier
-            .background(hintergrund, RoundedCornerShape(3.dp))
-            .padding(horizontal = 4.dp, vertical = 0.5.dp),
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = akzentFarbe,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-        )
-    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = akzentFarbe,
+        fontWeight = FontWeight.Bold,
+        maxLines = 1,
+    )
 }
 
 /**
@@ -244,6 +222,7 @@ fun WertErklaerKarte(
     if (wert == null) return
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val stufenFarbe = farben.stufenFarbe(wert.stufe)
 
     Surface(
@@ -259,15 +238,15 @@ fun WertErklaerKarte(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
+                    .height(2.5.dp)
                     .background(stufenFarbe),
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -285,10 +264,11 @@ fun WertErklaerKarte(
                             color = farben.tinte,
                             modifier = Modifier.archivUeberschrift(),
                         )
-                        ArchivStempel(
+                        Text(
                             text = wert.stufenName,
-                            farbe = stufenFarbe,
-                            hintergrund = stufenFarbe.copy(alpha = 0.09f),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = stufenFarbe,
+                            fontWeight = FontWeight.SemiBold,
                         )
                         if (wert.aenderungsText != null) {
                             WertDeltaBadge(
@@ -304,7 +284,10 @@ fun WertErklaerKarte(
                             .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                             .clip(RoundedCornerShape(6.dp))
                             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                            .clickable(onClick = onSchliessen)
+                            .clickable {
+                                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                onSchliessen()
+                            }
                             .semantics {
                                 role = Role.Button
                                 contentDescription = "Erklärkarte für ${wert.bezeichnung} schließen"
@@ -325,7 +308,7 @@ fun WertErklaerKarte(
                         segmenteGesamt = wert.segmenteGesamt,
                         aktiveFarbe = stufenFarbe,
                         leereFarbe = farben.segmentLeer,
-                        modifier = Modifier.width(124.dp),
+                        modifier = Modifier.width(120.dp),
                     )
                     Text(
                         text = wert.stufenKurz,
@@ -335,20 +318,18 @@ fun WertErklaerKarte(
                     )
                 }
 
-                // Zitat mit feiner linker Linie statt Kasten-in-Kasten
+                // Zitat mit feiner linker Linie statt Kasten
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .background(farben.papier.copy(alpha = 0.72f), RoundedCornerShape(4.dp))
-                        .padding(end = 12.dp),
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Box(
                         modifier = Modifier
-                            .width(2.5.dp)
+                            .width(2.dp)
                             .fillMaxHeight()
-                            .background(stufenFarbe.copy(alpha = 0.8f)),
+                            .background(stufenFarbe.copy(alpha = 0.75f)),
                     )
                     Text(
                         text = "„${wert.zustandssatz}“",
@@ -356,7 +337,7 @@ fun WertErklaerKarte(
                         fontFamily = FontFamily.Serif,
                         fontStyle = FontStyle.Italic,
                         color = farben.tinte,
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier.padding(vertical = 2.dp),
                     )
                 }
 

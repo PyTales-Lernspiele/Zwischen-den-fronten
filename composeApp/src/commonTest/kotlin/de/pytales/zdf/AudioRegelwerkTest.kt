@@ -1,11 +1,13 @@
 package de.pytales.zdf
 
+import de.pytales.zdf.audio.ArchivSfxSynthese
 import de.pytales.zdf.audio.AudioAusgabe
 import de.pytales.zdf.audio.AudioKoordinator
 import de.pytales.zdf.audio.AudioRegelwerk
 import de.pytales.zdf.audio.AudioSperrGrund
 import de.pytales.zdf.audio.AudioSpur
 import de.pytales.zdf.audio.RuhigeArchivSynthese
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.engine.HartesEndeErgebnis
@@ -17,15 +19,19 @@ import de.pytales.zdf.model.MusterungsGrad
 import de.pytales.zdf.model.Pfad
 import de.pytales.zdf.model.SpielModus
 import de.pytales.zdf.ui.state.SpielController
+import kotlin.math.abs
+import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Prüfsuite für AP 6 — Optionales dezentes Audio und harte Musiksperre auf `front` & `etappe`.
+ * Prüfsuite für optionales Audio, getragene Kammermusik-Synthese, taktile Soundeffekte
+ * sowie die harte Musiksperre auf `front`, `etappe` und im Auffangnetz.
  */
 class AudioRegelwerkTest {
 
@@ -34,11 +40,16 @@ class AudioRegelwerkTest {
 
     private class FakeAudioAusgabe : AudioAusgabe {
         val abgespielteSpuren = mutableListOf<Pair<AudioSpur, Float>>()
+        val abgespielteEffekte = mutableListOf<Pair<SoundEffekt, Float>>()
         var stoppAufrufe: Int = 0
         var freigabeAufrufe: Int = 0
 
         override fun aktualisiere(spur: AudioSpur, lautstaerke: Float) {
             abgespielteSpuren += spur to lautstaerke
+        }
+
+        override fun spieleEffekt(effekt: SoundEffekt, lautstaerke: Float) {
+            abgespielteEffekte += effekt to lautstaerke
         }
 
         override fun stoppe() {
@@ -302,5 +313,162 @@ class AudioRegelwerkTest {
         koordinator.setzeHintergrundPausiert(true)
         koordinator.setzeHintergrundPausiert(false)
         assertEquals(2, fakeAusgabe.abgespielteSpuren.size, "Stummgeschalteter Ton darf nach Rückkehr nicht starten.")
+    }
+
+    @Test
+    fun kammermusikHatEchteDynamikRuhepausenUndNahtlosenLoopKeinStatischerDauerton() {
+        val spuren = listOf(AudioSpur.START_RUHIG, AudioSpur.HEIMAT_RUHIG, AudioSpur.EPILOG_RUHIG)
+        val ersteBloecke = mutableMapOf<AudioSpur, ByteArray>()
+
+        for (spur in spuren) {
+            val partitur = RuhigeArchivSynthese.partiturFuer(spur)
+            assertTrue(
+                partitur.dauerSekunden in 30.0..60.0,
+                "Komposition $spur soll 30–60 s Zyklus besitzen, gefunden: ${partitur.dauerSekunden}",
+            )
+            assertTrue(partitur.klavierNoten.size >= 10, "$spur braucht eine echte Klavier-Phrasierung.")
+            assertTrue(partitur.celloBoegen.isNotEmpty(), "$spur braucht getragene tiefe Cello-Bögen.")
+            assertTrue(
+                partitur.klavierNoten.map { it.midiNote }.toSet().size >= 5,
+                "$spur muss melodisch-harmonische Bewegung statt statischem Dreiklang haben.",
+            )
+
+            // Messfenster von 0,5 s über den gesamten Zyklus -> echte Ruhepausen + Klangspitzen prüfen
+            val fensterSamples = RuhigeArchivSynthese.SAMPLE_RATE / 2
+            val puffer = ByteArray(fensterSamples * 2)
+            val fensterAnzahl = (partitur.dauerSekunden * 2.0).toInt()
+            val rmsWerte = mutableListOf<Double>()
+            var maxAbsGesamt = 0
+
+            for (f in 0 until fensterAnzahl) {
+                val startSample = f.toLong() * fensterSamples
+                RuhigeArchivSynthese.fuellePcm16Puffer(spur, 0.24f, startSample, puffer)
+                if (f == 0) {
+                    ersteBloecke[spur] = puffer.copyOf(2048)
+                }
+                var sumSq = 0.0
+                for (i in puffer.indices step 2) {
+                    val sample = lesePcm16Sample(puffer, i)
+                    val a = abs(sample)
+                    if (a > maxAbsGesamt) maxAbsGesamt = a
+                    sumSq += sample.toDouble() * sample.toDouble()
+                }
+                rmsWerte += sqrt(sumSq / fensterSamples)
+            }
+
+            val stilleFenster = rmsWerte.count { it < 20.0 }
+            val aktiveSpitze = rmsWerte.maxOrNull() ?: 0.0
+            assertTrue(
+                stilleFenster >= 6,
+                "$spur muss echte Ruhepausen/Atemräume ohne Dauerton haben (stille 0,5s-Fenster: $stilleFenster).",
+            )
+            assertTrue(
+                aktiveSpitze > 180.0,
+                "$spur braucht klar hörbare musikalische Phrasen (max RMS: $aktiveSpitze).",
+            )
+            assertTrue(
+                maxAbsGesamt <= Short.MAX_VALUE / 3,
+                "$spur muss dezent ausgesteuert bleiben (maxAbs=$maxAbsGesamt).",
+            )
+
+            // Nahtloser, knackfreier Loop-Übergang an der Zyklusgrenze
+            val gesamtSamples = (partitur.dauerSekunden * RuhigeArchivSynthese.SAMPLE_RATE).toLong()
+            val grenzePuffer = ByteArray(4)
+            RuhigeArchivSynthese.fuellePcm16Puffer(spur, 0.24f, gesamtSamples - 1, grenzePuffer)
+            val letztes = lesePcm16Sample(grenzePuffer, 0)
+            val erstes = lesePcm16Sample(grenzePuffer, 2)
+            assertTrue(
+                abs(erstes - letztes) < 400,
+                "Knackfreier Loop-Übergang verletzt bei $spur: letztes=$letztes, erstes=$erstes",
+            )
+        }
+
+        // Alle drei Spuren klingen eigenständig unterschiedlich
+        assertFalse(ersteBloecke.getValue(AudioSpur.START_RUHIG).contentEquals(ersteBloecke.getValue(AudioSpur.HEIMAT_RUHIG)))
+        assertFalse(ersteBloecke.getValue(AudioSpur.HEIMAT_RUHIG).contentEquals(ersteBloecke.getValue(AudioSpur.EPILOG_RUHIG)))
+        assertFalse(ersteBloecke.getValue(AudioSpur.START_RUHIG).contentEquals(ersteBloecke.getValue(AudioSpur.EPILOG_RUHIG)))
+    }
+
+    @Test
+    fun soundEffekteSyntheseUndSchutzregelnUnterMusiksperreUndAuffangnetz() {
+        // 1. PCM-Synthese aller 4 Effekte erzeugt saubere, dezente Wellenformen und Stille bei Pegel 0
+        for (effekt in SoundEffekt.entries) {
+            val stumm = ArchivSfxSynthese.erzeugePcm16(effekt, 0f)
+            assertTrue(stumm.all { it == 0.toByte() }, "$effekt muss bei Lautstärke 0 komplett still sein.")
+
+            val pcm = ArchivSfxSynthese.erzeugePcm16(effekt, 0.24f)
+            assertTrue(pcm.isNotEmpty())
+            var maxAbs = 0
+            for (i in pcm.indices step 2) {
+                val a = abs(lesePcm16Sample(pcm, i))
+                if (a > maxAbs) maxAbs = a
+            }
+            assertTrue(
+                maxAbs in 20..(Short.MAX_VALUE / 2),
+                "$effekt muss ein sanftes, hörbares Signal erzeugen (maxAbs=$maxAbs).",
+            )
+        }
+        assertNotEquals(
+            ArchivSfxSynthese.dauerMsFuer(SoundEffekt.KLICK_SANFT),
+            ArchivSfxSynthese.dauerMsFuer(SoundEffekt.ENTSCHEIDUNG),
+        )
+
+        // 2. Regelwerk & Koordinator: abgeschaltete Effekte sind immer stumm
+        val fake = FakeAudioAusgabe()
+        val koordinator = AudioKoordinator(fake)
+        val startState = engine.neuesSpiel()
+        koordinator.synchronisiere(startState, audioAktiv = false, effekteAktiv = false)
+        for (effekt in SoundEffekt.entries) {
+            assertFalse(koordinator.spieleEffekt(effekt))
+        }
+        assertTrue(fake.abgespielteEffekte.isEmpty())
+
+        // 3. Effekte unabhängig von Grundmusik erlaubt (Startmenü / Heimat)
+        koordinator.synchronisiere(startState, audioAktiv = false, effekteAktiv = true)
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.KLICK_SANFT))
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.ENTSCHEIDUNG))
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.KAPITELWECHSEL))
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.EINSCHNITT))
+        assertEquals(4, fake.abgespielteEffekte.size)
+
+        // 4. Unter Musiksperre (Front / Etappe): taktile Papier-/Klicklaute ja, musikalische Impulse NEIN
+        var front = engine.herkunftWahlOeffnen(engine.neuesSpiel(SpielModus.KURZ, direktwahlAktiv = true))
+        front = engine.waehlePerson(front, "buergertum", Geschlecht.MAENNLICH, 18, direktwahlPfad = Pfad.FRONT)
+        koordinator.synchronisiere(front, audioAktiv = true, effekteAktiv = true)
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.KLICK_SANFT))
+        assertTrue(koordinator.spieleEffekt(SoundEffekt.ENTSCHEIDUNG))
+        assertFalse(koordinator.spieleEffekt(SoundEffekt.KAPITELWECHSEL), "Kein musikalischer Kapitelimpuls an der Front.")
+        assertFalse(koordinator.spieleEffekt(SoundEffekt.EINSCHNITT), "Kein musikalischer Einschnitt-Ton an der Front.")
+
+        // 5. Im Auffangnetz: EINSCHNITT & KAPITELWECHSEL strikt verboten (niemals Game-Over-Jingle!)
+        var heimat = engine.herkunftWahlOeffnen(engine.neuesSpiel(SpielModus.KURZ, direktwahlAktiv = true))
+        heimat = engine.waehlePerson(heimat, "arbeiterschaft", Geschlecht.WEIBLICH, 18, direktwahlPfad = Pfad.HEIMAT)
+        val hartesEnde = HartesEndeErgebnis(
+            id = HartesEndeId.ENDE_VERHUNGERT,
+            titel = "Verhungert",
+            text = "Ein ruhiger Einschnitt.",
+            jahr = 1917,
+        )
+        val auffangState = heimat.copy(
+            jahr = 1917,
+            phase = GamePhase.Abgeschlossen(
+                hartesEnde = hartesEnde,
+                lebenslauf = engine.lebenslaufCalculator.berechneLebenslauf(heimat.copy(jahr = 1917), hartesEnde),
+            ),
+        )
+        koordinator.synchronisiere(auffangState, audioAktiv = true, effekteAktiv = true)
+        assertFalse(koordinator.spieleEffekt(SoundEffekt.EINSCHNITT), "Im Auffangnetz darf kein musikalischer Ton erklingen.")
+        assertFalse(koordinator.spieleEffekt(SoundEffekt.KAPITELWECHSEL))
+
+        // 6. Im Hintergrund pausiert: auch Klickgeräusche strikt blockiert
+        koordinator.synchronisiere(startState, audioAktiv = true, effekteAktiv = true)
+        koordinator.setzeHintergrundPausiert(true)
+        assertFalse(koordinator.spieleEffekt(SoundEffekt.KLICK_SANFT))
+    }
+
+    private fun lesePcm16Sample(puffer: ByteArray, byteIndex: Int): Int {
+        val lo = puffer[byteIndex].toInt() and 0xFF
+        val hi = puffer[byteIndex + 1].toInt() shl 8
+        return (hi or lo).toShort().toInt()
     }
 }

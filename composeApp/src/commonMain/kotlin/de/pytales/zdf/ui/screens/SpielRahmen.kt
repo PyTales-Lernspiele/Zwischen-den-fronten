@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -56,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import de.pytales.zdf.audio.AudioZustand
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
@@ -63,13 +62,12 @@ import de.pytales.zdf.model.OnboardingGrundsatz
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
 import de.pytales.zdf.ui.components.ChevronIcon
-import de.pytales.zdf.ui.components.EingeklappteKopfRandLeiste
 import de.pytales.zdf.ui.components.EinstellungenIcon
 import de.pytales.zdf.ui.components.KopfLeiste
+import de.pytales.zdf.ui.components.KopfLeisteLasche
 import de.pytales.zdf.ui.components.SchliessenIcon
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
 import de.pytales.zdf.ui.components.TonIcon
-import de.pytales.zdf.ui.components.archivEckenDekor
 import de.pytales.zdf.ui.components.archivEscapeAktion
 import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.components.archivFokusRahmen
@@ -83,14 +81,16 @@ import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
- * Gemeinsamer Landscape-First-Rahmen für alle Spielphasen mit Befindensleiste
+ * Gemeinsamer, radikal ruhiger Rahmen für alle Spielphasen mit Befindensleiste
  * (`Musterung`, `Erwerb`, `KapitelStart`, `Ereignis`, `KapitelAbschluss`):
- * - Oben: sehr schlanke, einzeilige & ein-/ausklappbare [KopfLeiste] mit Ton- und Einstellungs-Symbol
- * - Bei eingeklappter Kopfleiste im Querformat: volle vertikale Bühnenhöhe + schlanke
- *   [EingeklappteKopfRandLeiste] am rechten Rand ohne Überdeckung der Spielbühne.
+ * - **Aufgeklappt:** Flache, luftige [KopfLeiste] oben.
+ * - **Eingeklappt:** Volle Bildschirmbreite & -höhe für das aufgeschlagene Buch — keine
+ *   dunkle Seitenleiste! Einzig die kleine dezente Ecke/Lasche ([KopfLeisteLasche]) oben
+ *   rechts öffnet die Kopfleiste jederzeit mit einem Tippen.
  */
 @Composable
 internal fun SpielBuehnenRahmen(
@@ -105,14 +105,12 @@ internal fun SpielBuehnenRahmen(
     inhalt: @Composable BoxScope.() -> Unit,
 ) {
     val gameState = uiState.gameState
-    val metrik = ArchivTheme.metrik
     val werteUi = remember(engine, gameState) {
         UiStateMapper.mapBefindensLeiste(engine, gameState)
     }
     val emotionUi = remember(engine, gameState) {
         UiStateMapper.mapLiveEmotion(engine, gameState)
     }
-    val zeigeRandLeiste = uiState.kopfleisteEingeklappt && metrik.kopfNebeneinander
 
     Column(
         modifier = modifier
@@ -142,35 +140,19 @@ internal fun SpielBuehnenRahmen(
             },
         )
 
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
-                content = inhalt,
-            )
+            inhalt()
 
-            if (zeigeRandLeiste) {
-                EingeklappteKopfRandLeiste(
+            if (uiState.kopfleisteEingeklappt) {
+                KopfLeisteLasche(
                     werte = werteUi,
                     emotion = emotionUi,
                     onAusklappen = onKopfleisteToggle,
-                    onEmotionTippen = { onEmotionDetailsOffenChange(true) },
-                    zusatzAktionenVertikal = {
-                        AudioIconKnopf(
-                            audioZustand = uiState.audioZustand,
-                            aufDunkel = true,
-                            onToggle = onAudioToggle,
-                        )
-                        EinstellungenIconKnopf(
-                            aufDunkel = true,
-                            onClick = onEinstellungenOeffnen,
-                        )
-                    },
+                    modifier = Modifier.align(Alignment.TopEnd),
                 )
             }
         }
@@ -178,19 +160,19 @@ internal fun SpielBuehnenRahmen(
 }
 
 /**
- * Schlankes, einzeiliges dunkles Archiv-Kopfband (~52 dp Höhe) für Bildschirme ohne
- * Befindensleiste (`HerkunftWahl`, `Auffangnetz`, `Lebenslauf`).
- * Enthält ausschließlich Zeit-/Kontextangabe, Titel sowie dezente Ton- und Einstellungs-Symbole.
+ * Extrem schlankes, einzeiliges dunkles Archiv-Kopfband für Bildschirme ohne Befindensleiste
+ * (`HerkunftWahl`, `Auffangnetz`, `Lebenslauf`). Zeigt nur eine knappe Kontextzeile links
+ * (niemals doppelte Überschriften!) sowie die flachen Ton- und Einstellungs-Symbole rechts.
  */
 @Composable
 internal fun ArchivKopfBand(
     marke: String,
-    titel: String,
     audioZustand: AudioZustand,
     onAudioToggle: () -> Unit,
     onEinstellungenOeffnen: () -> Unit,
-    untertitel: String? = null,
     modifier: Modifier = Modifier,
+    titel: String? = null,
+    linksZusatz: (@Composable () -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
@@ -215,53 +197,44 @@ internal fun ArchivKopfBand(
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(
                         horizontal = metrik.aussenAbstand,
-                        vertical = if (metrik.kompakteHoehe) 3.dp else 6.dp,
+                        vertical = if (metrik.kompakteHoehe) 2.dp else 4.dp,
                     ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(1.dp),
-                ) {
+                if (linksZusatz != null) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        linksZusatz()
+                    }
+                } else {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = marke,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontFamily = FontFamily.Serif,
                             color = farben.stufenFarbeHell(2),
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                         )
-                        if (!untertitel.isNullOrBlank()) {
+                        if (!titel.isNullOrBlank()) {
                             Text(
-                                text = "·  $untertitel",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = farben.textHell.copy(alpha = 0.78f),
+                                text = "·  $titel",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontFamily = FontFamily.Serif,
+                                color = farben.textHell,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
-                    Text(
-                        text = titel,
-                        style = if (metrik.kompakteHoehe) {
-                            MaterialTheme.typography.titleLarge
-                        } else {
-                            MaterialTheme.typography.headlineSmall
-                        },
-                        color = farben.textHell,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.archivUeberschrift(),
-                    )
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AudioIconKnopf(
@@ -279,15 +252,15 @@ internal fun ArchivKopfBand(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.5.dp)
-                .background(farben.akzent.copy(alpha = 0.78f)),
+                .height(1.dp)
+                .background(farben.akzent.copy(alpha = 0.62f)),
         )
     }
 }
 
 /**
- * Dezenter Ton-Umschalter als 48×48-dp-Icon-Button (auf dunkler Leiste oder hellem Archivpapier).
- * Zeigt bei aktiver Musiksperre (Front, Etappe, Auffangnetz) respektvolle Stille an.
+ * Flacher, ruhiger Ton-Umschalter (48×48 dp Touch-Ziel, ohne Kastenrahmen).
+ * Bei Stummschaltung über dieses Symbol ist sofort alles still (Grundmusik + Klickgeräusche).
  */
 @Composable
 internal fun AudioIconKnopf(
@@ -300,33 +273,26 @@ internal fun AudioIconKnopf(
     val minTouch = ArchivTheme.metrik.minTouchHoehe
     val gesperrt = audioZustand.musikGesperrt
     val spielt = audioZustand.spieltGerade
+    val tonAn = audioZustand.hatAktivenTon
 
     val iconFarbe = when {
-        gesperrt -> if (aufDunkel) farben.textHell.copy(alpha = 0.58f) else farben.tinteMatt.copy(alpha = 0.7f)
-        spielt -> if (aufDunkel) farben.stufenFarbeHell(0) else farben.stufenFarbe(0)
-        else -> if (aufDunkel) farben.textHell.copy(alpha = 0.88f) else farben.tinteMatt
-    }
-    val kapselFlaeche = when {
-        spielt && aufDunkel -> farben.stufenFarbe(0).copy(alpha = 0.30f)
-        spielt && !aufDunkel -> farben.stufenFarbe(0).copy(alpha = 0.12f)
-        aufDunkel -> farben.dunkelHell.copy(alpha = 0.78f)
-        else -> farben.papierHell.copy(alpha = 0.88f)
-    }
-    val kapselRahmen = when {
-        spielt -> iconFarbe.copy(alpha = 0.55f)
-        aufDunkel -> farben.segmentDunkel
-        else -> farben.linieFein
+        gesperrt -> if (aufDunkel) farben.textHell.copy(alpha = 0.56f) else farben.tinteMatt.copy(alpha = 0.72f)
+        tonAn -> if (aufDunkel) farben.stufenFarbeHell(0) else farben.stufenFarbe(0)
+        else -> if (aufDunkel) farben.textHell.copy(alpha = 0.85f) else farben.tinteMatt
     }
 
     val statusText = when {
-        gesperrt -> audioZustand.sperrGrund?.hinweis ?: "Respektvolle Stille."
-        spielt -> "Dezenter Ton eingeschaltet."
+        gesperrt && !audioZustand.effekteAktiv -> audioZustand.sperrGrund?.hinweis ?: "Respektvolle Stille."
+        gesperrt -> "${audioZustand.sperrGrund?.hinweis ?: "Respektvolle Stille."} Klickgeräusche aktiv."
+        spielt && audioZustand.effekteAktiv -> "Grundmusik und Klickgeräusche eingeschaltet."
+        spielt -> "Grundmusik eingeschaltet."
+        audioZustand.effekteAktiv -> "Klick- und Papiergeräusche eingeschaltet."
         else -> "Stummgeschaltet."
     }
-    val beschreibung = when {
-        gesperrt -> "$statusText Tippen, um die allgemeine Ton-Einstellung umzuschalten."
-        spielt -> "$statusText Tippen zum Stummschalten."
-        else -> "$statusText Tippen, um dezenten Ton für Startmenü und Heimat einzuschalten."
+    val beschreibung = if (tonAn || audioZustand.audioAktiv || audioZustand.effekteAktiv) {
+        "$statusText Tippen zum vollständigen Stummschalten."
+    } else {
+        "$statusText Tippen, um Grundmusik und Klickgeräusche einzuschalten."
     }
 
     Box(
@@ -337,32 +303,23 @@ internal fun AudioIconKnopf(
             .clickable(onClick = onToggle)
             .clearAndSetSemantics {
                 role = Role.Switch
-                selected = audioZustand.audioAktiv && !gesperrt
+                selected = tonAn
                 stateDescription = statusText
                 contentDescription = beschreibung
             },
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(kapselFlaeche)
-                .border(0.75.dp, kapselRahmen, RoundedCornerShape(6.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            TonIcon(
-                aktiv = spielt,
-                gesperrt = gesperrt,
-                farbe = iconFarbe,
-                groesse = 18.dp,
-            )
-        }
+        TonIcon(
+            aktiv = tonAn,
+            gesperrt = gesperrt && !audioZustand.effekteAktiv,
+            farbe = iconFarbe,
+            groesse = 19.dp,
+        )
     }
 }
 
 /**
- * Dezentes Einstellungs-Symbol (Zahnrad, 48×48 dp Touch-Ziel) zum Öffnen von [EinstellungenDialog].
+ * Flaches Einstellungs-Symbol (Zahnrad, 48×48 dp Touch-Ziel, ohne Kastenrahmen).
  */
 @Composable
 internal fun EinstellungenIconKnopf(
@@ -373,39 +330,33 @@ internal fun EinstellungenIconKnopf(
 ) {
     val farben = ArchivTheme.farben
     val minTouch = ArchivTheme.metrik.minTouchHoehe
-    val iconFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.9f) else farben.tinte
-    val kapselFlaeche = if (aufDunkel) farben.dunkelHell.copy(alpha = 0.78f) else farben.papierHell.copy(alpha = 0.88f)
-    val kapselRahmen = if (aufDunkel) farben.segmentDunkel else farben.linieFein
+    val spieleEffekt = LocalSoundEffektSpielen.current
+    val iconFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.88f) else farben.tinte
 
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = aufDunkel)
-            .clickable(onClick = onClick)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onClick()
+            }
             .clearAndSetSemantics {
                 role = Role.Button
-                contentDescription = "Einstellungen öffnen (Schriftgröße, Ton, Animationen, Direktwahl)"
+                contentDescription = "Einstellungen öffnen (Schriftgröße, Musik, Geräusche, Animationen)"
             },
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(kapselFlaeche)
-                .border(0.75.dp, kapselRahmen, RoundedCornerShape(6.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             EinstellungenIcon(
                 farbe = iconFarbe,
-                groesse = 18.dp,
+                groesse = 19.dp,
             )
             if (hatHinweisPunkt) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(5.dp)
                         .size(6.dp)
                         .clip(CircleShape)
                         .background(farben.akzent),
@@ -416,7 +367,9 @@ internal fun EinstellungenIconKnopf(
 }
 
 /**
- * Ruhiger, aufgeräumter Einstellungs-Dialog für Schriftgröße, Animationen, Ton und Direktwahl.
+ * Ruhiger, klar gegliederter Einstellungs-Dialog:
+ * Schriftgröße, **Grundmusik** (Ein/Aus), **Klick- & Papiergeräusche** (Ein/Aus),
+ * Animationen reduzieren sowie (vor Spielbeginn) Unterrichts-Direktwahl.
  */
 @Composable
 internal fun EinstellungenDialog(
@@ -424,12 +377,14 @@ internal fun EinstellungenDialog(
     uiState: SpielUiState,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onReduzierteAnimationenToggle: () -> Unit,
-    onAudioToggle: () -> Unit,
+    onGrundmusikToggle: () -> Unit,
+    onEffekteToggle: () -> Unit,
     onDirektwahlChange: (Boolean) -> Unit,
     onSchliessen: () -> Unit,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val direktwahlOption = content.herkunft.direktwahlOption
     val imStartmenue = uiState.gameState.phase is GamePhase.Start
     val direktwahlAktiv = uiState.gameState.direktwahlAktiv
@@ -453,7 +408,7 @@ internal fun EinstellungenDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 540.dp)
+                    .widthIn(max = 520.dp)
                     .archivFokusGruppe(),
                 color = farben.papierHell,
                 shape = RoundedCornerShape(8.dp),
@@ -478,7 +433,6 @@ internal fun EinstellungenDialog(
                             .padding(horizontal = 20.dp, vertical = 14.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        // Dialog-Kopf
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -495,7 +449,10 @@ internal fun EinstellungenDialog(
                                     .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                                     .clip(RoundedCornerShape(6.dp))
                                     .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                                    .clickable(onClick = onSchliessen)
+                                    .clickable {
+                                        spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                        onSchliessen()
+                                    }
                                     .semantics {
                                         role = Role.Button
                                         contentDescription = "Einstellungen schließen"
@@ -515,40 +472,57 @@ internal fun EinstellungenDialog(
                             )
                             SchriftgroessenSchalter(
                                 aktuell = uiState.schriftgroesse,
-                                onAuswahl = onSchriftgroesseChange,
+                                onAuswahl = {
+                                    spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                    onSchriftgroesseChange(it)
+                                },
                                 aufDunkel = false,
                                 kompakt = false,
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
 
-                        ArchivTrennlinie()
+                        ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.55f))
 
-                        // 2. Dezenter Ton
+                        // 2. Grundmusik (getragene Kammermusik)
                         ArchivSchalterZeile(
-                            titel = "Dezenter Ton",
+                            titel = "Grundmusik",
                             beschreibung = if (uiState.audioZustand.musikGesperrt) {
-                                "An Front, Etappe und bei Einschnitt herrscht Stille."
+                                "An Front, Etappe und bei Einschnitt herrscht respektvolle Stille."
                             } else {
-                                "Leise Begleitung im Startmenü und in der Heimat."
+                                "Getragene Kammermusik im Startmenü und in der Heimat."
                             },
                             aktiv = uiState.audioAktiv,
-                            onToggle = onAudioToggle,
+                            onToggle = {
+                                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                onGrundmusikToggle()
+                            },
                         )
 
-                        ArchivTrennlinie()
+                        // 3. Klick- & Papiergeräusche
+                        ArchivSchalterZeile(
+                            titel = "Klick- & Papiergeräusche",
+                            beschreibung = "Leises Tippen und Umblättern bei Entscheidungen.",
+                            aktiv = uiState.effekteAktiv,
+                            onToggle = onEffekteToggle,
+                        )
 
-                        // 3. Animationen reduzieren
+                        ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.55f))
+
+                        // 4. Animationen reduzieren
                         ArchivSchalterZeile(
                             titel = "Animationen reduzieren",
-                            beschreibung = "Sofortige, ruhige Wechsel ohne Überblendungen.",
+                            beschreibung = "Sofortige Wechsel ohne Überblendungen.",
                             aktiv = uiState.reduzierteAnimationen,
-                            onToggle = onReduzierteAnimationenToggle,
+                            onToggle = {
+                                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                onReduzierteAnimationenToggle()
+                            },
                         )
 
-                        // 4. Unterrichts-Direktwahl
+                        // 5. Unterrichts-Direktwahl
                         if (direktwahlOption.aktiv) {
-                            ArchivTrennlinie()
+                            ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.55f))
                             ArchivSchalterZeile(
                                 titel = "Pfad direkt wählen (Unterricht)",
                                 beschreibung = if (imStartmenue) {
@@ -558,7 +532,10 @@ internal fun EinstellungenDialog(
                                 },
                                 aktiv = direktwahlAktiv,
                                 aktiviert = imStartmenue,
-                                onToggle = { onDirektwahlChange(!direktwahlAktiv) },
+                                onToggle = {
+                                    spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                    onDirektwahlChange(!direktwahlAktiv)
+                                },
                             )
                         }
                     }
@@ -580,6 +557,7 @@ internal fun GrundsaetzeDialog(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val roemisch = listOf("I", "II", "III", "IV")
 
     Dialog(
@@ -601,7 +579,7 @@ internal fun GrundsaetzeDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 560.dp)
+                    .widthIn(max = 540.dp)
                     .archivFokusGruppe(),
                 color = farben.papierHell,
                 shape = RoundedCornerShape(8.dp),
@@ -641,7 +619,10 @@ internal fun GrundsaetzeDialog(
                                     .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                                     .clip(RoundedCornerShape(6.dp))
                                     .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                                    .clickable(onClick = onSchliessen)
+                                    .clickable {
+                                        spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                        onSchliessen()
+                                    }
                                     .semantics {
                                         role = Role.Button
                                         contentDescription = "Grundsätze schließen"
@@ -658,10 +639,13 @@ internal fun GrundsaetzeDialog(
                                 numeral = roemisch.getOrElse(index) { "${index + 1}" },
                                 grundsatz = grundsatz,
                                 aufgeklappt = offen,
-                                onToggle = { onGrundsatzToggle(grundsatz.id) },
+                                onToggle = {
+                                    spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                    onGrundsatzToggle(grundsatz.id)
+                                },
                             )
                             if (index < grundsaetze.lastIndex) {
-                                ArchivTrennlinie()
+                                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.55f))
                             }
                         }
 
@@ -754,9 +738,11 @@ internal fun ArchivPrimaerKnopf(
     modifier: Modifier = Modifier,
     aktiviert: Boolean = true,
     akzentStil: Boolean = false,
+    klickEffekt: SoundEffekt? = SoundEffekt.KLICK_SANFT,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val flaeche = when {
         !aktiviert -> farben.papierDunkel
         akzentStil -> farben.akzent
@@ -770,7 +756,10 @@ internal fun ArchivPrimaerKnopf(
             .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-            .clickable(enabled = aktiviert, onClick = onClick)
+            .clickable(enabled = aktiviert) {
+                if (klickEffekt != null) spieleEffekt(klickEffekt)
+                onClick()
+            }
             .semantics {
                 role = Role.Button
                 contentDescription = label
@@ -803,23 +792,28 @@ internal fun ArchivSekundaerKnopf(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     aktiviert: Boolean = true,
+    klickEffekt: SoundEffekt? = SoundEffekt.KLICK_SANFT,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
 
     Surface(
         modifier = modifier
             .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-            .clickable(enabled = aktiviert, onClick = onClick)
+            .clickable(enabled = aktiviert) {
+                if (klickEffekt != null) spieleEffekt(klickEffekt)
+                onClick()
+            }
             .semantics {
                 role = Role.Button
                 contentDescription = label
             },
         color = if (aktiviert) farben.papierHell else farben.papier,
         shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.9.dp, if (aktiviert) farben.linie else farben.linieFein),
+        border = BorderStroke(0.75.dp, if (aktiviert) farben.linie else farben.linieFein),
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 11.dp),
@@ -836,7 +830,7 @@ internal fun ArchivSekundaerKnopf(
 }
 
 /**
- * Schlichter, zurückhaltender Text-Button (z. B. „Drei Grundsätze“, „Einstellungen“ im Startmenü).
+ * Schlichter, zurückhaltender Text-Button (z. B. „Grundsätze“, „Herkunft ändern“).
  */
 @Composable
 internal fun ArchivTextKnopf(
@@ -844,16 +838,21 @@ internal fun ArchivTextKnopf(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     hervorgehoben: Boolean = false,
+    klickEffekt: SoundEffekt? = SoundEffekt.KLICK_SANFT,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
 
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-            .clickable(onClick = onClick)
+            .clickable {
+                if (klickEffekt != null) spieleEffekt(klickEffekt)
+                onClick()
+            }
             .semantics {
                 role = Role.Button
                 contentDescription = label
@@ -918,7 +917,6 @@ internal fun ArchivSchalterZeile(
             )
         }
 
-        // Schlichter, taktiler Schiebeschalter im Archiv-Stil
         val bahnFarbe = when {
             !aktiviert -> farben.segmentLeer.copy(alpha = 0.6f)
             aktiv -> farben.akzent
@@ -943,8 +941,8 @@ internal fun ArchivSchalterZeile(
 }
 
 /**
- * Stimmungsvoll gerahmter 16:9-Kapitelbild-Rahmen (`1280×720`) im Skizzenbuch-Passepartout
- * — ohne Stempel über dem Bild und ohne Technik-/Dateipfad-Einblendungen.
+ * Stimmungsvoll gerahmtes 16:9-Kapitelbild (`1280×720`) im ruhigen Buch-Passepartout
+ * mit einer einzigen schlichten Zeitraum-Zeile darunter (keine doppelte Kapitelüberschrift).
  */
 @Composable
 internal fun KapitelbildRahmen(
@@ -957,125 +955,90 @@ internal fun KapitelbildRahmen(
     val rahmenBeschreibung =
         "Kapitelbild ${kapitelbild.jahr}: ${kapitelbild.ueberschrift} (${kapitelbild.zeitraum})"
 
-    Surface(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = rahmenBeschreibung },
-        color = farben.papierHell,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-        shadowElevation = 2.dp,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .archivEckenDekor(
-                    farbe = farben.linie.copy(alpha = 0.45f),
-                    einrueckung = 5.dp,
-                    schenkelLaenge = 8.dp,
-                )
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = farben.papierHell,
+            shape = RoundedCornerShape(5.dp),
+            border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.78f)),
+            shadowElevation = 2.dp,
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(farben.papier),
+                    .padding(6.dp),
             ) {
-                if (bildContent != null) {
-                    bildContent(kapitelbild.bildId)
-                } else {
-                    ArchivKapitelBild(
-                        kapitelBildId = kapitelbild.bildId,
-                        beschreibung = rahmenBeschreibung,
-                        medienRegister = medienRegister,
-                    ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val w = size.width
-                            val h = size.height
-                            val inset = 12.dp.toPx()
-                            val eckLaenge = 14.dp.toPx()
-
-                            drawRect(
-                                color = farben.linieFein.copy(alpha = 0.55f),
-                                topLeft = Offset(inset, inset),
-                                size = Size(w - 2 * inset, h - 2 * inset),
-                                style = Stroke(width = 0.9f),
-                            )
-
-                            val markenFarbe = farben.akzentMatt.copy(alpha = 0.55f)
-                            val strich = 1.25f
-                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset + eckLaenge, inset), strich)
-                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset, inset + eckLaenge), strich)
-                            drawLine(markenFarbe, Offset(w - inset - eckLaenge, inset), Offset(w - inset, inset), strich)
-                            drawLine(markenFarbe, Offset(w - inset, inset), Offset(w - inset, inset + eckLaenge), strich)
-                            drawLine(markenFarbe, Offset(inset, h - inset), Offset(inset + eckLaenge, h - inset), strich)
-                            drawLine(markenFarbe, Offset(inset, h - inset - eckLaenge), Offset(inset, h - inset), strich)
-                            drawLine(markenFarbe, Offset(w - inset - eckLaenge, h - inset), Offset(w - inset, h - inset), strich)
-                            drawLine(markenFarbe, Offset(w - inset, h - inset - eckLaenge), Offset(w - inset, h - inset), strich)
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(horizontal = 24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(farben.papier),
+                ) {
+                    if (bildContent != null) {
+                        bildContent(kapitelbild.bildId)
+                    } else {
+                        ArchivKapitelBild(
+                            kapitelBildId = kapitelbild.bildId,
+                            beschreibung = rahmenBeschreibung,
+                            medienRegister = medienRegister,
                         ) {
-                            Text(
-                                text = kapitelbild.jahr.toString(),
-                                style = MaterialTheme.typography.displaySmall,
-                                color = farben.akzent,
-                                textAlign = TextAlign.Center,
-                            )
-                            Text(
-                                text = kapitelbild.ueberschrift,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = farben.tinte,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                text = kapitelbild.zeitraum,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Serif,
-                                fontStyle = FontStyle.Italic,
-                                color = farben.tinteMatt,
-                                textAlign = TextAlign.Center,
-                            )
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                val w = size.width
+                                val h = size.height
+                                val inset = 12.dp.toPx()
+
+                                drawRect(
+                                    color = farben.linieFein.copy(alpha = 0.50f),
+                                    topLeft = Offset(inset, inset),
+                                    size = Size(w - 2 * inset, h - 2 * inset),
+                                    style = Stroke(width = 0.9f),
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(horizontal = 24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(5.dp),
+                            ) {
+                                Text(
+                                    text = kapitelbild.jahr.toString(),
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = farben.akzent,
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    text = kapitelbild.ueberschrift,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = farben.tinte,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }
             }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "${kapitelbild.ueberschrift} · ${kapitelbild.zeitraum}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = FontFamily.Serif,
-                    fontStyle = FontStyle.Italic,
-                    color = farben.tinte,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = kapitelbild.pfadMarke,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = farben.tinteMatt,
-                    maxLines = 1,
-                )
-            }
         }
+
+        Text(
+            text = "${kapitelbild.zeitraum} · ${kapitelbild.pfadMarke}",
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Serif,
+            fontStyle = FontStyle.Italic,
+            color = farben.tinteMatt,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 2.dp),
+        )
     }
 }
 
@@ -1108,7 +1071,6 @@ internal fun VerlassenSicherheitsDialog(
     onAppBeenden: (() -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
-    val metrik = ArchivTheme.metrik
 
     Dialog(
         onDismissRequest = onBleiben,
@@ -1173,8 +1135,6 @@ internal fun VerlassenSicherheitsDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             color = farben.tinteMatt,
                         )
-
-                        ArchivTrennlinie()
 
                         Column(
                             modifier = Modifier.fillMaxWidth(),

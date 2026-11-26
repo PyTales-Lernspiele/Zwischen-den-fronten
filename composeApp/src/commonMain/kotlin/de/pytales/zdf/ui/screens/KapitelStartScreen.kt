@@ -1,6 +1,5 @@
 package de.pytales.zdf.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -31,20 +28,21 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
-import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
 
 /**
- * Ruhiger Jahres-Auftakt (`GamePhase.KapitelStart`) als zweispaltige Buchseite im Querformat:
- * links das gerahmte 16:9-Kapitelbild im Passepartout, rechts Kapitelüberschrift,
- * geschichtlicher Auftakt, Leitfrage und spürbare Jahreswechsel-Wirkung.
+ * Ruhiger Jahres-Auftakt (`GamePhase.KapitelStart`) als offene Buch-Doppelseite:
+ * links das gerahmte 16:9-Kapitelbild, rechts freie Typografie direkt auf dem Archivpapier
+ * ohne Kastenrahmen und ohne doppelte Überschriften.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,150 +61,99 @@ fun KapitelStartScreen(
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
     val kompakt = metrik.kompakteHoehe
-    val zeigeRandLeiste = uiState.kopfleisteEingeklappt && metrik.kopfNebeneinander
     val kapitelUi = remember(engine, phase, uiState.gameState.pfad) {
         UiStateMapper.mapKapitelStart(engine, phase, uiState.gameState.pfad)
     }
+    val laschenLuftOben = if (uiState.kopfleisteEingeklappt) 26.dp else 0.dp
 
-    val textBlatt: @Composable (Modifier) -> Unit = { mod ->
-        Surface(
+    val textSpalte: @Composable (Modifier) -> Unit = { mod ->
+        Column(
             modifier = mod,
-            color = farben.papierHell,
-            shape = RoundedCornerShape(6.dp),
-            border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-            shadowElevation = 2.dp,
+            verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(2.5.dp)
-                        .background(farben.akzent),
-                )
+            Text(
+                text = if (kapitelUi.istEpilog) "Epilog ${kapitelUi.jahr}" else "Jahr ${kapitelUi.jahr}",
+                style = MaterialTheme.typography.labelMedium,
+                fontFamily = FontFamily.Serif,
+                color = farben.akzent,
+                fontWeight = FontWeight.SemiBold,
+            )
 
-                Column(
+            Text(
+                text = kapitelUi.ueberschrift,
+                style = if (kompakt) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium,
+                color = farben.tinte,
+                modifier = Modifier.archivUeberschrift(),
+            )
+
+            Text(
+                text = kapitelUi.text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = farben.tinte,
+            )
+
+            if (!kapitelUi.leitfrage.isNullOrBlank()) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            horizontal = metrik.kartenInnenAbstand,
-                            vertical = if (kompakt) 12.dp else 18.dp,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(if (kompakt) 9.dp else 12.dp),
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = if (kapitelUi.istEpilog) "Epilog ${kapitelUi.jahr}" else "Jahr ${kapitelUi.jahr}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontFamily = FontFamily.Serif,
-                            color = farben.akzent,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = kapitelUi.zeitraum,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-
-                    Text(
-                        text = kapitelUi.ueberschrift,
-                        style = if (kompakt) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium,
-                        color = farben.tinte,
-                        modifier = Modifier.archivUeberschrift(),
+                    Box(
+                        modifier = Modifier
+                            .width(2.dp)
+                            .fillMaxHeight()
+                            .background(farben.akzentMatt.copy(alpha = 0.72f)),
                     )
-
-                    if (kapitelUi.stichworte.isNotEmpty()) {
-                        Text(
-                            text = kapitelUi.stichworte.joinToString("  ·  "),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-
-                    ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
-
                     Text(
-                        text = kapitelUi.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = farben.tinte,
-                    )
-
-                    // Ruhige Leitfrage mit linker Akzentlinie
-                    if (!kapitelUi.leitfrage.isNullOrBlank()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Min)
-                                .background(farben.papier.copy(alpha = 0.65f), RoundedCornerShape(4.dp)),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(2.5.dp)
-                                    .fillMaxHeight()
-                                    .background(farben.akzentMatt),
-                            )
-                            Text(
-                                text = "„${kapitelUi.leitfrage}“",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontFamily = FontFamily.Serif,
-                                fontStyle = FontStyle.Italic,
-                                color = farben.tinte,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                            )
-                        }
-                    }
-
-                    // Sichtbare Kapitelwirkung (ab 1915)
-                    if (kapitelUi.wirkungText != null || kapitelUi.wirkungen.isNotEmpty()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(farben.papierDunkel.copy(alpha = 0.45f), RoundedCornerShape(5.dp))
-                                .padding(horizontal = 12.dp, vertical = 9.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            if (kapitelUi.wirkungText != null) {
-                                Text(
-                                    text = kapitelUi.wirkungText,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = farben.tinte,
-                                )
-                            }
-                            if (kapitelUi.wirkungen.isNotEmpty()) {
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                                ) {
-                                    kapitelUi.wirkungen.forEach { wirkung ->
-                                        val farbe = farben.deltaFarbe(
-                                            schlechter = wirkung.schlechter,
-                                            aufDunkel = false,
-                                        )
-                                        ArchivStempel(
-                                            text = "${wirkung.name} ${wirkung.zeichen}",
-                                            farbe = farbe,
-                                            hintergrund = farben.papierHell,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    ArchivPrimaerKnopf(
-                        label = kapitelUi.aktionLabel,
-                        onClick = onStarteKapitel,
+                        text = "„${kapitelUi.leitfrage}“",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Serif,
+                        fontStyle = FontStyle.Italic,
+                        color = farben.tinteMatt,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
+
+            // Sichtbare Kapitelwirkung (ab 1915) kompakt ohne graue Box
+            if (kapitelUi.wirkungText != null || kapitelUi.wirkungen.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (kapitelUi.wirkungText != null) {
+                        Text(
+                            text = kapitelUi.wirkungText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = farben.tinteMatt,
+                        )
+                    }
+                    if (kapitelUi.wirkungen.isNotEmpty()) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            kapitelUi.wirkungen.forEach { wirkung ->
+                                val farbe = farben.deltaFarbe(
+                                    schlechter = wirkung.schlechter,
+                                    aufDunkel = false,
+                                )
+                                ArchivStempel(
+                                    text = "${wirkung.name} ${wirkung.zeichen}",
+                                    farbe = farbe,
+                                    hintergrund = farbe.copy(alpha = 0.08f),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            ArchivPrimaerKnopf(
+                label = kapitelUi.aktionLabel,
+                klickEffekt = SoundEffekt.KAPITELWECHSEL,
+                onClick = onStarteKapitel,
+            )
         }
     }
 
@@ -223,36 +170,38 @@ fun KapitelStartScreen(
         if (metrik.zweispaltigeBuehne) {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.TopCenter,
+                contentAlignment = Alignment.Center,
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
+                        .archivInhaltsSafeArea()
                         .widthIn(max = metrik.maxInhaltsBreite)
                         .padding(
                             horizontal = metrik.aussenAbstand,
-                            vertical = if (kompakt) 8.dp else 16.dp,
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 14.dp else 20.dp),
-                    verticalAlignment = Alignment.Top,
+                            vertical = if (kompakt) 10.dp else 20.dp,
+                        )
+                        .archivFokusGruppe(),
+                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 20.dp else 32.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(
+                    Box(
                         modifier = Modifier
                             .weight(0.44f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center,
                     ) {
                         KapitelbildRahmen(kapitelbild = kapitelUi.kapitelbild)
                     }
-                    Column(
+                    Box(
                         modifier = Modifier
                             .weight(0.56f)
                             .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState())
+                            .padding(top = laschenLuftOben),
+                        contentAlignment = Alignment.CenterStart,
                     ) {
-                        textBlatt(Modifier.fillMaxWidth())
-                        Spacer(modifier = Modifier.height(10.dp))
+                        textSpalte(Modifier.fillMaxWidth())
                     }
                 }
             }
@@ -268,12 +217,17 @@ fun KapitelStartScreen(
                         .fillMaxWidth()
                         .archivInhaltsSafeArea()
                         .widthIn(max = metrik.maxInhaltsBreite)
-                        .padding(horizontal = metrik.aussenAbstand, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                        .padding(
+                            start = metrik.aussenAbstand,
+                            end = metrik.aussenAbstand,
+                            top = if (uiState.kopfleisteEingeklappt) 34.dp else 14.dp,
+                            bottom = 18.dp,
+                        )
+                        .archivFokusGruppe(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     KapitelbildRahmen(kapitelbild = kapitelUi.kapitelbild)
-                    textBlatt(Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(12.dp))
+                    textSpalte(Modifier.fillMaxWidth())
                 }
             }
         }

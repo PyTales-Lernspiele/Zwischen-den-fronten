@@ -48,20 +48,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.model.Stimmung
 import de.pytales.zdf.ui.media.ArchivPortraitBild
 import de.pytales.zdf.ui.state.LiveEmotionUiState
 import de.pytales.zdf.ui.theme.ArchivFarben
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
- * Kompakte Live-Emotions-Kachel rechts oben in der Kopfleiste:
+ * Flache, unaufdringliche Live-Emotions-Kachel rechts oben in der Kopfleiste:
  * - Reagiert live auf `GameEngine.liveEmotion(state)` (`neutral`, `hungrig`, `erschoepft`, `angst`, `einsam`).
  * - Zeigt das Stil-A-Portrait (`portrait_<herkunft>_<geschlecht>_<stimmung>`, WebP)
- *   über [ArchivPortraitBild] sowie Name und Stimmung.
- * - Bei [nurPortrait] = true (sehr schmale Querformat-Displays) zeigt sie platzsparend
- *   nur das gerahmte Portrait samt Stimmungs-Akzent; Tippen öffnet stets die volle Figuren-Ansicht.
+ *   über [ArchivPortraitBild] — direkt auf der Leiste ohne überflüssigen äußeren Kastenrahmen.
+ * - Bei [nurPortrait] = true zeigt sie platzsparend nur das gerahmte Portrait mit Stimmungs-Akzent;
+ *   Tippen öffnet stets die volle ruhige Figuren-Ansicht als Overlay.
  */
 @Composable
 fun LiveEmotionsKachel(
@@ -77,6 +79,7 @@ fun LiveEmotionsKachel(
 ) {
     val farben = ArchivTheme.farben
     val reduziert = ArchivTheme.reduzierteAnimationen
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val stimmungsFarbe by animateColorAsState(
         targetValue = stimmungsAkzentFarbe(
             stimmung = emotion.stimmung,
@@ -88,11 +91,10 @@ fun LiveEmotionsKachel(
         label = "stimmungsFarbe",
     )
 
-    val hintergrund = if (aufDunkel) farben.dunkelHell.copy(alpha = 0.78f) else farben.papierHell
-    val rahmen = when {
-        detailsOffen -> stimmungsFarbe
-        aufDunkel -> farben.segmentDunkel.copy(alpha = 0.85f)
-        else -> farben.linieFein
+    val hintergrund = when {
+        detailsOffen && aufDunkel -> farben.dunkelHell
+        detailsOffen -> farben.papierDunkel
+        else -> Color.Transparent
     }
     val titelFarbe = if (aufDunkel) farben.textHell else farben.tinte
 
@@ -112,7 +114,10 @@ fun LiveEmotionsKachel(
     val klickModifier = if (onTippen != null) {
         Modifier
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = aufDunkel)
-            .clickable(onClick = onTippen)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onTippen()
+            }
             .clearAndSetSemantics {
                 role = Role.Button
                 selected = detailsOffen
@@ -125,64 +130,59 @@ fun LiveEmotionsKachel(
         }
     }
 
-    Surface(
+    Row(
         modifier = modifier
             .defaultMinSize(minWidth = ArchivTheme.metrik.minTouchHoehe, minHeight = ArchivTheme.metrik.minTouchHoehe)
             .clip(RoundedCornerShape(6.dp))
-            .then(klickModifier),
-        color = hintergrund,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(if (detailsOffen) 1.25.dp else 0.75.dp, rahmen),
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = if (nurPortrait) 4.dp else 7.dp,
-                vertical = 4.dp,
+            .background(hintergrund)
+            .then(klickModifier)
+            .padding(
+                horizontal = if (nurPortrait) 4.dp else 6.dp,
+                vertical = 3.dp,
             ),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ArchivPortraitRahmen(
-                emotion = emotion,
-                stimmungsFarbe = stimmungsFarbe,
-                groesse = portraitGroesse,
-                aufDunkel = aufDunkel,
-                portraitContent = portraitContent,
-            )
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ArchivPortraitRahmen(
+            emotion = emotion,
+            stimmungsFarbe = stimmungsFarbe,
+            groesse = portraitGroesse,
+            aufDunkel = aufDunkel,
+            portraitContent = portraitContent,
+        )
 
-            if (!nurPortrait) {
-                Column(
-                    modifier = Modifier.weight(1f, fill = !kompakt),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+        if (!nurPortrait) {
+            Column(
+                modifier = Modifier.weight(1f, fill = !kompakt),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    text = emotion.personName,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = titelFarbe,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(stimmungsFarbe),
+                    )
                     Text(
-                        text = emotion.personName,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = titelFarbe,
-                        fontWeight = FontWeight.SemiBold,
+                        text = emotion.stimmungBezeichnung,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = stimmungsFarbe,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(7.dp)
-                                .clip(CircleShape)
-                                .background(stimmungsFarbe),
-                        )
-                        Text(
-                            text = emotion.stimmungBezeichnung,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = stimmungsFarbe,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
                 }
             }
         }
@@ -216,7 +216,7 @@ fun ArchivPortraitRahmen(
             .size(groesse)
             .clip(RoundedCornerShape(4.dp))
             .background(innenFlaeche)
-            .border(0.75.dp, stimmungsFarbe.copy(alpha = 0.72f), RoundedCornerShape(4.dp)),
+            .border(1.dp, stimmungsFarbe.copy(alpha = 0.80f), RoundedCornerShape(4.dp)),
         contentAlignment = Alignment.Center,
     ) {
         if (portraitContent != null) {
@@ -289,6 +289,7 @@ fun LiveEmotionDetailKarte(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val akzent = stimmungsAkzentFarbe(
         stimmung = emotion.stimmung,
         hoechsteStufe = emotion.hoechsteStufe,
@@ -309,13 +310,13 @@ fun LiveEmotionDetailKarte(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
+                    .height(2.5.dp)
                     .background(akzent),
             )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(
@@ -326,13 +327,13 @@ fun LiveEmotionDetailKarte(
                     ArchivPortraitRahmen(
                         emotion = emotion,
                         stimmungsFarbe = akzent,
-                        groesse = 80.dp,
+                        groesse = 82.dp,
                         aufDunkel = false,
                         portraitContent = portraitContent,
                     )
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
                     ) {
                         Text(
                             text = emotion.personName,
@@ -346,18 +347,20 @@ fun LiveEmotionDetailKarte(
                             color = farben.tinteMatt,
                         )
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            ArchivStempel(
-                                text = emotion.stimmungBezeichnung,
-                                farbe = akzent,
-                                hintergrund = akzent.copy(alpha = 0.09f),
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(akzent),
                             )
                             Text(
-                                text = emotion.stimmungKurzhinweis,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = farben.tinteMatt,
+                                text = "${emotion.stimmungBezeichnung} · ${emotion.stimmungKurzhinweis}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = akzent,
+                                fontWeight = FontWeight.Medium,
                             )
                         }
                     }
@@ -367,7 +370,10 @@ fun LiveEmotionDetailKarte(
                             .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                             .clip(RoundedCornerShape(6.dp))
                             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                            .clickable(onClick = onSchliessen)
+                            .clickable {
+                                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                                onSchliessen()
+                            }
                             .semantics {
                                 role = Role.Button
                                 contentDescription = "Figuren-Ansicht schließen"
@@ -381,16 +387,14 @@ fun LiveEmotionDetailKarte(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .background(farben.papier.copy(alpha = 0.72f), RoundedCornerShape(4.dp))
-                        .padding(end = 12.dp),
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Box(
                         modifier = Modifier
-                            .width(2.5.dp)
+                            .width(2.dp)
                             .fillMaxHeight()
-                            .background(akzent.copy(alpha = 0.8f)),
+                            .background(akzent.copy(alpha = 0.75f)),
                     )
                     Text(
                         text = "„${emotion.zustandssatz}“",
@@ -398,7 +402,7 @@ fun LiveEmotionDetailKarte(
                         fontFamily = FontFamily.Serif,
                         fontStyle = FontStyle.Italic,
                         color = farben.tinte,
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier.padding(vertical = 2.dp),
                     )
                 }
             }

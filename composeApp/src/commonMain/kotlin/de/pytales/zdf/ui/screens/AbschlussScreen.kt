@@ -50,15 +50,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.engine.HartesEndeErgebnis
 import de.pytales.zdf.engine.LebenslaufFachErgebnis
 import de.pytales.zdf.engine.LebenslaufZeitleistenEintrag
 import de.pytales.zdf.engine.WertStatus
-import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
-import de.pytales.zdf.ui.components.ArchivZierLinie
 import de.pytales.zdf.ui.components.ChevronIcon
 import de.pytales.zdf.ui.components.FuenfSegmentBalken
 import de.pytales.zdf.ui.components.archivFokusGruppe
@@ -78,14 +77,15 @@ import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.LayoutKlasse
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
  * Schlussbildschirm (`GamePhase.Abgeschlossen`):
  * - Bei vorzeitigem Abbruch (`hartesEnde != null && !auffangnetzBestaetigt`): ruhiges,
- *   respektvolles Auffangnetz mit historischer Einordnung (kein Game-Over-Schock, kein Punktestand)
+ *   respektvolles Auffangnetz als offene Buchseite ohne Schockeffekte und ohne doppelte Titel.
  * - Danach bzw. bei regulärem Erreichen von 1919: luftiger, ruhig gesetzter **4-Fächer-Lebenslauf**
- *   mit Portrait, Personendaten, historischem Ausgang, allen 4 Fächern, chronologischer Zeitleiste,
- *   aufklappbarem Entscheidungsweg, Wertebilanz, Druck-/Export-Werkzeug und „Neuer Durchgang“.
+ *   ohne doppelte Kopfdaten, mit viel Weißraum, Zeitleiste, Wertebilanz, Druck-/Export-Werkzeug
+ *   und „Neuer Durchgang“.
  */
 @Composable
 fun AbschlussScreen(
@@ -126,7 +126,7 @@ fun AbschlussScreen(
 
 /**
  * Ruhiges, respektvolles Auffangnetz bei vorzeitigem Einschnitt vor 1919
- * (bewusst ohne Schockeffekte, ohne Vorwurf und ohne Punktestand).
+ * (bewusst ohne Schockeffekte, ohne Vorwurf, ohne Punktestand und ohne Musik-Jingle).
  */
 @Composable
 private fun AuffangnetzAnsicht(
@@ -143,7 +143,6 @@ private fun AuffangnetzAnsicht(
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
     val kompakt = metrik.kompakteHoehe
-    val person = uiState.gameState.person
     val pfadMarke = engine.content.konfiguration.pfade.definitionen[uiState.gameState.pfad]?.marke
         ?: uiState.gameState.pfad.code
 
@@ -153,9 +152,8 @@ private fun AuffangnetzAnsicht(
             .archivPapierHintergrund(),
     ) {
         ArchivKopfBand(
-            marke = "Jahr ${hartesEnde.jahr}",
-            titel = "Dein Weg endet vor 1919",
-            untertitel = listOfNotNull(person?.vollerName, pfadMarke).joinToString(" · "),
+            marke = "1914–${hartesEnde.jahr}",
+            titel = pfadMarke,
             audioZustand = uiState.audioZustand,
             onAudioToggle = onAudioToggle,
             onEinstellungenOeffnen = onEinstellungenOeffnen,
@@ -168,136 +166,116 @@ private fun AuffangnetzAnsicht(
                 .verticalScroll(rememberScrollState()),
             contentAlignment = Alignment.Center,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .archivInhaltsSafeArea()
-                    .widthIn(max = 920.dp)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = if (kompakt) 12.dp else 20.dp)
-                    .archivFokusGruppe(),
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-                    shadowElevation = 2.dp,
+            val erzaehlSpalte: @Composable (Modifier) -> Unit = { mod ->
+                Column(
+                    modifier = mod,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Einschnitt · ${hartesEnde.jahr}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontFamily = FontFamily.Serif,
+                        color = farben.tinteMatt,
+                    )
+                    Text(
+                        text = hartesEnde.titel,
+                        style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
+                        color = farben.tinte,
+                        modifier = Modifier.archivUeberschrift(),
+                    )
+                    Text(
+                        text = hartesEnde.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = farben.tinte,
+                    )
+                }
+            }
+
+            val einordnungsSpalte: @Composable (Modifier) -> Unit = { mod ->
+                Column(
+                    modifier = mod,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(2.5.dp)
-                                .background(farben.tinteMatt),
+                                .width(2.dp)
+                                .fillMaxHeight()
+                                .background(farben.tinteMatt.copy(alpha = 0.65f)),
                         )
-
-                        val erzaehlSpalte: @Composable (Modifier) -> Unit = { mod ->
-                            Column(
-                                modifier = mod,
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                Text(
-                                    text = "${hartesEnde.jahr} · $pfadMarke",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontFamily = FontFamily.Serif,
-                                    color = farben.tinteMatt,
-                                )
-                                Text(
-                                    text = hartesEnde.titel,
-                                    style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
-                                    color = farben.tinte,
-                                    modifier = Modifier.archivUeberschrift(),
-                                )
-                                Text(
-                                    text = hartesEnde.text,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = farben.tinte,
-                                )
-                            }
-                        }
-
-                        val einordnungsSpalte: @Composable (Modifier) -> Unit = { mod ->
-                            Column(
-                                modifier = mod,
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(IntrinsicSize.Min)
-                                        .background(farben.papier.copy(alpha = 0.72f), RoundedCornerShape(5.dp)),
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .width(2.5.dp)
-                                            .fillMaxHeight()
-                                            .background(farben.tinteMatt),
-                                    )
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                                    ) {
-                                        Text(
-                                            text = "Kein persönliches Versagen",
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontFamily = FontFamily.Serif,
-                                            color = farben.tinte,
-                                        )
-                                        Text(
-                                            text = fazit,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = farben.tinte,
-                                        )
-                                        Text(
-                                            text = "Dein bisheriger Weg bleibt im Lebenslauf vollständig erhalten.",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontStyle = FontStyle.Italic,
-                                            color = farben.tinteMatt,
-                                        )
-                                    }
-                                }
-
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    ArchivPrimaerKnopf(
-                                        label = "Erreichten Lebenslauf ansehen",
-                                        onClick = onLebenslaufAnsehen,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                    ArchivSekundaerKnopf(
-                                        label = "Neuer Durchgang",
-                                        onClick = onNeuerDurchgang,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
-                            }
-                        }
-
-                        if (metrik.zweispaltigeBuehne) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrik.kartenInnenAbstand),
-                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 18.dp else 26.dp),
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                erzaehlSpalte(Modifier.weight(0.54f))
-                                einordnungsSpalte(Modifier.weight(0.46f))
-                            }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrik.kartenInnenAbstand),
-                                verticalArrangement = Arrangement.spacedBy(14.dp),
-                            ) {
-                                erzaehlSpalte(Modifier.fillMaxWidth())
-                                ArchivTrennlinie()
-                                einordnungsSpalte(Modifier.fillMaxWidth())
-                            }
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(5.dp),
+                        ) {
+                            Text(
+                                text = "Kein persönliches Versagen",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontFamily = FontFamily.Serif,
+                                color = farben.tinte,
+                            )
+                            Text(
+                                text = fazit,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = farben.tinte,
+                            )
+                            Text(
+                                text = "Dein bisheriger Weg bleibt im Lebenslauf erhalten.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = FontStyle.Italic,
+                                color = farben.tinteMatt,
+                            )
                         }
                     }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ArchivPrimaerKnopf(
+                            label = "Erreichten Lebenslauf ansehen",
+                            klickEffekt = SoundEffekt.ENTSCHEIDUNG,
+                            onClick = onLebenslaufAnsehen,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        ArchivSekundaerKnopf(
+                            label = "Neuer Durchgang",
+                            klickEffekt = SoundEffekt.KLICK_SANFT,
+                            onClick = onNeuerDurchgang,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+            }
+
+            if (metrik.zweispaltigeBuehne) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .archivInhaltsSafeArea()
+                        .widthIn(max = 920.dp)
+                        .padding(horizontal = metrik.aussenAbstand, vertical = if (kompakt) 14.dp else 26.dp)
+                        .archivFokusGruppe(),
+                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 24.dp else 36.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    erzaehlSpalte(Modifier.weight(0.54f))
+                    einordnungsSpalte(Modifier.weight(0.46f))
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .archivInhaltsSafeArea()
+                        .widthIn(max = 560.dp)
+                        .padding(horizontal = metrik.aussenAbstand, vertical = 20.dp)
+                        .archivFokusGruppe(),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
+                ) {
+                    erzaehlSpalte(Modifier.fillMaxWidth())
+                    ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.6f))
+                    einordnungsSpalte(Modifier.fillMaxWidth())
                 }
             }
         }
@@ -305,7 +283,8 @@ private fun AuffangnetzAnsicht(
 }
 
 /**
- * Ruhiger, übersichtlicher 4-Fächer-Lebenslauf im Querformat-Buchdruck-Stil.
+ * Ruhiger, offener 4-Fächer-Lebenslauf im Buchdruck-Stil (ohne doppelte Überschriften
+ * zwischen Kopfband und Personenblatt, weniger Rahmen und mehr Weißraum).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -321,6 +300,7 @@ private fun LebenslaufAnsicht(
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
     val kompakt = metrik.kompakteHoehe
+    val spieleEffekt = LocalSoundEffektSpielen.current
     val gameState = uiState.gameState
     val person = gameState.person
     val lebenslauf = phase.lebenslauf
@@ -374,14 +354,10 @@ private fun LebenslaufAnsicht(
             .fillMaxSize()
             .archivPapierHintergrund(),
     ) {
+        // Schlankes Kopfband ohne doppelte Personendaten
         ArchivKopfBand(
             marke = "Lebenslauf $zeitspanne",
-            titel = person?.vollerName?.ifBlank { null } ?: "Abgeschlossener Lebenslauf",
-            untertitel = listOfNotNull(
-                person?.herkunftTitel?.ifBlank { null },
-                person?.let { "Jg. ${it.jahrgang}" },
-                pfadMarke,
-            ).joinToString(" · "),
+            titel = pfadMarke,
             audioZustand = uiState.audioZustand,
             onAudioToggle = onAudioToggle,
             onEinstellungenOeffnen = onEinstellungenOeffnen,
@@ -398,180 +374,156 @@ private fun LebenslaufAnsicht(
                 modifier = Modifier
                     .fillMaxWidth()
                     .archivInhaltsSafeArea()
-                    .widthIn(max = metrik.maxInhaltsBreite)
+                    .widthIn(max = 960.dp)
                     .padding(
                         horizontal = metrik.aussenAbstand,
-                        vertical = if (kompakt) 10.dp else 18.dp,
+                        vertical = if (kompakt) 14.dp else 24.dp,
                     )
                     .archivFokusGruppe(),
-                verticalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 18.dp),
+                verticalArrangement = Arrangement.spacedBy(if (kompakt) 20.dp else 28.dp),
             ) {
-                // 1. Ausgang & Personenblatt (im Querformat zweispaltig mit Stil-A-Portrait)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-                    shadowElevation = 2.dp,
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(2.5.dp)
-                                .background(if (lebenslauf.istVorzeitigerAbbruch) farben.tinteMatt else farben.akzent),
+                // 1. Ausgang & Personenblatt — offen direkt auf dem warmen Archivpapier
+                val ausgangSpalte: @Composable (Modifier) -> Unit = { mod ->
+                    Column(
+                        modifier = mod,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = if (lebenslauf.istVorzeitigerAbbruch) {
+                                "Vorzeitiger Einschnitt · $endJahr"
+                            } else {
+                                "Historischer Ausgang · 1919"
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            fontFamily = FontFamily.Serif,
+                            color = if (lebenslauf.istVorzeitigerAbbruch) farben.tinteMatt else farben.akzent,
+                            fontWeight = FontWeight.SemiBold,
                         )
 
-                        val ausgangSpalte: @Composable (Modifier) -> Unit = { mod ->
-                            Column(
-                                modifier = mod,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
+                        val ausgang = lebenslauf.ausgang
+                        val hartesEnde = lebenslauf.hartesEnde
+                        when {
+                            ausgang != null -> {
                                 Text(
-                                    text = if (lebenslauf.istVorzeitigerAbbruch) {
-                                        "Vorzeitiger Einschnitt · $endJahr"
-                                    } else {
-                                        "Historischer Ausgang · 1919"
-                                    },
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontFamily = FontFamily.Serif,
-                                    color = if (lebenslauf.istVorzeitigerAbbruch) farben.tinteMatt else farben.akzent,
-                                    fontWeight = FontWeight.SemiBold,
+                                    text = ausgang.titel,
+                                    style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
+                                    color = farben.tinte,
+                                    modifier = Modifier.archivUeberschrift(),
                                 )
-
-                                val ausgang = lebenslauf.ausgang
-                                val hartesEnde = lebenslauf.hartesEnde
-                                when {
-                                    ausgang != null -> {
-                                        Text(
-                                            text = ausgang.titel,
-                                            style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
-                                            color = farben.tinte,
-                                            modifier = Modifier.archivUeberschrift(),
-                                        )
-                                        Text(
-                                            text = "„${ausgang.deutung}“",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontFamily = FontFamily.Serif,
-                                            fontStyle = FontStyle.Italic,
-                                            color = farben.akzent,
-                                        )
-                                        Text(
-                                            text = lebenslauf.fazit,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = farben.tinte,
-                                        )
-                                    }
-
-                                    hartesEnde != null -> {
-                                        Text(
-                                            text = "${hartesEnde.titel} ($endJahr)",
-                                            style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
-                                            color = farben.tinte,
-                                            modifier = Modifier.archivUeberschrift(),
-                                        )
-                                        Text(
-                                            text = hartesEnde.text,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = farben.tinte,
-                                        )
-                                        Text(
-                                            text = lebenslauf.fazit,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontStyle = FontStyle.Italic,
-                                            color = farben.tinteMatt,
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = "„${ausgang.deutung}“",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontFamily = FontFamily.Serif,
+                                    fontStyle = FontStyle.Italic,
+                                    color = farben.akzent,
+                                )
+                                Text(
+                                    text = lebenslauf.fazit,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = farben.tinte,
+                                )
                             }
-                        }
 
-                        val steckbriefSpalte: @Composable (Modifier) -> Unit = { mod ->
-                            Column(
-                                modifier = mod,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                if (person != null) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(if (kompakt) 60.dp else 72.dp)
-                                                .clip(RoundedCornerShape(5.dp))
-                                                .background(farben.papier)
-                                                .border(0.75.dp, farben.linieFein, RoundedCornerShape(5.dp)),
-                                        ) {
-                                            ArchivPortraitBild(
-                                                portraitId = emotionUi.portraitId,
-                                                stimmungsFarbe = farben.akzent,
-                                                beschreibung = "Portrait von ${person.vollerName}",
-                                            ) {}
-                                        }
-                                        Column(
-                                            modifier = Modifier.weight(1f),
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            Text(
-                                                text = person.vollerName,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontFamily = FontFamily.Serif,
-                                                color = farben.tinte,
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                            Text(
-                                                text = "${person.herkunftTitel} · Jg. ${person.jahrgang}",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = farben.tinteMatt,
-                                            )
-                                            Text(
-                                                text = "$modusBezeichnung · $pfadMarke",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = farben.tinteMatt,
-                                            )
-                                        }
-                                    }
-
-                                    ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.6f))
-
-                                    SteckbriefZeile("Friedensberuf", person.friedensberuf)
-                                    SteckbriefZeile("Stellung im Krieg", person.stand)
-                                    if (musterungText != null) {
-                                        SteckbriefZeile("Musterung", musterungText)
-                                    }
-                                }
-                            }
-                        }
-
-                        if (metrik.zweispaltigeBuehne) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrik.kartenInnenAbstand),
-                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 18.dp else 26.dp),
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                ausgangSpalte(Modifier.weight(0.56f))
-                                steckbriefSpalte(Modifier.weight(0.44f))
-                            }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrik.kartenInnenAbstand),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                ausgangSpalte(Modifier.fillMaxWidth())
-                                ArchivTrennlinie()
-                                steckbriefSpalte(Modifier.fillMaxWidth())
+                            hartesEnde != null -> {
+                                Text(
+                                    text = "${hartesEnde.titel} ($endJahr)",
+                                    style = if (kompakt) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
+                                    color = farben.tinte,
+                                    modifier = Modifier.archivUeberschrift(),
+                                )
+                                Text(
+                                    text = hartesEnde.text,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = farben.tinte,
+                                )
+                                Text(
+                                    text = lebenslauf.fazit,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontStyle = FontStyle.Italic,
+                                    color = farben.tinteMatt,
+                                )
                             }
                         }
                     }
                 }
 
-                // 2. Die 4 Fächer des Lebenslaufs (sauberes 2×2-Raster im Querformat)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                val steckbriefSpalte: @Composable (Modifier) -> Unit = { mod ->
+                    Column(
+                        modifier = mod,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (person != null) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(if (kompakt) 62.dp else 74.dp)
+                                        .clip(RoundedCornerShape(5.dp))
+                                        .background(farben.papierHell)
+                                        .border(0.75.dp, farben.linieFein, RoundedCornerShape(5.dp)),
+                                ) {
+                                    ArchivPortraitBild(
+                                        portraitId = emotionUi.portraitId,
+                                        stimmungsFarbe = farben.akzent,
+                                        beschreibung = "Portrait von ${person.vollerName}",
+                                    ) {}
+                                }
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                ) {
+                                    Text(
+                                        text = person.vollerName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontFamily = FontFamily.Serif,
+                                        color = farben.tinte,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = "${person.herkunftTitel} · Jg. ${person.jahrgang}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = farben.tinteMatt,
+                                    )
+                                    Text(
+                                        text = modusBezeichnung,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = farben.tinteMatt,
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(2.dp))
+                            SteckbriefZeile("Friedensberuf", person.friedensberuf)
+                            SteckbriefZeile("Stellung im Krieg", person.stand)
+                            if (musterungText != null) {
+                                SteckbriefZeile("Musterung", musterungText)
+                            }
+                        }
+                    }
+                }
+
+                if (metrik.zweispaltigeBuehne) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(if (kompakt) 24.dp else 36.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        ausgangSpalte(Modifier.weight(0.56f))
+                        steckbriefSpalte(Modifier.weight(0.44f))
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        ausgangSpalte(Modifier.fillMaxWidth())
+                        steckbriefSpalte(Modifier.fillMaxWidth())
+                    }
+                }
+
+                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
+
+                // 2. Die 4 Fächer des Lebenslaufs (luftiges 2×2-Raster)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                         text = "Was diesen Weg geprägt hat",
                         style = MaterialTheme.typography.headlineSmall,
@@ -585,7 +537,7 @@ private fun LebenslaufAnsicht(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(IntrinsicSize.Min),
-                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 16.dp),
                             ) {
                                 paar.forEach { fach ->
                                     LebenslaufFachKarte(
@@ -612,62 +564,57 @@ private fun LebenslaufAnsicht(
                     }
                 }
 
-                // 3. Chronologische Zeitleiste & Befindensstand
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-                    shadowElevation = 1.dp,
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(metrik.kartenInnenAbstand),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(
-                            text = "Zeitleiste deines Weges",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = farben.tinte,
-                            modifier = Modifier.archivUeberschrift(),
-                        )
+                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
 
-                        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                            lebenslauf.zeitleiste.forEachIndexed { idx, eintrag ->
-                                ZeitleistenEintragZeile(
-                                    eintrag = eintrag,
-                                    istLetzter = idx == lebenslauf.zeitleiste.lastIndex,
-                                )
-                            }
-                        }
+                // 3. Chronologische Zeitleiste & Befindensstand — offen ohne umschließende Kästen
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "Zeitleiste deines Weges",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = farben.tinte,
+                        modifier = Modifier.archivUeberschrift(),
+                    )
 
-                        if (lebenslauf.werteBilanz.isNotEmpty()) {
-                            ArchivZierLinie()
-                            WerteBilanzBlock(
-                                werte = lebenslauf.werteBilanz,
-                                endJahr = endJahr,
+                    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                        lebenslauf.zeitleiste.forEachIndexed { idx, eintrag ->
+                            ZeitleistenEintragZeile(
+                                eintrag = eintrag,
+                                istLetzter = idx == lebenslauf.zeitleiste.lastIndex,
                             )
                         }
+                    }
+
+                    if (lebenslauf.werteBilanz.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        WerteBilanzBlock(
+                            werte = lebenslauf.werteBilanz,
+                            endJahr = endJahr,
+                        )
                     }
                 }
 
                 // 4. Aufklappbarer Entscheidungsweg
                 if (protokollUi.isNotEmpty()) {
+                    ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
                     EntscheidungsProtokollBox(eintraege = protokollUi)
                 }
 
+                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
+
                 // 5. Lebenslauf drucken/sichern & Neuer Durchgang
-                LebenslaufExportUndNeustartKarte(
+                LebenslaufExportUndNeustartBereich(
                     dokument = exportDokument,
                     bruecke = exportBruecke,
                     hatProtokoll = protokollUi.isNotEmpty(),
                     mitProtokoll = exportMitProtokoll,
-                    onMitProtokollToggle = { exportMitProtokoll = !exportMitProtokoll },
+                    onMitProtokollToggle = {
+                        spieleEffekt(SoundEffekt.KLICK_SANFT)
+                        exportMitProtokoll = !exportMitProtokoll
+                    },
                     onNeuerDurchgang = onNeuerDurchgang,
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
@@ -710,16 +657,15 @@ private fun LebenslaufFachKarte(
 
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
-        color = if (istGefuellt) farben.papierHell else farben.papierHell.copy(alpha = 0.55f),
+        color = if (istGefuellt) farben.papierHell else farben.papierHell.copy(alpha = 0.48f),
         shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-        shadowElevation = if (istGefuellt) 1.dp else 0.dp,
+        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.78f)),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 15.dp, vertical = 13.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -784,7 +730,6 @@ private fun ZeitleistenEintragZeile(
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Feine durchgehende Sepia-Zeitlinie mit Punkt
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight(),
@@ -792,7 +737,7 @@ private fun ZeitleistenEintragZeile(
             Box(
                 modifier = Modifier
                     .padding(top = 6.dp)
-                    .size(8.dp)
+                    .size(7.dp)
                     .clip(CircleShape)
                     .background(farben.akzent),
             )
@@ -847,7 +792,7 @@ private fun WerteBilanzBlock(
     val farben = ArchivTheme.farben
     val spalten = if (ArchivTheme.layoutKlasse == LayoutKlasse.KOMPAKT) 1 else 2
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = "Befindensstand ($endJahr)",
             style = MaterialTheme.typography.titleLarge,
@@ -858,16 +803,14 @@ private fun WerteBilanzBlock(
         werte.chunked(spalten).forEach { zeile ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 zeile.forEach { status ->
                     val stufenFarbe = farben.stufenFarbe(status.stufe)
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .semantics(mergeDescendants = true) {}
-                            .background(farben.papier.copy(alpha = 0.55f), RoundedCornerShape(5.dp))
-                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                            .semantics(mergeDescendants = true) {},
                         verticalArrangement = Arrangement.spacedBy(5.dp),
                     ) {
                         Row(
@@ -880,10 +823,11 @@ private fun WerteBilanzBlock(
                                 style = MaterialTheme.typography.titleSmall,
                                 color = farben.tinte,
                             )
-                            ArchivStempel(
+                            Text(
                                 text = status.stufenName,
-                                farbe = stufenFarbe,
-                                hintergrund = farben.papierHell,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = stufenFarbe,
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
                         FuenfSegmentBalken(
@@ -914,103 +858,89 @@ private fun EntscheidungsProtokollBox(
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
     val reduziert = ArchivTheme.reduzierteAnimationen
+    val spieleEffekt = LocalSoundEffektSpielen.current
     var aufgeklappt by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = farben.papierHell,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                .clip(RoundedCornerShape(6.dp))
+                .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
+                .clickable {
+                    spieleEffekt(SoundEffekt.KLICK_SANFT)
+                    aufgeklappt = !aufgeklappt
+                }
+                .clearAndSetSemantics {
+                    role = Role.Button
+                    selected = aufgeklappt
+                    stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
+                    contentDescription = if (aufgeklappt) {
+                        "Entscheidungen im Überblick (${eintraege.size} Stationen) zuklappen"
+                    } else {
+                        "Entscheidungen im Überblick (${eintraege.size} Stationen) aufklappen"
+                    }
+                }
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Entscheidungen im Überblick (${eintraege.size} Stationen)",
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Serif,
+                color = farben.tinte,
+                modifier = Modifier.weight(1f),
+            )
+            ChevronIcon(
+                nachOben = aufgeklappt,
+                farbe = farben.tinteMatt,
+                groesse = 16.dp,
+            )
+        }
+
+        AnimatedVisibility(
+            visible = aufgeklappt,
+            enter = ArchivUebergaenge.aufklappEnter(reduziert),
+            exit = ArchivUebergaenge.aufklappExit(reduziert),
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = metrik.minTouchHoehe)
-                    .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-                    .clickable { aufgeklappt = !aufgeklappt }
-                    .clearAndSetSemantics {
-                        role = Role.Button
-                        selected = aufgeklappt
-                        stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
-                        contentDescription = if (aufgeklappt) {
-                            "Entscheidungen im Überblick (${eintraege.size} Stationen) zuklappen"
-                        } else {
-                            "Entscheidungen im Überblick (${eintraege.size} Stationen) aufklappen"
-                        }
-                    }
-                    .padding(horizontal = metrik.kartenInnenAbstand, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(top = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Deine Entscheidungen im Überblick (${eintraege.size} Stationen)",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.tinte,
-                    )
-                    Text(
-                        text = "Zum Nachlesen und Vergleichen aufklappen.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = farben.tinteMatt,
-                    )
-                }
-                ChevronIcon(
-                    nachOben = aufgeklappt,
-                    farbe = farben.tinteMatt,
-                    groesse = 16.dp,
-                )
-            }
-
-            AnimatedVisibility(
-                visible = aufgeklappt,
-                enter = ArchivUebergaenge.aufklappEnter(reduziert),
-                exit = ArchivUebergaenge.aufklappExit(reduziert),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = metrik.kartenInnenAbstand)
-                        .padding(bottom = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    ArchivTrennlinie()
-                    eintraege.forEachIndexed { idx, eintrag ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .semantics(mergeDescendants = true) {}
-                                .padding(vertical = 3.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.Top,
+                eintraege.forEach { eintrag ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics(mergeDescendants = true) {},
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        Text(
+                            text = eintrag.jahr.toString(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontFamily = FontFamily.Serif,
+                            color = farben.akzent,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(1.dp),
                         ) {
                             Text(
-                                text = eintrag.jahr.toString(),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontFamily = FontFamily.Serif,
-                                color = farben.akzent,
-                                fontWeight = FontWeight.SemiBold,
+                                text = eintrag.wahl,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = farben.tinte,
+                                fontWeight = FontWeight.Medium,
                             )
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(1.dp),
-                            ) {
-                                Text(
-                                    text = eintrag.wahl,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = farben.tinte,
-                                    fontWeight = FontWeight.Medium,
-                                )
-                                Text(
-                                    text = eintrag.station,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = farben.tinteMatt,
-                                )
-                            }
-                        }
-                        if (idx < eintraege.lastIndex) {
-                            ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.45f))
+                            Text(
+                                text = eintrag.station,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = farben.tinteMatt,
+                            )
                         }
                     }
                 }
@@ -1020,11 +950,11 @@ private fun EntscheidungsProtokollBox(
 }
 
 /**
- * Ruhige Abschluss-Karte für Lebenslauf-Druck, Export/Kopieren und „Neuer Durchgang“.
+ * Offener Abschlussbereich für Lebenslauf-Druck, Export/Kopieren und „Neuer Durchgang“.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LebenslaufExportUndNeustartKarte(
+private fun LebenslaufExportUndNeustartBereich(
     dokument: LebenslaufExportDokument,
     bruecke: PlattformExportBruecke,
     hatProtokoll: Boolean,
@@ -1039,146 +969,133 @@ private fun LebenslaufExportUndNeustartKarte(
     var letztesErgebnis by remember { mutableStateOf<ExportErgebnis?>(null) }
     var textVorschauOffen by remember { mutableStateOf(false) }
 
-    Surface(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        color = farben.papierHell,
-        shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-        shadowElevation = 1.dp,
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(metrik.kartenInnenAbstand),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = "Lebenslauf sichern oder drucken",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = farben.tinte,
-                        modifier = Modifier.archivUeberschrift(),
-                    )
-                    Text(
-                        text = "Als ruhiges A4-Druckblatt oder Text für Mappe und Gespräch.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = farben.tinteMatt,
-                    )
-                }
-
-                if (metrik.zweispaltigeBuehne) {
-                    ArchivPrimaerKnopf(
-                        label = "Neuer Durchgang",
-                        akzentStil = true,
-                        onClick = onNeuerDurchgang,
-                    )
-                }
-            }
-
-            if (hatProtokoll) {
-                ArchivSchalterZeile(
-                    titel = "Entscheidungsprotokoll einschließen",
-                    beschreibung = "Alle Stationen mit in Druckblatt und Text übernehmen.",
-                    aktiv = mitProtokoll,
-                    onToggle = onMitProtokollToggle,
+                Text(
+                    text = "Lebenslauf sichern oder drucken",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = farben.tinte,
+                    modifier = Modifier.archivUeberschrift(),
+                )
+                Text(
+                    text = "Als ruhiges A4-Druckblatt oder Text für Mappe und Gespräch.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = farben.tinteMatt,
                 )
             }
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ArchivPrimaerKnopf(
-                    label = bruecke.druckenLabel,
-                    onClick = { letztesErgebnis = bruecke.drucken(dokument) },
-                )
-                ArchivSekundaerKnopf(
-                    label = bruecke.speichernLabel,
-                    onClick = { letztesErgebnis = bruecke.speichernOderTeilen(dokument) },
-                )
-                ArchivSekundaerKnopf(
-                    label = "Als Text kopieren",
-                    onClick = { letztesErgebnis = bruecke.kopieren(dokument) },
-                )
-                ArchivSekundaerKnopf(
-                    label = if (textVorschauOffen) "Vorschau ausblenden" else "Textvorschau",
-                    onClick = { textVorschauOffen = !textVorschauOffen },
-                )
-            }
-
-            val ergebnis = letztesErgebnis
-            if (ergebnis != null) {
-                val hinweisFarbe = if (ergebnis.erfolgreich) farben.stufenFarbe(0) else farben.akzent
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .archivLiveHinweis()
-                        .background(farben.papier.copy(alpha = 0.72f), RoundedCornerShape(4.dp)),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(2.5.dp)
-                            .fillMaxHeight()
-                            .background(hinweisFarbe),
-                    )
-                    Text(
-                        text = ergebnis.meldung,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = farben.tinte,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                    )
-                }
-            }
-
-            AnimatedVisibility(
-                visible = textVorschauOffen,
-                enter = ArchivUebergaenge.aufklappEnter(reduziert),
-                exit = ArchivUebergaenge.aufklappExit(reduziert),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(farben.papier, RoundedCornerShape(5.dp))
-                        .border(0.75.dp, farben.linieFein, RoundedCornerShape(5.dp))
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Text(
-                        text = "Markierbare Textvorschau",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = farben.tinteMatt,
-                    )
-                    SelectionContainer {
-                        Text(
-                            text = dokument.klartext,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace,
-                            color = farben.tinte,
-                        )
-                    }
-                }
-            }
-
-            if (!metrik.zweispaltigeBuehne) {
-                ArchivTrennlinie()
+            if (metrik.zweispaltigeBuehne) {
                 ArchivPrimaerKnopf(
                     label = "Neuer Durchgang",
                     akzentStil = true,
                     onClick = onNeuerDurchgang,
-                    modifier = Modifier.fillMaxWidth(),
                 )
             }
+        }
+
+        if (hatProtokoll) {
+            ArchivSchalterZeile(
+                titel = "Entscheidungsprotokoll einschließen",
+                beschreibung = "Alle Stationen mit in Druckblatt und Text übernehmen.",
+                aktiv = mitProtokoll,
+                onToggle = onMitProtokollToggle,
+            )
+        }
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ArchivPrimaerKnopf(
+                label = bruecke.druckenLabel,
+                onClick = { letztesErgebnis = bruecke.drucken(dokument) },
+            )
+            ArchivSekundaerKnopf(
+                label = bruecke.speichernLabel,
+                onClick = { letztesErgebnis = bruecke.speichernOderTeilen(dokument) },
+            )
+            ArchivSekundaerKnopf(
+                label = "Als Text kopieren",
+                onClick = { letztesErgebnis = bruecke.kopieren(dokument) },
+            )
+            ArchivSekundaerKnopf(
+                label = if (textVorschauOffen) "Vorschau ausblenden" else "Textvorschau",
+                onClick = { textVorschauOffen = !textVorschauOffen },
+            )
+        }
+
+        val ergebnis = letztesErgebnis
+        if (ergebnis != null) {
+            val hinweisFarbe = if (ergebnis.erfolgreich) farben.stufenFarbe(0) else farben.akzent
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .archivLiveHinweis(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(hinweisFarbe),
+                )
+                Text(
+                    text = ergebnis.meldung,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = farben.tinte,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = textVorschauOffen,
+            enter = ArchivUebergaenge.aufklappEnter(reduziert),
+            exit = ArchivUebergaenge.aufklappExit(reduziert),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(farben.papierHell, RoundedCornerShape(5.dp))
+                    .border(0.75.dp, farben.linieFein, RoundedCornerShape(5.dp))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = "Markierbare Textvorschau",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = farben.tinteMatt,
+                )
+                SelectionContainer {
+                    Text(
+                        text = dokument.klartext,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = farben.tinte,
+                    )
+                }
+            }
+        }
+
+        if (!metrik.zweispaltigeBuehne) {
+            ArchivPrimaerKnopf(
+                label = "Neuer Durchgang",
+                akzentStil = true,
+                onClick = onNeuerDurchgang,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

@@ -16,9 +16,28 @@ enum class AudioSpur(
     val bezeichnung: String,
 ) {
     STILLE("stille", "Stille"),
-    START_RUHIG("start_ruhig", "Ruhige Archiv-Begleitung"),
-    HEIMAT_RUHIG("heimat_ruhig", "Dezente Heimat-Begleitung"),
-    EPILOG_RUHIG("epilog_ruhig", "Ruhiger Ausklang 1919"),
+    START_RUHIG("start_ruhig", "Getragene Kammermusik (Auftakt)"),
+    HEIMAT_RUHIG("heimat_ruhig", "Bedrückende Heimat-Kammermusik"),
+    EPILOG_RUHIG("epilog_ruhig", "Erschöpfter Ausklang 1919"),
+}
+
+/**
+ * Dezente, taktile Soundeffekte für Bedienung und Übergänge.
+ *
+ * - [KLICK_SANFT]: Sehr kurzes, warmes Holz-/Papier-Tippen (~35 ms) für Buttons & Schalter.
+ * - [ENTSCHEIDUNG]: Leises, organisches Papier-Umblättern (~135 ms) bei Entscheidungen & Weitergehen.
+ * - [KAPITELWECHSEL]: Gedämpfter dunkler Tiefklang-Impuls beim Jahreswechsel (unter Musiksperre stumm).
+ * - [EINSCHNITT]: Sehr leiser, respektvoller Einzelton für ruhige Dialoge/Abschluss
+ *   (im Auffangnetz sowie an Front & Etappe strikt stumm — niemals ein „Game-Over-Jingle“).
+ */
+enum class SoundEffekt(
+    val code: String,
+    val istMusikalisch: Boolean,
+) {
+    KLICK_SANFT("klick_sanft", istMusikalisch = false),
+    ENTSCHEIDUNG("entscheidung", istMusikalisch = false),
+    KAPITELWECHSEL("kapitelwechsel", istMusikalisch = true),
+    EINSCHNITT("einschnitt", istMusikalisch = true),
 }
 
 /**
@@ -61,27 +80,31 @@ data class AudioZustand(
     val aktiveSpur: AudioSpur,
     val musikGesperrt: Boolean,
     val sperrGrund: AudioSperrGrund?,
+    val effekteAktiv: Boolean = false,
 ) {
     val spieltGerade: Boolean
         get() = aktiveSpur != AudioSpur.STILLE && audioAktiv && !musikGesperrt && lautstaerke > 0f
+
+    val hatAktivenTon: Boolean
+        get() = spieltGerade || (effekteAktiv && lautstaerke > 0f)
 }
 
 /**
- * Reines, plattformunabhängiges Regelwerk für das optionale dezente Audio.
+ * Reines, plattformunabhängiges Regelwerk für Grundmusik und dezente Klick-/Papiergeräusche.
  *
  * Zentrale pädagogische Leitplanke:
  * - **Harte Musiksperre auf `front` und `etappe`:** Sobald eine Figur den Pfad `front`
  *   oder `etappe` betritt (einschließlich Musterungsbescheid mit Zielpfad `front`/`etappe`
  *   sowie Abschluss eines `front`-/`etappe`-Durchgangs), wird strikt [AudioSpur.STILLE]
  *   erzwungen — unabhängig vom Stummschalter oder der eingestellten Lautstärke.
- * - **Respektvolle Stille im Auffangnetz:** Bei vorzeitigem Abbruch vor 1919 wird ebenfalls
- *   strikt keine Musik gespielt.
- * - **Standardmäßig schul- und browserfreundlich:** Ton startet stumm (`audioAktiv = false`)
- *   und bleibt bei Aktivierung auf einer sehr leisen, dezenten Lautstärke begrenzt.
+ * - **Respektvolle Stille im Auffangnetz:** Bei vorzeitigem Abbruch vor 1919 wird weder
+ *   Musik noch ein musikalischer Effekt abgespielt (niemals ein „Game-Over-Jingle“).
+ * - **Standardmäßig schul- und browserfreundlich:** Ton startet stumm (`audioAktiv = false`,
+ *   `effekteAktiv = false`) und bleibt auf einer sehr leisen, dezenten Lautstärke begrenzt.
  */
 object AudioRegelwerk {
 
-    const val STANDARD_LAUTSTAERKE: Float = 0.22f
+    const val STANDARD_LAUTSTAERKE: Float = 0.24f
     const val MAX_DEZENTE_LAUTSTAERKE: Float = 0.35f
 
     /**
@@ -98,7 +121,7 @@ object AudioRegelwerk {
 
     /**
      * Ermittelt, ob im aktuellen [GameState] eine harte pädagogische Musiksperre greift.
-     * Gibt `null` zurück, wenn dezenter Ton grundsätzlich erlaubt ist (Startmenü, Herkunftswahl,
+     * Gibt `null` zurück, wenn dezente Musik grundsätzlich erlaubt ist (Startmenü, Herkunftswahl,
      * Heimat-Pfad oder regulärer Heimat-Abschluss 1919).
      */
     fun musikSperreFuer(gameState: GameState): AudioSperrGrund? = when (val phase = gameState.phase) {
@@ -122,13 +145,36 @@ object AudioRegelwerk {
     }
 
     /**
-     * Berechnet den effektiven [AudioZustand] aus aktuellem [GameState] und Nutzereinstellung.
+     * Prüft, ob ein [SoundEffekt] im gegebenen [AudioZustand] abgespielt werden darf:
+     * - Bei abgeschalteten Effekten oder Lautstärke `0`: immer verboten.
+     * - Musikalische Impulse ([SoundEffekt.KAPITELWECHSEL], [SoundEffekt.EINSCHNITT]):
+     *   unter Musiksperre (`front`, `etappe`, `auffangnetz`) strikt verboten.
+     * - Rein taktile Papier-/Klickgeräusche ([SoundEffekt.KLICK_SANFT], [SoundEffekt.ENTSCHEIDUNG]):
+     *   erlaubt, sobald Effekte eingeschaltet sind (im Auffangnetz bleibt [SoundEffekt.EINSCHNITT]
+     *   stets stumm).
+     */
+    fun istEffektErlaubt(
+        effekt: SoundEffekt,
+        zustand: AudioZustand,
+    ): Boolean {
+        if (!zustand.effekteAktiv || begrenzeLautstaerke(zustand.lautstaerke) <= 0f) {
+            return false
+        }
+        if (effekt.istMusikalisch && (zustand.musikGesperrt || zustand.sperrGrund == AudioSperrGrund.AUFFANGNETZ)) {
+            return false
+        }
+        return true
+    }
+
+    /**
+     * Berechnet den effektiven [AudioZustand] aus aktuellem [GameState] und Nutzereinstellungen.
      * Die harte Musiksperre hat stets oberste Priorität vor `audioAktiv`.
      */
     fun bestimmeZustand(
         gameState: GameState,
         audioAktiv: Boolean,
         lautstaerke: Float = STANDARD_LAUTSTAERKE,
+        effekteAktiv: Boolean = audioAktiv,
     ): AudioZustand {
         val effektiveLautstaerke = begrenzeLautstaerke(lautstaerke)
         val sperre = musikSperreFuer(gameState)
@@ -139,6 +185,7 @@ object AudioRegelwerk {
                 aktiveSpur = AudioSpur.STILLE,
                 musikGesperrt = true,
                 sperrGrund = sperre,
+                effekteAktiv = effekteAktiv && effektiveLautstaerke > 0f,
             )
         }
 
@@ -149,6 +196,7 @@ object AudioRegelwerk {
                 aktiveSpur = AudioSpur.STILLE,
                 musikGesperrt = false,
                 sperrGrund = AudioSperrGrund.STUMMGESCHALTET,
+                effekteAktiv = effekteAktiv && effektiveLautstaerke > 0f,
             )
         }
 
@@ -189,6 +237,7 @@ object AudioRegelwerk {
             aktiveSpur = spur,
             musikGesperrt = false,
             sperrGrund = null,
+            effekteAktiv = effekteAktiv,
         )
     }
 
@@ -205,6 +254,7 @@ object AudioRegelwerk {
  */
 interface AudioAusgabe {
     fun aktualisiere(spur: AudioSpur, lautstaerke: Float)
+    fun spieleEffekt(effekt: SoundEffekt, lautstaerke: Float) = Unit
     fun stoppe()
     fun freigeben()
 }
@@ -214,6 +264,7 @@ interface AudioAusgabe {
  */
 object StilleAudioAusgabe : AudioAusgabe {
     override fun aktualisiere(spur: AudioSpur, lautstaerke: Float) = Unit
+    override fun spieleEffekt(effekt: SoundEffekt, lautstaerke: Float) = Unit
     override fun stoppe() = Unit
     override fun freigeben() = Unit
 }
@@ -238,11 +289,13 @@ class AudioKoordinator(
         gameState: GameState,
         audioAktiv: Boolean,
         lautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
+        effekteAktiv: Boolean = audioAktiv,
     ): AudioZustand {
         val zustand = AudioRegelwerk.bestimmeZustand(
             gameState = gameState,
             audioAktiv = audioAktiv,
             lautstaerke = lautstaerke,
+            effekteAktiv = effekteAktiv,
         )
         synchronisiereZustand(zustand)
         return zustand
@@ -279,6 +332,18 @@ class AudioKoordinator(
             ausgabe.aktualisiere(zustand.aktiveSpur, zustand.lautstaerke)
             ausgabeLaeuft = true
         }
+    }
+
+    /**
+     * Spielt einen kurzen, dezenten [SoundEffekt] ab, sofern die App im Vordergrund ist
+     * und [AudioRegelwerk.istEffektErlaubt] den Effekt im aktuellen Zustand freigibt.
+     */
+    fun spieleEffekt(effekt: SoundEffekt): Boolean {
+        if (imHintergrundPausiert) return false
+        val zustand = letzterZustand ?: return false
+        if (!AudioRegelwerk.istEffektErlaubt(effekt, zustand)) return false
+        ausgabe.spieleEffekt(effekt, AudioRegelwerk.begrenzeLautstaerke(zustand.lautstaerke))
+        return true
     }
 
     /**

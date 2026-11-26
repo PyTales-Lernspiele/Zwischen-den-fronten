@@ -1,7 +1,6 @@
 package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,18 +14,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -44,29 +42,30 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.state.LiveEmotionUiState
 import de.pytales.zdf.ui.state.WertKachelUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
- * Sehr schlanke, einzeilige und ein-/ausklappbare Kopfleiste für Querformat-Displays:
- * - Zeigt im ausgeklappten Zustand kompakt in einer einzigen Zeile (~58–66 dp Höhe) alle 4
- *   Befindenswerte (*Hunger, Erschöpfung, Verdacht, Einsamkeit*), die [LiveEmotionsKachel]
- *   rechts oben sowie dezente Symbole für Ton, Einstellungen und Einklappen.
- * - Geöffnete Wert- oder Figuren-Erklärkarten erscheinen als ruhiges, leichtes Overlay/Popover,
- *   ohne die Spielbühne nach unten wegzudrücken.
- * - Im eingeklappten Zustand im Querformat zieht sich die obere Leiste vollständig zurück
- *   (nur Statusbar-Hintergrund + feine Zierlinie), während [EingeklappteKopfRandLeiste] rechts
- *   am Rand Ausklappen, Mini-Portrait, 4 Farbindikatoren, Ton und Einstellungen bereithält.
+ * Ruhige, flache und platzsparende Kopfleiste:
+ * - **Aufgeklappt:** Einzeilig, flach und luftig direkt auf der dunklen Leiste ohne Kasten-in-Kasten;
+ *   zeigt alle 4 Befindenswerte, das Live-Portrait sowie dezente Symbole für Ton, Einstellungen
+ *   und Einklappen.
+ * - **Eingeklappt:** Verschwindet vollständig nach oben (0 dp Inhalts-Höhe, keine permanente
+ *   Seitenleiste!), sodass die gesamte Bildschirmbreite und -höhe frei für das aufgeschlagene
+ *   Archivbuch bleibt. Über eine einzige dezente Ecke/Lasche oben rechts ([KopfLeisteLasche])
+ *   lässt sich die Leiste jederzeit mit einem Tippen auf- und wieder zuklappen.
+ * - **Erklärkarten:** Öffnen stets als ruhiges Overlay ohne Seitenverschiebung.
  */
 @Composable
 fun KopfLeiste(
@@ -150,8 +149,8 @@ fun KopfLeiste(
                 setzeEmotionOffen(false)
             },
     ) {
-        if (eingeklappt && istQuerformat) {
-            // Im Querformat eingeklappt: 0 dp Inhalts-Höhe — nur Statusleisten-Hintergrund + feine Linie
+        if (eingeklappt) {
+            // Eingeklappt: 0 dp Inhalts-Höhe — nur Statusbar-Fläche + hauchfeine Trennlinie
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,11 +160,11 @@ fun KopfLeiste(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.5.dp)
-                    .background(farben.akzent.copy(alpha = 0.72f)),
+                    .height(1.dp)
+                    .background(farben.linie.copy(alpha = 0.45f)),
             )
         } else {
-            // Dunkle Haupt-Kopfleiste (reicht randabfallend hinter Statusbar & Notch)
+            // Dunkle Haupt-Kopfleiste (randabfallend hinter Statusbar & Notch, innen flach & luftig)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,19 +180,19 @@ fun KopfLeiste(
                         .widthIn(max = metrik.maxInhaltsBreite)
                         .padding(
                             horizontal = metrik.aussenAbstand,
-                            vertical = if (metrik.kompakteHoehe) 4.dp else 6.dp,
+                            vertical = if (metrik.kompakteHoehe) 2.dp else 5.dp,
                         ),
                 ) {
                     val verfuegbareBreite = maxWidth
 
                     if (istQuerformat) {
-                        val zeigeJahrLinks = verfuegbareBreite >= 920.dp
-                        val nurPortrait = verfuegbareBreite < 740.dp
+                        val zeigeJahrLinks = verfuegbareBreite >= 860.dp
+                        val nurPortrait = verfuegbareBreite < 780.dp
                         val werteSchlank = metrik.kompakteHoehe || verfuegbareBreite < 960.dp
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(if (werteSchlank) 6.dp else 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(if (werteSchlank) 8.dp else 14.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             if (zeigeJahrLinks) {
@@ -203,7 +202,6 @@ fun KopfLeiste(
                                     fontFamily = FontFamily.Serif,
                                     color = farben.stufenFarbeHell(2),
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(end = 4.dp),
                                 )
                             }
 
@@ -226,18 +224,18 @@ fun KopfLeiste(
                                 nurPortrait = nurPortrait,
                                 detailsOffen = aktiveEmotionOffen,
                                 onTippen = { setzeEmotionOffen(!aktiveEmotionOffen) },
-                                portraitGroesse = if (werteSchlank) 40.dp else metrik.portraitGroesse,
+                                portraitGroesse = if (werteSchlank) 36.dp else 44.dp,
                                 portraitContent = portraitContent,
                                 modifier = if (nurPortrait) {
                                     Modifier
                                 } else {
-                                    Modifier.widthIn(min = 148.dp, max = 196.dp)
+                                    Modifier.widthIn(min = 136.dp, max = 186.dp)
                                 },
                             )
 
                             if (zusatzAktionen != null || onEingeklapptToggle != null) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(0.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     if (zusatzAktionen != null) {
@@ -253,10 +251,10 @@ fun KopfLeiste(
                             }
                         }
                     } else {
-                        // Schmale Fenster (< 600 dp): kompakt einklappbar auf eine 48-dp-Mikroleiste
+                        // Schmale Fenster (< 600 dp): luftige zweizeilige Darstellung
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -275,27 +273,20 @@ fun KopfLeiste(
                                         color = farben.stufenFarbeHell(2),
                                         fontWeight = FontWeight.Bold,
                                     )
-                                    if (eingeklappt) {
-                                        MiniWerteIndikatorZeile(
-                                            werte = werte,
-                                            onClick = onEingeklapptToggle,
-                                        )
-                                    } else {
-                                        LiveEmotionsKachel(
-                                            emotion = emotion,
-                                            aufDunkel = true,
-                                            kompakt = true,
-                                            detailsOffen = aktiveEmotionOffen,
-                                            onTippen = { setzeEmotionOffen(!aktiveEmotionOffen) },
-                                            portraitGroesse = 36.dp,
-                                            portraitContent = portraitContent,
-                                            modifier = Modifier.weight(1f, fill = false),
-                                        )
-                                    }
+                                    LiveEmotionsKachel(
+                                        emotion = emotion,
+                                        aufDunkel = true,
+                                        kompakt = true,
+                                        detailsOffen = aktiveEmotionOffen,
+                                        onTippen = { setzeEmotionOffen(!aktiveEmotionOffen) },
+                                        portraitGroesse = 34.dp,
+                                        portraitContent = portraitContent,
+                                        modifier = Modifier.weight(1f, fill = false),
+                                    )
                                 }
 
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(0.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     if (zusatzAktionen != null) {
@@ -303,7 +294,7 @@ fun KopfLeiste(
                                     }
                                     if (onEingeklapptToggle != null) {
                                         KopfLeisteKlappKnopf(
-                                            eingeklappt = eingeklappt,
+                                            eingeklappt = false,
                                             onClick = onEingeklapptToggle,
                                         )
                                     }
@@ -334,8 +325,8 @@ fun KopfLeiste(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.5.dp)
-                    .background(farben.akzent.copy(alpha = 0.78f)),
+                    .height(1.dp)
+                    .background(farben.akzent.copy(alpha = 0.62f)),
             )
         }
     }
@@ -387,154 +378,72 @@ fun KopfLeiste(
 }
 
 /**
- * Schmale rechte Archiv-Randleiste (~54 dp breit), die im Querformat bei eingeklappter
- * Kopfleiste 0 dp vertikale Höhe verbraucht und dennoch sofortigen Zugriff auf Ausklappen,
- * Live-Portrait, 4 farbcodierte Status-Indikatoren, Ton und Einstellungen bietet — ohne
- * jemals Text oder Illustrationen zu überdecken.
+ * Einzige dezente Ecke/Lasche oben rechts bei eingeklappter Kopfleiste:
+ * - Verbraucht 0 dp Seitenleiste und frisst keinerlei Bildschirmbreite.
+ * - Zeigt diskret die 4 farbcodierten Befindens-Punkte + Ausklapp-Pfeil in einer kleinen
+ *   Lesezeichen-Lasche (mit vollem ≥ 48×48 dp Touch-Ziel).
+ * - Ein einziges Tippen klappt die vollständige Kopfleiste ruhig auf.
  */
 @Composable
-fun EingeklappteKopfRandLeiste(
+fun KopfLeisteLasche(
     werte: List<WertKachelUiState>,
     emotion: LiveEmotionUiState,
     onAusklappen: () -> Unit,
-    onEmotionTippen: () -> Unit,
     modifier: Modifier = Modifier,
-    zusatzAktionenVertikal: (@Composable () -> Unit)? = null,
-    portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
-    val stimmungsFarbe = stimmungsAkzentFarbe(
-        stimmung = emotion.stimmung,
-        hoechsteStufe = emotion.hoechsteStufe,
-        farben = farben,
-        aufDunkel = true,
-    )
+    val minTouch = ArchivTheme.metrik.minTouchHoehe
+    val spieleEffekt = LocalSoundEffektSpielen.current
+    val laschenForm = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
 
-    Row(
+    Box(
         modifier = modifier
-            .fillMaxHeight()
-            .background(farben.dunkel)
-            .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(WindowInsetsSides.End + WindowInsetsSides.Bottom),
-            )
-            .archivFokusGruppe(),
-    ) {
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .fillMaxHeight()
-                .background(farben.akzent.copy(alpha = 0.55f)),
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(54.dp)
-                .padding(vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            // Exakt oben rechts, wo der Einklappen-Knopf lag
-            KopfLeisteKlappKnopf(
-                eingeklappt = true,
-                onClick = onAusklappen,
-            )
-
-            // Kompaktes Live-Portrait (48×48 Touch-Ziel)
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = true)
-                    .clickable(onClick = onEmotionTippen)
-                    .clearAndSetSemantics {
-                        role = Role.Button
-                        contentDescription = "${emotion.personName} (${emotion.stimmungBezeichnung}). Tippen für Figuren-Ansicht."
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                ArchivPortraitRahmen(
-                    emotion = emotion,
-                    stimmungsFarbe = stimmungsFarbe,
-                    groesse = 38.dp,
-                    aufDunkel = true,
-                    portraitContent = portraitContent,
-                )
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.End))
+            .padding(end = 10.dp)
+            .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
+            .clip(laschenForm)
+            .archivFokusRahmen(eckRadius = 8.dp, aufDunkel = false)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onAusklappen()
             }
-
-            // 4 farbcodierte Status-Indikatoren auf einen Blick (Tippen klappt Leiste aus)
-            Column(
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = true)
-                    .clickable(onClick = onAusklappen)
-                    .clearAndSetSemantics {
-                        role = Role.Button
-                        contentDescription = "Befindenswerte anzeigen: " +
-                            werte.joinToString(", ") { "${it.bezeichnung} ${it.stufenName}" } +
-                            ". Tippen, um Kopfleiste auszuklappen."
-                    }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            .clearAndSetSemantics {
+                role = Role.Button
+                selected = false
+                stateDescription = "Kopfleiste eingeklappt"
+                contentDescription = "Kopfleiste aufklappen (${emotion.personName}, ${emotion.stimmungBezeichnung}; " +
+                    werte.joinToString(", ") { "${it.bezeichnung} ${it.stufenName}" } + ")"
+            },
+        contentAlignment = Alignment.TopEnd,
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(laschenForm)
+                .background(farben.dunkel.copy(alpha = 0.90f))
+                .border(0.75.dp, farben.segmentDunkel, laschenForm)
+                .padding(horizontal = 10.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 4 dezente Statuspunkte für Hunger, Erschöpfung, Verdacht, Einsamkeit
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 werte.forEach { wert ->
-                    val farbe = farben.stufenFarbeHell(wert.stufe)
                     Box(
                         modifier = Modifier
-                            .width(24.dp)
-                            .height(5.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(farben.segmentDunkel),
-                    ) {
-                        val anteil = (wert.gefuellteSegmente.toFloat() / wert.segmenteGesamt.coerceAtLeast(1))
-                            .coerceIn(0.18f, 1f)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(anteil)
-                                .fillMaxHeight()
-                                .background(farbe),
-                        )
-                    }
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(farben.stufenFarbeHell(wert.stufe)),
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            if (zusatzAktionenVertikal != null) {
-                zusatzAktionenVertikal()
-            }
-        }
-    }
-}
-
-@Composable
-private fun MiniWerteIndikatorZeile(
-    werte: List<WertKachelUiState>,
-    onClick: (() -> Unit)?,
-) {
-    val farben = ArchivTheme.farben
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
-                } else {
-                    Modifier
-                },
-            )
-            .padding(horizontal = 6.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        werte.forEach { wert ->
-            val farbe = farben.stufenFarbeHell(wert.stufe)
-            Box(
-                modifier = Modifier
-                    .size(width = 16.dp, height = 6.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(farbe),
+            ChevronIcon(
+                nachOben = false,
+                farbe = farben.textHell.copy(alpha = 0.88f),
+                groesse = 14.dp,
             )
         }
     }
@@ -548,13 +457,17 @@ internal fun KopfLeisteKlappKnopf(
 ) {
     val farben = ArchivTheme.farben
     val minTouch = ArchivTheme.metrik.minTouchHoehe
+    val spieleEffekt = LocalSoundEffektSpielen.current
 
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = true)
-            .clickable(onClick = onClick)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onClick()
+            }
             .clearAndSetSemantics {
                 role = Role.Button
                 selected = eingeklappt
@@ -567,19 +480,10 @@ internal fun KopfLeisteKlappKnopf(
             },
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(farben.dunkelHell.copy(alpha = 0.85f))
-                .border(0.75.dp, farben.segmentDunkel, RoundedCornerShape(6.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            ChevronIcon(
-                nachOben = !eingeklappt,
-                farbe = farben.textHell,
-                groesse = 16.dp,
-            )
-        }
+        ChevronIcon(
+            nachOben = !eingeklappt,
+            farbe = farben.textHell.copy(alpha = 0.88f),
+            groesse = 17.dp,
+        )
     }
 }

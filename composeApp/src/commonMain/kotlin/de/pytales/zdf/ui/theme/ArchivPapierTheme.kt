@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.model.Farbwelt
 
 val LocalArchivFarben = staticCompositionLocalOf { ArchivFarben.default() }
@@ -21,6 +22,7 @@ val LocalLayoutMetrik = staticCompositionLocalOf {
     layoutMetrikFuer(LayoutKlasse.BREIT, Schriftgroesse.MITTEL)
 }
 val LocalReduzierteAnimationen = staticCompositionLocalOf { false }
+val LocalSoundEffektSpielen = staticCompositionLocalOf<(SoundEffekt) -> Unit> { {} }
 
 /**
  * Ruhige, kantige Archiv-Formen (Papierbögen, Stempel, Aktenblätter statt runder Spiel-Pills).

@@ -43,12 +43,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.SoundEffekt
 import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.model.ModusKonfiguration
 import de.pytales.zdf.model.SpielModus
-import de.pytales.zdf.ui.components.ArchivZierLinie
 import de.pytales.zdf.ui.components.HakenIcon
-import de.pytales.zdf.ui.components.archivEckenDekor
 import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.components.archivFokusRahmen
 import de.pytales.zdf.ui.components.archivPapierHintergrund
@@ -56,14 +55,14 @@ import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.media.ArchivSzenenBild
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.LocalSoundEffektSpielen
 
 /**
- * Einladender, ruhiger Querformat-Startbildschirm im Buchdruck- & Skizzenbuch-Stil:
- * - Links: stimmungsvoll gerahmtes Stil-A-Motiv (`schauplatz_brotschlange`) mit Buchtitel
- *   „Zwischen den Fronten“ & „Alltag 1914–1919“
- * - Rechts: klare, aufgeräumte Auswahl *Kurzer Verlauf* / *Langer Verlauf*, prominenter
- *   Button „Durchgang beginnen“ sowie dezente Zugänge für *Grundsätze* und *Einstellungen*
- * - Frei von Analysemodus, Entwickler-Vorschau, Stempel-Flut und verschachtelten Kästen.
+ * Radikal ruhiger, aufgeräumter Startbildschirm wie eine aufgeschlagene Buch-Titelseite:
+ * - Oben rechts (genau einmal, ohne doppelte Zugänge): flache Symbole für Ton & Einstellungen.
+ * - Links: stimmungsvoll gerahmtes Stil-A-Titelbild + Titel „Zwischen den Fronten“ & „1914–1919“.
+ * - Rechts: schlichte Auswahl *Kurz* / *Lang*, prominenter Button „Durchgang beginnen“ und
+ *   eine einzelne unauffällige Fußzeile für *Grundsätze*. Viel ruhige Archivpapier-Fläche.
  */
 @Composable
 fun StartScreen(
@@ -79,233 +78,199 @@ fun StartScreen(
     val konf = content.konfiguration
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val kompakt = metrik.kompakteHoehe
     val aktiverModus = uiState.gameState.modus
     val direktwahlAktiv = uiState.gameState.direktwahlAktiv
     val querformat = metrik.zweispaltigeBuehne
-
-    val werkzeugZeile: @Composable (Modifier) -> Unit = { mod ->
-        Row(
-            modifier = mod.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Verlauf wählen",
-                style = MaterialTheme.typography.labelMedium,
-                fontFamily = FontFamily.Serif,
-                color = farben.tinteMatt,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AudioIconKnopf(
-                    audioZustand = uiState.audioZustand,
-                    aufDunkel = false,
-                    onToggle = onAudioToggle,
-                )
-                EinstellungenIconKnopf(
-                    aufDunkel = false,
-                    hatHinweisPunkt = direktwahlAktiv,
-                    onClick = onEinstellungenOeffnen,
-                )
-            }
-        }
-    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .archivPapierHintergrund()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .verticalScroll(rememberScrollState())
-            .padding(
-                horizontal = metrik.aussenAbstand,
-                vertical = if (metrik.kompakteHoehe) 10.dp else 24.dp,
-            ),
-        contentAlignment = Alignment.Center,
+            .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
-        val titelBuehne: @Composable (Modifier) -> Unit = { mod ->
-            Column(
-                modifier = mod,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 8.dp else 14.dp),
-            ) {
-                // Stimmungsvoll gerahmtes Stil-A-Titelmotiv
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.85f)),
-                    shadowElevation = 3.dp,
+        // Einziger, unaufdringlicher Zugang zu Ton & Einstellungen oben rechts
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(horizontal = metrik.aussenAbstand, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AudioIconKnopf(
+                audioZustand = uiState.audioZustand,
+                aufDunkel = false,
+                onToggle = onAudioToggle,
+            )
+            EinstellungenIconKnopf(
+                aufDunkel = false,
+                hatHinweisPunkt = direktwahlAktiv,
+                onClick = onEinstellungenOeffnen,
+            )
+        }
+
+        // Zentrierte Buch-Titelseite mit viel freier Archivpapier-Fläche
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    start = metrik.aussenAbstand,
+                    end = metrik.aussenAbstand,
+                    top = if (kompakt) 44.dp else 56.dp,
+                    bottom = if (kompakt) 14.dp else 28.dp,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            val titelBuehne: @Composable (Modifier) -> Unit = { mod ->
+                Column(
+                    modifier = mod,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 16.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .archivEckenDekor(
-                                farbe = farben.linie.copy(alpha = 0.45f),
-                                einrueckung = 5.dp,
-                                schenkelLaenge = 9.dp,
-                            )
-                            .padding(8.dp),
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = farben.papierHell,
+                        shape = RoundedCornerShape(5.dp),
+                        border = BorderStroke(0.75.dp, farben.linieFein.copy(alpha = 0.78f)),
+                        shadowElevation = 2.dp,
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(farben.papier),
+                                .padding(6.dp),
                         ) {
-                            ArchivSzenenBild(
-                                bildId = "schauplatz_brotschlange",
-                                schauplatzBild = "schauplatz_brotschlange",
-                                beschreibung = "Illustration im Stil A: Alltag in einer deutschen Straße um 1915",
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(16f / 9f)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(farben.papier),
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center,
+                                ArchivSzenenBild(
+                                    bildId = "schauplatz_brotschlange",
+                                    schauplatzBild = "schauplatz_brotschlange",
+                                    beschreibung = "Illustration im Stil A: Alltag in einer deutschen Straße um 1915",
                                 ) {
-                                    Text(
-                                        text = "1914 – 1919",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = farben.akzent,
-                                    )
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "1914–1919",
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            color = farben.akzent,
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Buchdruck-Titelblock unter dem Motiv
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
-                ) {
-                    Text(
-                        text = "1914  —  1919",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.akzent,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = konf.spielTitel,
-                        style = if (metrik.kompakteHoehe) {
-                            MaterialTheme.typography.headlineMedium
-                        } else {
-                            MaterialTheme.typography.displaySmall
-                        },
-                        color = farben.tinte,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.archivUeberschrift(),
-                    )
-                    Text(
-                        text = "Alltag 1914–1919  ·  ${konf.zielgruppe}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic,
-                        color = farben.tinteMatt,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
-
-        val aktionsSpalte: @Composable (Modifier, Boolean) -> Unit = { mod, mitWerkzeugZeile ->
-            Column(
-                modifier = mod.archivFokusGruppe(),
-                verticalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 8.dp else 14.dp),
-            ) {
-                if (mitWerkzeugZeile) {
-                    werkzeugZeile(Modifier)
-                }
-
-                // Auswahl Kurzer Verlauf / Langer Verlauf
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    listOf(SpielModus.KURZ, SpielModus.LANG).forEach { modus ->
-                        val modusKonf = konf.modi.getValue(modus)
-                        StartModusKarte(
-                            modus = modus,
-                            konf = modusKonf,
-                            ausgewaehlt = modus == aktiverModus,
-                            kompakt = metrik.kompakteHoehe,
-                            onClick = { onModusWaehlen(modus) },
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = "1914–1919",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontFamily = FontFamily.Serif,
+                            color = farben.akzent,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = konf.spielTitel,
+                            style = if (kompakt) {
+                                MaterialTheme.typography.headlineMedium
+                            } else {
+                                MaterialTheme.typography.displaySmall
+                            },
+                            color = farben.tinte,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.archivUeberschrift(),
                         )
                     }
                 }
+            }
 
-                if (direktwahlAktiv) {
-                    Text(
-                        text = "Unterrichts-Direktwahl aktiv: Pfad wird nach der Herkunft frei gewählt.",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontStyle = FontStyle.Italic,
-                        color = farben.akzent,
-                    )
-                }
-
-                ArchivPrimaerKnopf(
-                    label = "Durchgang beginnen",
-                    akzentStil = true,
-                    onClick = onDurchgangBeginnen,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                ArchivZierLinie(
-                    farbe = farben.linieFein.copy(alpha = 0.7f),
-                    akzentFarbe = farben.akzent.copy(alpha = 0.45f),
-                )
-
-                // Dezente Zugänge zu Grundsätzen & Einstellungen
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
+            val aktionsSpalte: @Composable (Modifier) -> Unit = { mod ->
+                Column(
+                    modifier = mod.archivFokusGruppe(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(if (kompakt) 12.dp else 18.dp),
                 ) {
+                    // Schlichte Auswahl Kurz / Lang
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        listOf(SpielModus.KURZ, SpielModus.LANG).forEach { modus ->
+                            val modusKonf = konf.modi.getValue(modus)
+                            StartModusOption(
+                                modus = modus,
+                                konf = modusKonf,
+                                ausgewaehlt = modus == aktiverModus,
+                                kompakt = kompakt,
+                                onClick = { onModusWaehlen(modus) },
+                            )
+                        }
+                    }
+
+                    if (direktwahlAktiv) {
+                        Text(
+                            text = "Direktwahl für den Unterricht aktiv",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontStyle = FontStyle.Italic,
+                            color = farben.akzent,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    ArchivPrimaerKnopf(
+                        label = "Durchgang beginnen",
+                        akzentStil = true,
+                        klickEffekt = SoundEffekt.ENTSCHEIDUNG,
+                        onClick = onDurchgangBeginnen,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Einzelne unauffällige Fußzeile für Grundsätze
                     ArchivTextKnopf(
-                        label = "Drei Grundsätze",
+                        label = "Grundsätze",
                         onClick = onGrundsaetzeOeffnen,
                     )
-                    ArchivTextKnopf(
-                        label = "Einstellungen",
-                        hervorgehoben = direktwahlAktiv,
-                        onClick = onEinstellungenOeffnen,
-                    )
                 }
             }
-        }
 
-        if (querformat) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 1040.dp),
-                horizontalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 20.dp else 32.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                titelBuehne(Modifier.weight(0.48f))
-                aktionsSpalte(Modifier.weight(0.52f), true)
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 520.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                werkzeugZeile(Modifier)
-                titelBuehne(Modifier.fillMaxWidth())
-                aktionsSpalte(Modifier.fillMaxWidth(), false)
+            if (querformat) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 980.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 28.dp else 44.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    titelBuehne(Modifier.weight(0.50f))
+                    aktionsSpalte(Modifier.weight(0.44f))
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 460.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    titelBuehne(Modifier.fillMaxWidth())
+                    aktionsSpalte(Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StartModusKarte(
+private fun StartModusOption(
     modus: SpielModus,
     konf: ModusKonfiguration,
     ausgewaehlt: Boolean,
@@ -313,30 +278,38 @@ private fun StartModusKarte(
     onClick: () -> Unit,
 ) {
     val farben = ArchivTheme.farben
-    val flaeche = if (ausgewaehlt) farben.papierHell else farben.papierHell.copy(alpha = 0.62f)
-    val rahmen = if (ausgewaehlt) farben.akzent else farben.linieFein.copy(alpha = 0.85f)
+    val spieleEffekt = LocalSoundEffektSpielen.current
+    val titel = when (modus) {
+        SpielModus.KURZ -> "Kurz"
+        SpielModus.LANG -> "Lang"
+    }
     val kurzInfo = when (modus) {
-        SpielModus.KURZ -> "${konf.zielzahl} Stationen · ca. 15–20 Min. (Einzelstunde)"
-        SpielModus.LANG -> "${konf.zielzahl} Stationen · ca. 25–35 Min. (Vertiefung)"
+        SpielModus.KURZ -> "${konf.zielzahl} Stationen · ca. 15–20 Min."
+        SpielModus.LANG -> "${konf.zielzahl} Stationen · ca. 25–35 Min."
     }
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = if (kompakt) 58.dp else 72.dp)
+            .defaultMinSize(minHeight = if (kompakt) 52.dp else 60.dp)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-            .clickable(onClick = onClick)
+            .clickable {
+                spieleEffekt(SoundEffekt.KLICK_SANFT)
+                onClick()
+            }
             .clearAndSetSemantics {
                 role = Role.RadioButton
                 selected = ausgewaehlt
                 stateDescription = if (ausgewaehlt) "Ausgewählt" else "Nicht ausgewählt"
-                contentDescription = "${konf.bezeichnung}: $kurzInfo. ${konf.umfang}"
+                contentDescription = "${konf.bezeichnung}: $kurzInfo"
             },
-        color = flaeche,
+        color = if (ausgewaehlt) farben.papierHell else Color.Transparent,
         shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(if (ausgewaehlt) 1.4.dp else 0.75.dp, rahmen),
-        shadowElevation = if (ausgewaehlt) 2.dp else 0.dp,
+        border = BorderStroke(
+            width = if (ausgewaehlt) 1.2.dp else 0.75.dp,
+            color = if (ausgewaehlt) farben.akzent else farben.linieFein.copy(alpha = 0.85f),
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -345,7 +318,7 @@ private fun StartModusKarte(
         ) {
             Box(
                 modifier = Modifier
-                    .width(if (ausgewaehlt) 3.5.dp else 0.dp)
+                    .width(if (ausgewaehlt) 3.dp else 0.dp)
                     .fillMaxHeight()
                     .background(if (ausgewaehlt) farben.akzent else Color.Transparent),
             )
@@ -353,40 +326,29 @@ private fun StartModusKarte(
                 modifier = Modifier
                     .weight(1f)
                     .padding(
-                        horizontal = if (kompakt) 12.dp else 16.dp,
-                        vertical = if (kompakt) 9.dp else 12.dp,
+                        horizontal = if (kompakt) 14.dp else 16.dp,
+                        vertical = if (kompakt) 10.dp else 12.dp,
                     ),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
+                Text(
+                    text = titel,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Serif,
+                    color = farben.tinte,
+                    fontWeight = if (ausgewaehlt) FontWeight.Bold else FontWeight.SemiBold,
+                )
+                Text(
+                    text = kurzInfo,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = farben.tinteMatt,
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = konf.bezeichnung,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
-                        color = farben.tinte,
-                        fontWeight = if (ausgewaehlt) FontWeight.Bold else FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = kurzInfo,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = farben.tinteMatt,
-                    )
-                    if (!kompakt) {
-                        Text(
-                            text = konf.umfang,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinteMatt.copy(alpha = 0.88f),
-                        )
-                    }
-                }
+                )
                 if (ausgewaehlt) {
                     HakenIcon(
                         farbe = farben.akzent,
-                        groesse = 16.dp,
+                        groesse = 15.dp,
                     )
                 }
             }
