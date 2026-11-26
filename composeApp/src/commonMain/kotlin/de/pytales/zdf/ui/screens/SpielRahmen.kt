@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
@@ -31,20 +33,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.audio.AudioSperrGrund
+import de.pytales.zdf.audio.AudioZustand
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.KopfLeiste
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
+import de.pytales.zdf.ui.components.archivFokusGruppe
+import de.pytales.zdf.ui.components.archivFokusRahmen
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.media.ArchivKapitelBild
 import de.pytales.zdf.ui.media.BildAufloeser
 import de.pytales.zdf.ui.media.LocalMedienRegister
@@ -57,8 +66,10 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
  * Dunkles Archiv-Kopfband für Bildschirme ohne Befindensleiste
- * (`Start`, `HerkunftWahl` und `Abgeschlossen`).
+ * (`Start`, `HerkunftWahl` und `Abgeschlossen`) mit klar sichtbarem Stummschalter,
+ * Analysemodus-Schalter und dreistufiger Schriftgröße (alle Touch-Ziele ≥ 48 dp).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ArchivKopfBand(
     marke: String,
@@ -67,6 +78,8 @@ internal fun ArchivKopfBand(
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     analyseModus: Boolean,
     onAnalyseModusToggle: (() -> Unit)? = null,
+    audioZustand: AudioZustand? = null,
+    onAudioToggle: (() -> Unit)? = null,
     untertitel: String? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -74,7 +87,11 @@ internal fun ArchivKopfBand(
     val metrik = ArchivTheme.metrik
     val kompakt = ArchivTheme.layoutKlasse == LayoutKlasse.KOMPAKT
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .archivFokusGruppe(),
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,21 +124,59 @@ internal fun ArchivKopfBand(
                             Text(
                                 text = untertitel,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = farben.textHell.copy(alpha = 0.78f),
+                                color = farben.textHell.copy(alpha = 0.84f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
 
-                    Row(
+                    if (!kompakt) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (audioZustand != null && onAudioToggle != null) {
+                                AudioKopfKnopf(
+                                    audioZustand = audioZustand,
+                                    kompakt = false,
+                                    onToggle = onAudioToggle,
+                                )
+                            }
+                            if (onAnalyseModusToggle != null) {
+                                AnalyseModusKopfKnopf(
+                                    aktiv = analyseModus,
+                                    kompakt = false,
+                                    onToggle = onAnalyseModusToggle,
+                                )
+                            }
+                            SchriftgroessenSchalter(
+                                aktuell = schriftgroesse,
+                                onAuswahl = onSchriftgroesseChange,
+                                aufDunkel = true,
+                                kompakt = false,
+                            )
+                        }
+                    }
+                }
+
+                if (kompakt) {
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
+                        if (audioZustand != null && onAudioToggle != null) {
+                            AudioKopfKnopf(
+                                audioZustand = audioZustand,
+                                kompakt = true,
+                                onToggle = onAudioToggle,
+                            )
+                        }
                         if (onAnalyseModusToggle != null) {
                             AnalyseModusKopfKnopf(
                                 aktiv = analyseModus,
-                                kompakt = kompakt,
+                                kompakt = true,
                                 onToggle = onAnalyseModusToggle,
                             )
                         }
@@ -129,7 +184,7 @@ internal fun ArchivKopfBand(
                             aktuell = schriftgroesse,
                             onAuswahl = onSchriftgroesseChange,
                             aufDunkel = true,
-                            kompakt = kompakt,
+                            kompakt = true,
                         )
                     }
                 }
@@ -142,12 +197,13 @@ internal fun ArchivKopfBand(
                         MaterialTheme.typography.headlineLarge
                     },
                     color = farben.textHell,
+                    modifier = Modifier.archivUeberschrift(),
                 )
                 if (!untertitel.isNullOrBlank() && kompakt) {
                     Text(
                         text = untertitel,
                         style = MaterialTheme.typography.bodySmall,
-                        color = farben.textHell.copy(alpha = 0.8f),
+                        color = farben.textHell.copy(alpha = 0.84f),
                     )
                 }
             }
@@ -164,14 +220,17 @@ internal fun ArchivKopfBand(
 
 /**
  * Spiel-Kopfleiste mit vollständiger [KopfLeiste] (Befindensleiste + Live-Emotions-Kachel)
- * sowie dezentem Schriftgrößen- und Analysemodus-Zugriff für den Unterricht.
+ * sowie dezentem Stummschalter (inkl. Anzeige der Musiksperre an Front & Etappe),
+ * Schriftgrößen- und Analysemodus-Zugriff für den Unterricht.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SpielKopfLeiste(
     engine: GameEngine,
     uiState: SpielUiState,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit,
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -196,10 +255,16 @@ internal fun SpielKopfLeiste(
         ausgewaehlterWert = uiState.ausgewaehlterWert,
         onAusgewaehlterWertChange = onWertErklaerungChange,
         zusatzAktionen = {
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
+                AudioKopfKnopf(
+                    audioZustand = uiState.audioZustand,
+                    kompakt = kompakt,
+                    onToggle = onAudioToggle,
+                )
                 AnalyseModusKopfKnopf(
                     aktiv = uiState.analyseModus,
                     kompakt = kompakt,
@@ -217,6 +282,93 @@ internal fun SpielKopfLeiste(
     )
 }
 
+/**
+ * Klar sichtbarer Stummschalter in der Kopfleiste.
+ * Zeigt auf `front`, `etappe` und im Auffangnetz ausdrücklich die respektvolle Stille
+ * (harte Musiksperre) an, während die allgemeine Toneinstellung weiterhin umgeschaltet
+ * werden kann (ohne dass auf gesperrten Pfaden jemals Musik erklingt).
+ */
+@Composable
+internal fun AudioKopfKnopf(
+    audioZustand: AudioZustand,
+    kompakt: Boolean,
+    onToggle: () -> Unit,
+) {
+    val farben = ArchivTheme.farben
+    val minTouch = ArchivTheme.metrik.minTouchHoehe
+    val gesperrt = audioZustand.musikGesperrt
+    val spielt = audioZustand.spieltGerade
+
+    val flaeche = when {
+        gesperrt -> farben.dunkelHell
+        spielt -> farben.stufenFarbe(0)
+        else -> farben.dunkelHell
+    }
+    val rahmen = when {
+        gesperrt -> farben.segmentDunkel
+        spielt -> farben.stufenFarbeHell(0)
+        else -> farben.linie.copy(alpha = 0.65f)
+    }
+    val textFarbe = when {
+        gesperrt -> farben.textHell.copy(alpha = 0.86f)
+        spielt -> farben.papierHell
+        else -> farben.textHell
+    }
+
+    val anzeigeText = when {
+        gesperrt -> when (audioZustand.sperrGrund) {
+            AudioSperrGrund.PFAD_FRONT -> if (kompakt) "Stille" else "Stille · Front"
+            AudioSperrGrund.PFAD_ETAPPE -> if (kompakt) "Stille" else "Stille · Etappe"
+            else -> "Stille"
+        }
+
+        spielt -> if (kompakt) "Ton: An" else "Ton: Leise"
+        else -> if (kompakt) "Stumm" else "Ton: Aus"
+    }
+
+    val statusText = when {
+        gesperrt -> audioZustand.sperrGrund?.hinweis ?: "Respektvolle Stille."
+        spielt -> "Dezenter Ton eingeschaltet (${audioZustand.aktiveSpur.bezeichnung})."
+        else -> "Stummgeschaltet."
+    }
+
+    val beschreibung = when {
+        gesperrt -> "$statusText Tippen, um die allgemeine Ton-Einstellung (${if (audioZustand.audioAktiv) "ein" else "aus"}) für Startmenü und Heimat umzuschalten."
+        spielt -> "$statusText Tippen zum Stummschalten."
+        else -> "$statusText Tippen, um dezenten Ton für Startmenü und Heimat einzuschalten."
+    }
+
+    Surface(
+        modifier = Modifier
+            .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
+            .clip(RoundedCornerShape(3.dp))
+            .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = true)
+            .clickable(onClick = onToggle)
+            .clearAndSetSemantics {
+                role = Role.Switch
+                selected = audioZustand.audioAktiv && !gesperrt
+                stateDescription = statusText
+                contentDescription = beschreibung
+            },
+        color = flaeche,
+        shape = RoundedCornerShape(3.dp),
+        border = BorderStroke(1.dp, rahmen),
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = if (kompakt) 10.dp else 12.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = anzeigeText,
+                style = MaterialTheme.typography.labelMedium,
+                color = textFarbe,
+                fontWeight = if (spielt) FontWeight.Bold else FontWeight.Medium,
+                maxLines = 1,
+            )
+        }
+    }
+}
+
 @Composable
 internal fun AnalyseModusKopfKnopf(
     aktiv: Boolean,
@@ -224,18 +376,21 @@ internal fun AnalyseModusKopfKnopf(
     onToggle: () -> Unit,
 ) {
     val farben = ArchivTheme.farben
+    val minTouch = ArchivTheme.metrik.minTouchHoehe
     val flaeche = if (aktiv) farben.akzent else farben.dunkelHell
     val rahmen = if (aktiv) farben.stufenFarbeHell(2) else farben.linie.copy(alpha = 0.65f)
     val textFarbe = if (aktiv) farben.papierHell else farben.textHell
 
     Surface(
         modifier = Modifier
-            .defaultMinSize(minHeight = 40.dp)
+            .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
             .clip(RoundedCornerShape(3.dp))
+            .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = true)
             .clickable(onClick = onToggle)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.Switch
                 selected = aktiv
+                stateDescription = if (aktiv) "Eingeschaltet" else "Ausgeschaltet"
                 contentDescription = if (aktiv) {
                     "Analysemodus ist eingeschaltet. Tippen zum Ausschalten."
                 } else {
@@ -247,7 +402,7 @@ internal fun AnalyseModusKopfKnopf(
         border = BorderStroke(1.dp, rahmen),
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = if (kompakt) 8.dp else 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = if (kompakt) 10.dp else 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -283,8 +438,9 @@ internal fun ArchivPrimaerKnopf(
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = metrik.minTouchHoehe)
+            .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
             .clickable(enabled = aktiviert, onClick = onClick)
             .semantics {
                 role = Role.Button
@@ -316,31 +472,33 @@ internal fun ArchivSekundaerKnopf(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    aktiviert: Boolean = true,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = metrik.minTouchHoehe)
+            .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(4.dp))
-            .clickable(onClick = onClick)
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
+            .clickable(enabled = aktiviert, onClick = onClick)
             .semantics {
                 role = Role.Button
                 contentDescription = label
             },
-        color = farben.papierHell,
+        color = if (aktiviert) farben.papierHell else farben.papier,
         shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(1.dp, farben.linie),
+        border = BorderStroke(1.dp, if (aktiviert) farben.linie else farben.linieFein),
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
-                color = farben.tinte,
+                color = if (aktiviert) farben.tinte else farben.tinteMatt,
                 textAlign = TextAlign.Center,
             )
         }
@@ -349,7 +507,7 @@ internal fun ArchivSekundaerKnopf(
 
 /**
  * Touch-/Klick-Umschalter im Archivstil für Optionen im Startmenü
- * (Analysemodus, Unterrichts-Direktwahl).
+ * (Analysemodus, Animationen reduzieren, Dezenter Ton, Unterrichts-Direktwahl).
  */
 @Composable
 internal fun ArchivSchalterZeile(
@@ -358,6 +516,8 @@ internal fun ArchivSchalterZeile(
     aktiv: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    statusLabelAktiv: String = "EIN",
+    statusLabelInaktiv: String = "AUS",
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
@@ -367,10 +527,12 @@ internal fun ArchivSchalterZeile(
             .fillMaxWidth()
             .defaultMinSize(minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
             .clickable(onClick = onToggle)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.Switch
                 selected = aktiv
+                stateDescription = if (aktiv) "Eingeschaltet" else "Ausgeschaltet"
                 contentDescription = "$titel: ${if (aktiv) "eingeschaltet" else "ausgeschaltet"}. $beschreibung"
             },
         color = if (aktiv) farben.papierDunkel.copy(alpha = 0.72f) else farben.papier,
@@ -402,9 +564,9 @@ internal fun ArchivSchalterZeile(
             }
 
             ArchivStempel(
-                text = if (aktiv) "EIN" else "AUS",
+                text = if (aktiv) statusLabelAktiv else statusLabelInaktiv,
                 farbe = if (aktiv) farben.akzent else farben.tinteMatt,
-                hintergrund = if (aktiv) farben.akzent.copy(alpha = 0.14f) else farben.papierHell,
+                hintergrund = if (aktiv) farben.papierHell else farben.papierHell,
                 grossbuchstaben = true,
             )
         }
@@ -521,7 +683,7 @@ internal fun KapitelbildRahmen(
                             Text(
                                 text = "Kapiteltafel 16:9",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = farben.linie,
+                                color = farben.tinteMatt,
                                 textAlign = TextAlign.Center,
                             )
                         }

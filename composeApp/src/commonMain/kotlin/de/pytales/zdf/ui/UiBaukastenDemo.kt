@@ -1,10 +1,6 @@
 package de.pytales.zdf.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,6 +37,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,10 +61,12 @@ import de.pytales.zdf.ui.components.EreignisAusgangKarte
 import de.pytales.zdf.ui.components.KopfLeiste
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
 import de.pytales.zdf.ui.components.SzenenbildRahmen
+import de.pytales.zdf.ui.components.archivFokusRahmen
 import de.pytales.zdf.ui.media.BildAufloeser
 import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.LayoutKlasse
 import de.pytales.zdf.ui.theme.Schriftgroesse
 import kotlin.random.Random
@@ -513,6 +512,8 @@ private fun DemoWerkzeugLeiste(
     onZurueckZumSpiel: (() -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+    val reduziert = ArchivTheme.reduzierteAnimationen
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -524,10 +525,13 @@ private fun DemoWerkzeugLeiste(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 44.dp)
+                    .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                    .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
                     .clickable(onClick = onToggleOffen)
                     .semantics {
                         role = Role.Button
+                        selected = offen
+                        stateDescription = if (offen) "Ausgeklappt" else "Eingeklappt"
                         contentDescription = if (offen) {
                             "UI-Baukasten-Steuerung einklappen"
                         } else {
@@ -575,8 +579,8 @@ private fun DemoWerkzeugLeiste(
 
             AnimatedVisibility(
                 visible = offen,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
+                enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                exit = ArchivUebergaenge.aufklappExit(reduziert),
             ) {
                 Column(
                     modifier = Modifier
@@ -677,10 +681,12 @@ private fun DemoAuswahlKnopf(
     onClick: () -> Unit,
 ) {
     val farben = ArchivTheme.farben
+    val minTouch = ArchivTheme.metrik.minTouchHoehe
     Surface(
         modifier = Modifier
-            .defaultMinSize(minHeight = 40.dp)
+            .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
             .clip(RoundedCornerShape(3.dp))
+            .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
             .clickable(onClick = onClick)
             .semantics {
                 role = Role.Button
@@ -691,7 +697,7 @@ private fun DemoAuswahlKnopf(
         border = BorderStroke(1.dp, if (aktiv) farben.tinte else farben.linie),
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

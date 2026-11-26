@@ -2,11 +2,6 @@ package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -40,10 +35,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +53,7 @@ import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.LiveEmotionUiState
 import de.pytales.zdf.ui.theme.ArchivFarben
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 
 /**
  * Live-Emotions-Kachel rechts oben:
@@ -77,6 +75,7 @@ fun LiveEmotionsKachel(
     portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
+    val reduziert = ArchivTheme.reduzierteAnimationen
     val stimmungsFarbe by animateColorAsState(
         targetValue = stimmungsAkzentFarbe(
             stimmung = emotion.stimmung,
@@ -84,7 +83,7 @@ fun LiveEmotionsKachel(
             farben = farben,
             aufDunkel = aufDunkel,
         ),
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = ArchivUebergaenge.farbSpec(reduziert),
         label = "stimmungsFarbe",
     )
 
@@ -95,7 +94,7 @@ fun LiveEmotionsKachel(
         else -> farben.linie
     }
     val titelFarbe = if (aufDunkel) farben.textHell else farben.tinte
-    val nebenFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.76f) else farben.tinteMatt
+    val nebenFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.78f) else farben.tinteMatt
 
     val semantikText = buildString {
         append("${emotion.personName}, ${emotion.stand}, ${emotion.pfadMarke}. ")
@@ -103,19 +102,25 @@ fun LiveEmotionsKachel(
         if (emotion.ausloeserBezeichnung != null) {
             append(" (${emotion.ausloeserBezeichnung})")
         }
-        append(".")
+        if (onTippen != null) {
+            append(if (detailsOffen) ". Figuren-Ansicht schließen." else ". Tippen für Figuren-Ansicht.")
+        } else {
+            append(".")
+        }
     }
 
     val klickModifier = if (onTippen != null) {
         Modifier
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = aufDunkel)
             .clickable(onClick = onTippen)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.Button
                 selected = detailsOffen
+                stateDescription = if (detailsOffen) "Figuren-Ansicht geöffnet" else "Figuren-Ansicht geschlossen"
                 contentDescription = semantikText
             }
     } else {
-        Modifier.semantics {
+        Modifier.clearAndSetSemantics {
             contentDescription = semantikText
         }
     }
@@ -297,13 +302,15 @@ fun LiveEmotionDetailKarte(
     modifier: Modifier = Modifier,
     portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
+    val reduziert = ArchivTheme.reduzierteAnimationen
     AnimatedVisibility(
         visible = sichtbar,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = ArchivUebergaenge.aufklappEnter(reduziert),
+        exit = ArchivUebergaenge.aufklappExit(reduziert),
         modifier = modifier,
     ) {
         val farben = ArchivTheme.farben
+        val metrik = ArchivTheme.metrik
         val medienRegister = LocalMedienRegister.current
         val aufgeloest = remember(emotion.portraitId, medienRegister) {
             BildAufloeser.loesePortrait(emotion.portraitId, medienRegister.verfuegbareIds)
@@ -316,7 +323,9 @@ fun LiveEmotionDetailKarte(
         )
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .archivLiveHinweis(),
             color = farben.papierHell,
             shape = RoundedCornerShape(4.dp),
             border = BorderStroke(1.dp, farben.linie),
@@ -332,7 +341,7 @@ fun LiveEmotionDetailKarte(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(ArchivTheme.metrik.kartenInnenAbstand),
+                        .padding(metrik.kartenInnenAbstand),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(
@@ -352,6 +361,7 @@ fun LiveEmotionDetailKarte(
                                 text = emotion.personName,
                                 style = MaterialTheme.typography.titleLarge,
                                 color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
                             )
                             Text(
                                 text = "${emotion.herkunftTitel} · ${emotion.stand} · ${emotion.pfadMarke}",
@@ -361,21 +371,22 @@ fun LiveEmotionDetailKarte(
                         }
                         Box(
                             modifier = Modifier
-                                .defaultMinSize(minHeight = 40.dp)
+                                .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                                 .clip(RoundedCornerShape(3.dp))
-                                .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
+                                .border(1.dp, farben.linie, RoundedCornerShape(3.dp))
+                                .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
                                 .clickable(onClick = onSchliessen)
                                 .semantics {
                                     role = Role.Button
                                     contentDescription = "Figuren-Ansicht schließen"
                                 }
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "Schließen ×",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = farben.tinteMatt,
+                                color = farben.tinte,
                             )
                         }
                     }
@@ -387,6 +398,7 @@ fun LiveEmotionDetailKarte(
                         ArchivStempel(
                             text = "Stimmung: ${emotion.stimmungBezeichnung}",
                             farbe = akzent,
+                            hintergrund = farben.papierHell,
                         )
                         Text(
                             text = emotion.stimmungKurzhinweis,

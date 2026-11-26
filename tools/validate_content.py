@@ -353,12 +353,19 @@ def main(argv: list[str] | None = None) -> int:
                 if all(gains1[w] >= gains0[w] for w in valid_werte) and any(gains1[w] > gains0[w] for w in valid_werte):
                     errors.append(f"[{eid}] Dominierte Option: '{o1['titel']}' dominiert '{o0['titel']}'.")
 
-        # Quelle pruefen
+        # Quelle pruefen (AP 6: Vollbelege fuer alle 104 Ereignisse verpflichtend)
         q = ev.get("quelle")
         if not q or not q.get("kurz") or not q.get("einordnung"):
             errors.append(f"[{eid}] Quelle unvollstaendig (kurz/einordnung fehlt).")
         else:
-            quellentexte.append((f"{eid}.quelle.einordnung", q["einordnung"]))
+            einordnung = q["einordnung"]
+            quellentexte.append((f"{eid}.quelle.einordnung", einordnung))
+            if re.search(r"\bGesucht\s+(?:wird|werden)\b", einordnung):
+                errors.append(f"[{eid}] quelle.einordnung enthaelt noch Entwurfs-Platzhalter ('Gesucht wird/werden').")
+
+            voll = (q.get("voll") or "").strip()
+            if len(voll) < 20:
+                errors.append(f"[{eid}] Historischer Vollbeleg (quelle.voll) fehlt oder ist zu knapp (<20 Zeichen).")
 
     # 4b. Unerreichbare Merkmale im Register ausschliessen
     dead_register = sorted(set(merk["register"].keys()) - produced_merkmale)
@@ -416,6 +423,16 @@ def main(argv: list[str] | None = None) -> int:
         for term, rx in pruef_list:
             if rx.search(txt):
                 warnings.append(f"[Sprache/Pruefen] '{term}' in {loc}")
+
+    # Historische Vollbelege (quelle.voll) zusaetzlich streng gegen Tabubegriffe pruefen
+    vollbelege_vorhanden = 0
+    for ev in events:
+        voll = (ev.get("quelle", {}).get("voll") or "").strip()
+        if len(voll) >= 20:
+            vollbelege_vorhanden += 1
+        for term, rx in tabu_list:
+            if rx.search(voll):
+                errors.append(f"[Sprache/Tabu] '{term}' gefunden in {ev['id']}.quelle.voll")
 
     max_w = sprach["maxWoerterJeSatz"]
     total_sentences = 0
@@ -524,6 +541,7 @@ def main(argv: list[str] | None = None) -> int:
 
     stats = {
         "ereignisse": len(events),
+        "vollbelege": f"{vollbelege_vorhanden}/{len(events)}",
         "kapitel": len(kap["kapitel"]),
         "merkmale": len(merk["register"]),
         "livePortraits": len(actual_portraits),
@@ -540,7 +558,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def report(errors: list[str], warnings: list[str], stats: dict) -> int:
     print("=" * 68)
-    print("ZWISCHEN DEN FRONTEN — INHALTS- & MEDIENPRUEFUNG (AP 1 / AP 5)")
+    print("ZWISCHEN DEN FRONTEN — INHALTS-, QUELLEN- & MEDIENPRUEFUNG")
     print("=" * 68)
     for k, v in stats.items():
         print(f"  {k:22s}: {v}")

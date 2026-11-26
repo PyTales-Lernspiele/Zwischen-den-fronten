@@ -70,8 +70,17 @@ fun KopfLeiste(
     val ausgewaehlterStatus = werte.firstOrNull { it.schluessel == aktiverWertSchluessel }
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val detailOffen = ausgewaehlterStatus != null || emotionDetailsOffen
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .archivFokusGruppe()
+            .archivEscapeAktion(aktiv = detailOffen) {
+                setzeWert(null)
+                emotionDetailsOffen = false
+            },
+    ) {
         // Dunkle Haupt-Kopfleiste
         Box(
             modifier = Modifier

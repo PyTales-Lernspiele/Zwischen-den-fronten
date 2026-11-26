@@ -161,6 +161,15 @@ class UiStateMapperTest {
             assertTrue(ui.szenenbild.fallbackRessourcenPfad.endsWith(".webp"))
             assertTrue(ui.quelle.artLabel.isNotBlank())
             assertTrue(ui.quelle.einordnung.isNotBlank())
+            assertFalse(
+                ui.quelle.einordnung.contains("Gesucht wird") || ui.quelle.einordnung.contains("Gesucht werden"),
+                "Entwurfstext in quelle.einordnung bei ${ereignis.id}",
+            )
+            assertNotNull(ui.quelle.voll, "Historischer Vollbeleg (quelle.voll) fehlt bei ${ereignis.id}")
+            assertTrue(
+                ui.quelle.voll.length >= 20,
+                "Historischer Vollbeleg zu knapp bei ${ereignis.id}: ${ui.quelle.voll}",
+            )
             if (ui.optionen.any { it.hinweis != null }) {
                 zaehlerMitHinweis++
             }

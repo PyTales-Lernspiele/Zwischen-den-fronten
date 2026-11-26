@@ -20,6 +20,7 @@ val LocalLayoutKlasse = staticCompositionLocalOf { LayoutKlasse.BREIT }
 val LocalLayoutMetrik = staticCompositionLocalOf {
     layoutMetrikFuer(LayoutKlasse.BREIT, Schriftgroesse.MITTEL)
 }
+val LocalReduzierteAnimationen = staticCompositionLocalOf { false }
 
 /**
  * Ruhige, kantige Archiv-Formen (Papierbögen, Stempel, Aktenblätter statt runder Spiel-Pills).
@@ -33,7 +34,7 @@ val ArchivShapes = Shapes(
 )
 
 /**
- * Zentraler Zugriffspunkt auf Farben, Schriftgröße und responsive Layout-Metriken im Theme.
+ * Zentraler Zugriffspunkt auf Farben, Schriftgröße, Animationsmodus und responsive Layout-Metriken im Theme.
  */
 object ArchivTheme {
     val farben: ArchivFarben
@@ -55,6 +56,11 @@ object ArchivTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalLayoutMetrik.current
+
+    val reduzierteAnimationen: Boolean
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalReduzierteAnimationen.current
 }
 
 /**
@@ -63,6 +69,7 @@ object ArchivTheme {
  * - Übernimmt die Farbwelt direkt aus `content/konfiguration.json` (Fallback bis geladen).
  * - Skaliert die gesamte Typografie über die 3 Stufen [Schriftgroesse.KLEIN], [Schriftgroesse.MITTEL]
  *   und [Schriftgroesse.GROSS] (Beamer-Modus).
+ * - Steuert ruhige Übergänge bzw. reduzierte Animationen zentral über [reduzierteAnimationen].
  * - Erkennt die [LayoutKlasse] automatisch anhand der verfügbaren Fensterbreite, sofern kein
  *   explizites [layoutKlasseOverride] gesetzt wird.
  */
@@ -70,6 +77,7 @@ object ArchivTheme {
 fun ArchivPapierTheme(
     farbwelt: Farbwelt? = null,
     schriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
+    reduzierteAnimationen: Boolean = false,
     layoutKlasseOverride: LayoutKlasse? = null,
     content: @Composable () -> Unit,
 ) {
@@ -88,6 +96,7 @@ fun ArchivPapierTheme(
             LocalSchriftgroesse provides schriftgroesse,
             LocalLayoutKlasse provides layoutKlasseOverride,
             LocalLayoutMetrik provides metrik,
+            LocalReduzierteAnimationen provides reduzierteAnimationen,
         ) {
             MaterialTheme(
                 colorScheme = colorScheme,
@@ -107,6 +116,7 @@ fun ArchivPapierTheme(
                 LocalSchriftgroesse provides schriftgroesse,
                 LocalLayoutKlasse provides ermittelteKlasse,
                 LocalLayoutMetrik provides metrik,
+                LocalReduzierteAnimationen provides reduzierteAnimationen,
             ) {
                 MaterialTheme(
                     colorScheme = colorScheme,

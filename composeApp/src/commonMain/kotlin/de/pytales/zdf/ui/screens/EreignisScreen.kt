@@ -1,5 +1,7 @@
 package de.pytales.zdf.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,9 +35,11 @@ import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.EntscheidungsKarte
 import de.pytales.zdf.ui.components.EreignisAusgangKarte
 import de.pytales.zdf.ui.components.SzenenbildRahmen
+import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.LayoutKlasse
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
@@ -42,7 +47,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
  * Durchgängiger Ereignis-Bildschirm für `GamePhase.EreignisAnzeige` und `GamePhase.EreignisAusgang`:
  * verbindet [SpielKopfLeiste] (`BefindensLeiste` + `LiveEmotionsKachel` mit AP-5-Portrait-Loader),
  * [SzenenbildRahmen] (mit automatischem Stufe-2→Stufe-1→Platzhalter-Loader),
- * [EntscheidungsKarte] (alle 5 Kartentypen, genau 2 Entscheidungen) und [EreignisAusgangKarte].
+ * [EntscheidungsKarte] (alle 5 Kartentypen, genau 2 Entscheidungen) und [EreignisAusgangKarte]
+ * mit ruhigen, abschaltbaren Kartenwechseln (`ArchivUebergaenge`).
  */
 @Composable
 fun EreignisScreen(
@@ -52,6 +58,7 @@ fun EreignisScreen(
     onWeiterNachAusgang: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -60,6 +67,8 @@ fun EreignisScreen(
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
     val layoutKlasse = ArchivTheme.layoutKlasse
+    val reduziert = ArchivTheme.reduzierteAnimationen
+    val uebergangsProfil = remember(reduziert) { ArchivUebergaenge.profilFuer(reduziert) }
     val scrollState = rememberScrollState()
 
     val ereignis = when (phase) {
@@ -118,10 +127,14 @@ fun EreignisScreen(
         scrollState.scrollTo(0)
     }
 
-    // Im Hochformat nach Wahl einer Option sanft zur neuen Ausgangskarte scrollen
-    LaunchedEffect(phase is GamePhase.EreignisAusgang, layoutKlasse) {
+    // Im Hochformat nach Wahl einer Option zur neuen Ausgangskarte scrollen (mit Respekt für reduzierte Animationen)
+    LaunchedEffect(phase is GamePhase.EreignisAusgang, layoutKlasse, uebergangsProfil.sanftScrollen) {
         if (phase is GamePhase.EreignisAusgang && layoutKlasse != LayoutKlasse.BREIT) {
-            scrollState.animateScrollTo(scrollState.maxValue)
+            if (uebergangsProfil.sanftScrollen) {
+                scrollState.animateScrollTo(scrollState.maxValue)
+            } else {
+                scrollState.scrollTo(scrollState.maxValue)
+            }
         }
     }
 
@@ -135,6 +148,7 @@ fun EreignisScreen(
             uiState = uiState,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
         )
 
@@ -145,44 +159,86 @@ fun EreignisScreen(
                 .verticalScroll(scrollState),
             contentAlignment = Alignment.TopCenter,
         ) {
-            Column(
+            AnimatedContent(
+                targetState = ereignis.id,
+                transitionSpec = { ArchivUebergaenge.phasenTransitionSpec(reduziert) },
+                label = "ereignisKartenWechsel",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
-                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-            ) {
-                val buehneNebeneinander = layoutKlasse == LayoutKlasse.BREIT
+                    .widthIn(max = metrik.maxInhaltsBreite),
+            ) { _ ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                        .archivFokusGruppe(),
+                    verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                ) {
+                    val buehneNebeneinander = layoutKlasse == LayoutKlasse.BREIT
 
-                if (buehneNebeneinander) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(0.42f),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                    if (buehneNebeneinander) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                            verticalAlignment = Alignment.Top,
                         ) {
-                            SzenenbildRahmen(
-                                szenenbild = kartenUi.szenenbild,
-                                analyseModus = uiState.analyseModus,
-                            )
-                            BefindensNotizBox(zustandssatz = zustandssatz)
+                            Column(
+                                modifier = Modifier.weight(0.42f),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                SzenenbildRahmen(
+                                    szenenbild = kartenUi.szenenbild,
+                                    analyseModus = uiState.analyseModus,
+                                )
+                                BefindensNotizBox(zustandssatz = zustandssatz)
+                            }
+
+                            Column(
+                                modifier = Modifier.weight(0.58f),
+                                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                            ) {
+                                EntscheidungsKarte(
+                                    karte = kartenUi,
+                                    ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
+                                    optionenAktiv = phase is GamePhase.EreignisAnzeige,
+                                    analyseModus = uiState.analyseModus,
+                                    onOptionWaehlen = onOptionWaehlen,
+                                )
+
+                                AnimatedVisibility(
+                                    visible = ausgangUi != null,
+                                    enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                                    exit = ArchivUebergaenge.aufklappExit(reduziert),
+                                ) {
+                                    if (ausgangUi != null) {
+                                        EreignisAusgangKarte(
+                                            ausgang = ausgangUi,
+                                            weiterLabel = weiterLabel,
+                                            onWeiter = onWeiterNachAusgang,
+                                        )
+                                    }
+                                }
+                            }
                         }
+                    } else {
+                        SzenenbildRahmen(
+                            szenenbild = kartenUi.szenenbild,
+                            analyseModus = uiState.analyseModus,
+                        )
 
-                        Column(
-                            modifier = Modifier.weight(0.58f),
-                            verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                        EntscheidungsKarte(
+                            karte = kartenUi,
+                            ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
+                            optionenAktiv = phase is GamePhase.EreignisAnzeige,
+                            analyseModus = uiState.analyseModus,
+                            onOptionWaehlen = onOptionWaehlen,
+                        )
+
+                        AnimatedVisibility(
+                            visible = ausgangUi != null,
+                            enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                            exit = ArchivUebergaenge.aufklappExit(reduziert),
                         ) {
-                            EntscheidungsKarte(
-                                karte = kartenUi,
-                                ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
-                                optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                                analyseModus = uiState.analyseModus,
-                                onOptionWaehlen = onOptionWaehlen,
-                            )
-
                             if (ausgangUi != null) {
                                 EreignisAusgangKarte(
                                     ausgang = ausgangUi,
@@ -191,33 +247,12 @@ fun EreignisScreen(
                                 )
                             }
                         }
-                    }
-                } else {
-                    SzenenbildRahmen(
-                        szenenbild = kartenUi.szenenbild,
-                        analyseModus = uiState.analyseModus,
-                    )
 
-                    EntscheidungsKarte(
-                        karte = kartenUi,
-                        ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
-                        optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                        analyseModus = uiState.analyseModus,
-                        onOptionWaehlen = onOptionWaehlen,
-                    )
-
-                    if (ausgangUi != null) {
-                        EreignisAusgangKarte(
-                            ausgang = ausgangUi,
-                            weiterLabel = weiterLabel,
-                            onWeiter = onWeiterNachAusgang,
-                        )
+                        BefindensNotizBox(zustandssatz = zustandssatz)
                     }
 
-                    BefindensNotizBox(zustandssatz = zustandssatz)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -231,6 +266,7 @@ private fun BefindensNotizBox(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
             .background(farben.papierHell.copy(alpha = 0.72f), RoundedCornerShape(3.dp))
             .padding(12.dp),

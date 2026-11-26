@@ -1,6 +1,8 @@
 package de.pytales.zdf.ui.state
 
 import androidx.compose.runtime.Immutable
+import de.pytales.zdf.audio.AudioRegelwerk
+import de.pytales.zdf.audio.AudioZustand
 import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
@@ -43,6 +45,9 @@ data class SpielUiState(
     val gameState: GameState,
     val schriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
     val analyseModus: Boolean = false,
+    val reduzierteAnimationen: Boolean = false,
+    val audioAktiv: Boolean = false,
+    val audioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
     val zeigeUiVorschau: Boolean = false,
     val aufgeklappteGrundsaetze: Set<String> = emptySet(),
     val ausgewaehlterWert: WertSchluessel? = null,
@@ -57,6 +62,16 @@ data class SpielUiState(
                 phase.hartesEnde != null &&
                 !auffangnetzBestaetigt
         }
+
+    /**
+     * Effektiver Audio-Zustand inkl. harter Musiksperre auf `front`, `etappe` und im Auffangnetz.
+     */
+    val audioZustand: AudioZustand
+        get() = AudioRegelwerk.bestimmeZustand(
+            gameState = gameState,
+            audioAktiv = audioAktiv,
+            lautstaerke = audioLautstaerke,
+        )
 }
 
 /**
@@ -73,16 +88,25 @@ class SpielController(
     val engine: GameEngine,
     initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
     initialAnalyseModus: Boolean = false,
+    initialReduzierteAnimationen: Boolean = false,
+    initialAudioAktiv: Boolean = false,
+    initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
 ) {
     constructor(
         content: GameContent,
         random: RandomSource = KotlinRandomSource(),
         initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
         initialAnalyseModus: Boolean = false,
+        initialReduzierteAnimationen: Boolean = false,
+        initialAudioAktiv: Boolean = false,
+        initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
     ) : this(
         engine = GameEngine(content, random),
         initialSchriftgroesse = initialSchriftgroesse,
         initialAnalyseModus = initialAnalyseModus,
+        initialReduzierteAnimationen = initialReduzierteAnimationen,
+        initialAudioAktiv = initialAudioAktiv,
+        initialAudioLautstaerke = initialAudioLautstaerke,
     )
 
     val content: GameContent
@@ -93,6 +117,9 @@ class SpielController(
             gameState = engine.neuesSpiel(),
             schriftgroesse = initialSchriftgroesse,
             analyseModus = initialAnalyseModus,
+            reduzierteAnimationen = initialReduzierteAnimationen,
+            audioAktiv = initialAudioAktiv,
+            audioLautstaerke = AudioRegelwerk.begrenzeLautstaerke(initialAudioLautstaerke),
         ),
     )
 
@@ -115,6 +142,27 @@ class SpielController(
 
     fun toggleAnalyseModus() {
         _uiState.update { it.copy(analyseModus = !it.analyseModus) }
+    }
+
+    fun setzeReduzierteAnimationen(aktiv: Boolean) {
+        _uiState.update { it.copy(reduzierteAnimationen = aktiv) }
+    }
+
+    fun toggleReduzierteAnimationen() {
+        _uiState.update { it.copy(reduzierteAnimationen = !it.reduzierteAnimationen) }
+    }
+
+    fun setzeAudioAktiv(aktiv: Boolean) {
+        _uiState.update { it.copy(audioAktiv = aktiv) }
+    }
+
+    fun toggleAudioAktiv() {
+        _uiState.update { it.copy(audioAktiv = !it.audioAktiv) }
+    }
+
+    fun setzeAudioLautstaerke(lautstaerke: Float) {
+        val begrenzt = AudioRegelwerk.begrenzeLautstaerke(lautstaerke)
+        _uiState.update { it.copy(audioLautstaerke = begrenzt) }
     }
 
     fun waehleWertErklaerung(schluessel: WertSchluessel?) {
@@ -396,8 +444,9 @@ class SpielController(
 
     /**
      * Startet nach abgeschlossenem Durchgang (regulär 1919 oder nach Auffangnetz) einen
-     * frischen Durchgang im Startmenü. Globale UI-Einstellungen (`schriftgroesse`, `analyseModus`,
-     * gewählter `modus` und `direktwahlAktiv`) bleiben für den Unterricht erhalten.
+     * frischen Durchgang im Startmenü. Globale Unterrichts- und Zugänglichkeits-Einstellungen
+     * (`schriftgroesse`, `analyseModus`, `reduzierteAnimationen`, `audioAktiv`, `audioLautstaerke`,
+     * gewählter `modus` und `direktwahlAktiv`) bleiben erhalten.
      */
     fun neuerDurchgang(): Boolean {
         val aktuell = _uiState.value

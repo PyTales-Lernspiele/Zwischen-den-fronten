@@ -33,6 +33,7 @@ import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
@@ -54,6 +55,7 @@ fun KapitelStartScreen(
     onStarteKapitel: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -74,6 +76,7 @@ fun KapitelStartScreen(
             uiState = uiState,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
         )
 
@@ -147,6 +150,7 @@ fun KapitelStartScreen(
                                     text = kapitelUi.ueberschrift,
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = farben.tinte,
+                                    modifier = Modifier.archivUeberschrift(),
                                 )
 
                                 // Stichworte des Jahres
@@ -234,6 +238,7 @@ fun KapitelStartScreen(
                                                     ArchivStempel(
                                                         text = "${wirkung.name} ${wirkung.zeichen} (${wirkung.richtung})",
                                                         farbe = farbe,
+                                                        hintergrund = farben.papierHell,
                                                     )
                                                 }
                                             }
