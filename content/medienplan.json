@@ -1,0 +1,1979 @@
+{
+  "hinweis": "Frischer, einheitlicher Illustrationsstil wird in AP 5 gemeinsam mit Dominik festgelegt. Alte Ren'Py-Bilder liegen im Branch archiv/renpy-2026.",
+  "format": {
+    "dateityp": "webp",
+    "szenenMasse": [
+      1280,
+      720
+    ],
+    "portraitMasse": [
+      320,
+      320
+    ]
+  },
+  "zusammenfassung": {
+    "stufe1PortraitsLiveEmotionen": 40,
+    "stufe1Kapitelbilder": 6,
+    "stufe1Schauplatzbilder": 17,
+    "stufe1Gesamt": 63,
+    "stufe2EinzelSzenenbilder": 104
+  },
+  "portraits": [
+    {
+      "id": "portrait_arbeiterschaft_m_neutral",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "m",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_m_hungrig",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "m",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_m_erschoepft",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "m",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_m_angst",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "m",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_m_einsam",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "m",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_w_neutral",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "w",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_w_hungrig",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "w",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_w_erschoepft",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "w",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_w_angst",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "w",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_arbeiterschaft_w_einsam",
+      "herkunft": "arbeiterschaft",
+      "geschlecht": "w",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_m_neutral",
+      "herkunft": "buergertum",
+      "geschlecht": "m",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_m_hungrig",
+      "herkunft": "buergertum",
+      "geschlecht": "m",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_m_erschoepft",
+      "herkunft": "buergertum",
+      "geschlecht": "m",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_m_angst",
+      "herkunft": "buergertum",
+      "geschlecht": "m",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_m_einsam",
+      "herkunft": "buergertum",
+      "geschlecht": "m",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_w_neutral",
+      "herkunft": "buergertum",
+      "geschlecht": "w",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_w_hungrig",
+      "herkunft": "buergertum",
+      "geschlecht": "w",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_w_erschoepft",
+      "herkunft": "buergertum",
+      "geschlecht": "w",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_w_angst",
+      "herkunft": "buergertum",
+      "geschlecht": "w",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_buergertum_w_einsam",
+      "herkunft": "buergertum",
+      "geschlecht": "w",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_m_neutral",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "m",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_m_hungrig",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "m",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_m_erschoepft",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "m",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_m_angst",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "m",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_m_einsam",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "m",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_w_neutral",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "w",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_w_hungrig",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "w",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_w_erschoepft",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "w",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_w_angst",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "w",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_landbevoelkerung_w_einsam",
+      "herkunft": "landbevoelkerung",
+      "geschlecht": "w",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_m_neutral",
+      "herkunft": "adel",
+      "geschlecht": "m",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_m_hungrig",
+      "herkunft": "adel",
+      "geschlecht": "m",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_m_erschoepft",
+      "herkunft": "adel",
+      "geschlecht": "m",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_m_angst",
+      "herkunft": "adel",
+      "geschlecht": "m",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_m_einsam",
+      "herkunft": "adel",
+      "geschlecht": "m",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_w_neutral",
+      "herkunft": "adel",
+      "geschlecht": "w",
+      "stimmung": "neutral",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_w_hungrig",
+      "herkunft": "adel",
+      "geschlecht": "w",
+      "stimmung": "hungrig",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_w_erschoepft",
+      "herkunft": "adel",
+      "geschlecht": "w",
+      "stimmung": "erschoepft",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_w_angst",
+      "herkunft": "adel",
+      "geschlecht": "w",
+      "stimmung": "angst",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "portrait_adel_w_einsam",
+      "herkunft": "adel",
+      "geschlecht": "w",
+      "stimmung": "einsam",
+      "stufe": 1,
+      "status": "offen_ap5"
+    }
+  ],
+  "kapitelbilder": [
+    {
+      "id": "kapitel_1914",
+      "jahr": 1914,
+      "titel": "Der Krieg beginnt",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "kapitel_1915",
+      "jahr": 1915,
+      "titel": "Der Krieg wird Gewohnheit",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "kapitel_1916",
+      "jahr": 1916,
+      "titel": "Das Jahr der Materialschlachten",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "kapitel_1917",
+      "jahr": 1917,
+      "titel": "Hunger, Streik und ein neuer Gegner",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "kapitel_1918",
+      "jahr": 1918,
+      "titel": "Das letzte Jahr",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "kapitel_1919",
+      "jahr": 1919,
+      "titel": "Was bleibt",
+      "stufe": 1,
+      "status": "offen_ap5"
+    }
+  ],
+  "schauplatzbilder": [
+    {
+      "id": "schauplatz_amt",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_bahnhof",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_bauernhof",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_brotschlange",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_etappe",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_fabrik",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_gefangenenlager",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_graben",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_landstrasse",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_lazarett",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_nachschub",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_niemandsland",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_quartier",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_schreibstube",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_versammlung",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_wirtshaus",
+      "stufe": 1,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "schauplatz_wohnviertel",
+      "stufe": 1,
+      "status": "offen_ap5"
+    }
+  ],
+  "einzelSzenenbilder": [
+    {
+      "id": "front_1914_marsch",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Belgien",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1914_dorf",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Nordfrankreich",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1914_erster_toter",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Nordfrankreich",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1914_schanzen",
+      "fallback": "schauplatz_graben",
+      "ort": "Flandern",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1914_weihnachten",
+      "fallback": "schauplatz_graben",
+      "ort": "Flandern",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_trommelfeuer",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_feldpost",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_kamerad",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1915,
+        1916,
+        1917
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_nachfrage",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappe",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_gas",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1915,
+        1916
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_laeuse",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_beute",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Niemandsland",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_stosstrupp",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1915,
+        1916
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_urlaub",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Heimatstadt",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1916_verdun",
+      "fallback": "schauplatz_graben",
+      "ort": "Verdun",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1916_hunger",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1916_gefangener",
+      "fallback": "schauplatz_graben",
+      "ort": "Somme",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1916_zaehlung",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappe",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_brotschlange",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1914_post",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1914,
+        1915
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1914_liebesgaben",
+      "fallback": "schauplatz_versammlung",
+      "ort": "Gemeindesaal",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_kriegsanleihe",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_todesnachricht",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_denunziation",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1915_brotkarte",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1915
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_unterstuetzung",
+      "fallback": "schauplatz_amt",
+      "ort": "Gemeindeamt",
+      "jahre": [
+        1915,
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_hamsterfahrt",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnhof",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_verfahren",
+      "fallback": "schauplatz_amt",
+      "ort": "Amtsgericht",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918,
+        1919
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_fabrik",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_lazarettzug",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Güterbahnhof",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_rueben",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Stadtrand",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_ernaehrungsamt",
+      "fallback": "schauplatz_amt",
+      "ort": "Bezirksamt",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_kohle",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_zensur",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_arbeitsniederlegung",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1916_kinderarbeit",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1916
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_ruhequartier",
+      "fallback": "schauplatz_quartier",
+      "ort": "Ruhequartier",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_sonntag",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "einstieg_meldung",
+      "fallback": "schauplatz_brotschlange",
+      "ort": "Kreisstadt",
+      "jahre": [],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "einstieg_offizier",
+      "fallback": "schauplatz_quartier",
+      "ort": "Ersatztruppenteil",
+      "jahre": [],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "einstieg_etappe",
+      "fallback": "schauplatz_lazarett",
+      "ort": "Reservelazarett",
+      "jahre": [],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "einstieg_abschied",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnhofshalle",
+      "jahre": [],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_verbruederung_nachhall",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_gerichtsherr",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappe",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_aprilstreik",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_hilfsdienst",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_ablieferung",
+      "fallback": "schauplatz_bauernhof",
+      "ort": "Bauernhof",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_akkord",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_schulspeisung",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_steckruebe",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_geruecht_osten",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_winterstellung",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1917_ablosung",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_unterseeboot",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_kohlennot",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1917_metallsammlung",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1917,
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_abrechnung",
+      "fallback": "schauplatz_landstrasse",
+      "ort": "Straße",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_liste",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappe",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_freiwillig_von_1914",
+      "fallback": "schauplatz_quartier",
+      "ort": "Ruhequartier",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_befehl",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_rat",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_grippe",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "lazarett_1918_grippestation",
+      "fallback": "schauplatz_lazarett",
+      "ort": "Lazarett",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_offensive",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Niemandsland",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_kokarde",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappe",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_1918_waffenstillstand",
+      "fallback": "schauplatz_graben",
+      "ort": "Grabenstellung",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "front"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_januarstreik",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Rüstungsbetrieb",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_grippewelle",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_matrosen",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnhof",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "heimat_1918_bekanntmachung",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1914_ankunft",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappenort",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_bahnhofsdienst",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnhof",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_verpflegungsausgabe",
+      "fallback": "schauplatz_nachschub",
+      "ort": "Magazin",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_verwundetenzug",
+      "fallback": "schauplatz_lazarett",
+      "ort": "Verwundetensammelstelle",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_listen",
+      "fallback": "schauplatz_schreibstube",
+      "ort": "Schreibstube",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_fronturlauber",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnsteig",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_feldbaeckerei",
+      "fallback": "schauplatz_nachschub",
+      "ort": "Feldbäckerei",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_munitionslager",
+      "fallback": "schauplatz_nachschub",
+      "ort": "Munitionslager",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_fuhrpark",
+      "fallback": "schauplatz_nachschub",
+      "ort": "Pferdedepot",
+      "jahre": [
+        1914,
+        1915,
+        1916
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1917_nachschubstockung",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappenort",
+      "jahre": [
+        1917
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_zensurstelle",
+      "fallback": "schauplatz_schreibstube",
+      "ort": "Zensurstelle",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_brief_von_daheim",
+      "fallback": "schauplatz_quartier",
+      "ort": "Quartier",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1914_gefangenenlager",
+      "fallback": "schauplatz_gefangenenlager",
+      "ort": "Gefangenenlager",
+      "jahre": [
+        1914
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_gefangenenarbeit",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Arbeitsstelle",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1916_verschleppt",
+      "fallback": "schauplatz_nachschub",
+      "ort": "Sammelstelle",
+      "jahre": [
+        1916,
+        1917
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_requisition",
+      "fallback": "schauplatz_niemandsland",
+      "ort": "Besetztes Dorf",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1918_grippe",
+      "fallback": "schauplatz_lazarett",
+      "ort": "Etappenlazarett",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_1918_raeumung",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappenort",
+      "jahre": [
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_innendienst",
+      "fallback": "schauplatz_lazarett",
+      "ort": "Bahnhofslazarett",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_quartier",
+      "fallback": "schauplatz_quartier",
+      "ort": "Quartier",
+      "jahre": [
+        1914,
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "etappe_abloesung",
+      "fallback": "schauplatz_etappe",
+      "ort": "Etappenkommandantur",
+      "jahre": [
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_heimkehr",
+      "fallback": "schauplatz_bahnhof",
+      "ort": "Bahnhof",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_rueckkehrer",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_versorgungsamt",
+      "fallback": "schauplatz_amt",
+      "ort": "Versorgungsamt",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_werktor",
+      "fallback": "schauplatz_fabrik",
+      "ort": "Werktor",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_wahl",
+      "fallback": "schauplatz_versammlung",
+      "ort": "Wahllokal",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_blockade",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_vertrag",
+      "fallback": "schauplatz_wohnviertel",
+      "ort": "Wohnviertel",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_1919_papiere",
+      "fallback": "schauplatz_amt",
+      "ort": "Meldebehörde",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "wirtshaus_wahl",
+      "fallback": "schauplatz_wirtshaus",
+      "ort": "Wirtshaus",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "front_tornister",
+      "fallback": "schauplatz_landstrasse",
+      "ort": "Landstraße",
+      "jahre": [
+        1914,
+        1915
+      ],
+      "pfade": [
+        "front",
+        "etappe"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "alltag_rotstift",
+      "fallback": "schauplatz_schreibstube",
+      "ort": "Schreibstube",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "alltag_acht_striche",
+      "fallback": "schauplatz_quartier",
+      "ort": "Quartier",
+      "jahre": [
+        1915,
+        1916,
+        1917,
+        1918
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    },
+    {
+      "id": "epilog_versorgungsantrag",
+      "fallback": "schauplatz_amt",
+      "ort": "Versorgungsamt",
+      "jahre": [
+        1919
+      ],
+      "pfade": [
+        "front",
+        "etappe",
+        "heimat"
+      ],
+      "stufe": 2,
+      "status": "offen_ap5"
+    }
+  ]
+}

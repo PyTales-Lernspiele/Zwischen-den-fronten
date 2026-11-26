@@ -1,0 +1,77 @@
+{
+  "zielgruppe": "Klasse 8 Oberschule (13–14 Jahre)",
+  "maxWoerterJeSatz": 20,
+  "zielSchnittWoerterJeSatz": 13,
+  "tabuBegriffe": [
+    {
+      "begriff": "Wehrkraftzersetzung",
+      "grund": "NS-Straftatbestand ab 1938. Für 1914 bis 1918: Landesverrat, Kriegsverrat, Majestätsbeleidigung oder Schutzhaft nach dem Belagerungszustandsgesetz."
+    },
+    {
+      "begriff": "Strafkompanie",
+      "grund": "Kein Begriff des Kaiserheeres. Zutreffend wäre Feldstrafgefangenenabteilung. Das Warten auf die Einberufung führte ohnehin nirgendwohin."
+    },
+    {
+      "begriff": "Volksgemeinschaft",
+      "grund": "NS-Leitbegriff. Für 1914 heißt es Burgfrieden."
+    },
+    {
+      "begriff": "Endsieg",
+      "grund": "NS-Propagandabegriff."
+    },
+    {
+      "begriff": "Blitzkrieg",
+      "grund": "Begriff des Zweiten Weltkriegs."
+    },
+    {
+      "begriff": "Landser",
+      "grund": "Soldatensprache des Zweiten Weltkriegs. 1914 bis 1918: Musketier, Infanterist, Kamerad."
+    },
+    {
+      "begriff": "Untermensch",
+      "grund": "NS-Begriff."
+    },
+    {
+      "begriff": "Lebensraum im Osten",
+      "grund": "NS-Begriff."
+    },
+    {
+      "begriff": "Konzentrationslager",
+      "grund": "Falsche Epoche."
+    },
+    {
+      "begriff": "Gestapo",
+      "grund": "Falsche Epoche."
+    },
+    {
+      "begriff": "Führerbefehl",
+      "grund": "Falsche Epoche. Im Kaiserheer: Divisionsbefehl, Regimentsbefehl, Tagesbefehl."
+    }
+  ],
+  "pruefBegriffe": [
+    {
+      "begriff": "Heimatfront",
+      "grund": "Erst im Zweiten Weltkrieg geläufig. Besser schlicht: die Heimat."
+    },
+    {
+      "begriff": "totaler Krieg",
+      "grund": "Begriff der Zwischenkriegszeit. Als Unterrichtsfrage zulässig, im Spieltext nicht."
+    },
+    {
+      "begriff": "Weltkrieg",
+      "grund": "Zeitgenossen sagten der große Krieg oder einfach der Krieg."
+    },
+    {
+      "begriff": "Trauma",
+      "grund": "Fachbegriff des späten 20. Jahrhunderts. Zeitgenössisch: Kriegsneurose, Kriegszitterer, Nervenschock."
+    },
+    {
+      "begriff": "Drückeberger",
+      "grund": "Zeitgenössisches Schimpfwort. Nur in wörtlicher Rede einer Figur zulässig, niemals in der Erzählstimme und niemals als Folge einer Wahl."
+    },
+    {
+      "begriff": "Nazi",
+      "grund": "Falsche Epoche."
+    }
+  ]
+}

@@ -1,54 +1,20 @@
-# Directories that Ren'Py changes files in.
-/game/saves
-/game/cache
-
-# Compiled script files. These are important for saving, and so should
-# be preserved by developer and build systems after the game has been released.
-/game/**/*.rpyc
-/game/**/*.rpymc
-
-# Files Ren'Py can generate.
-/game/**/*.bak
-/game/**/*.new
-/game/**/*.old
-
-# Error, log, and output files.
-/errors.txt
-/files.txt
-/image_cache.txt
-/log.txt
-/save_dump.txt
-/traceback.txt
-
-# Launcher-generated files.
-/dialogue.tab
-/dialogue.txt
-/strings.json
-
-# Ab Paket 2: Python-Werkzeuge und Kopierordner.
-#
-# __pycache__ entsteht, sobald ein Werkzeug ein anderes einliest.
-# sicherung/ enthaelt datierte Kopien der .rpy-Dateien. Seit dieses
-# Verzeichnis ein Git-Repository ist, hat die Versionsgeschichte diese
-# Aufgabe uebernommen; die Kopien bleiben als zweites Netz auf der
-# Platte, gehoeren aber nicht in die Geschichte.
+# Python
 __pycache__/
-/sicherung/
+*.py[cod]
+.venv/
 
-# Persoenliche Claude-Code-Einstellungen (Berechtigungen). Sie gehoeren
-# auf diesen Rechner und nicht in die Versionsgeschichte.
-/.claude/settings.local.json
+# Kotlin / Gradle / Android / Compose Multiplatform (ab AP 2)
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.kotlin/
+*.jks
+*.keystore
 
-# Ab Paket 8, Schritt 2.6: die Zwischendatei fuer "git commit -F".
-#
-# PowerShell 5.1 zerlegt eine Commit-Meldung mit Anfuehrungszeichen, also
-# wird sie in eine Datei geschrieben und mit -F uebergeben. Zweimal ist
-# diese Datei danach versehentlich mitcommittet worden - einmal am
-# 6. September in der Vorsitzung, einmal in derselben Nacht noch einmal.
-# Beide Male, weil "git add -A" sie mitnahm. Hier steht sie, damit es
-# kein drittes Mal gibt.
-/commit_msg.txt
-
-# bericht.txt und bericht_ausgang.txt werden NICHT ignoriert. Sie sind
-# das Messprotokoll des Projekts: Erst wenn sie mit im Commit stehen,
-# laesst sich spaeter nachlesen, welcher Stand welche Zahlen hatte.
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/

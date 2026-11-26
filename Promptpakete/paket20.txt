@@ -1,7 +1,0 @@
-Dieses Paket gibt es nicht mehr einzeln.
-
-Sein Inhalt ist jetzt SCHRITT 2 von Paket 9.
-Nimm die Datei paket09.txt.
-
-Warum: groessere Pakete, damit Claude Code laenger am Stueck
-arbeiten kann. Die Uebersicht steht in PAKETPLAN.md.
