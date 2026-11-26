@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Warmes Archivpapier (#EFE9DC) als ruhiger Grundton -->
+    <path
+        android:fillColor="#EFE9DC"
+        android:pathData="M0,0 H108 V108 H0 Z" />
+
+    <!-- Dezenter dunklerer Pergament-Randrahmen (#E2DBCA) -->
+    <path
+        android:fillColor="#E2DBCA"
+        android:pathData="M0,0 H108 V14 H0 Z M0,94 H108 V108 H0 Z M0,14 H14 V94 H0 Z M94,14 H108 V94 H94 Z" />
+
+    <!-- Feine horizontale Archiv-Liniatur im Hintergrund -->
+    <path
+        android:pathData="M14,24 H94 M14,34 H94 M14,44 H94 M14,54 H94 M14,64 H94 M14,74 H94 M14,84 H94"
+        android:strokeWidth="0.6"
+        android:strokeColor="#DCD3C1" />
+
+    <!-- Feiner doppelter Aktenrahmen -->
+    <path
+        android:pathData="M14,14 H94 V94 H14 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#B6AE9E" />
+    <path
+        android:pathData="M17.5,17.5 H90.5 V90.5 H17.5 Z"
+        android:strokeWidth="0.7"
+        android:strokeColor="#CFC7B6" />
+</vector>

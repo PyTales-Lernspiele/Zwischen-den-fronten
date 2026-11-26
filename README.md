@@ -6,7 +6,7 @@ Das Spiel wird von Grund auf entschlackt und als moderne **Kotlin-Multiplatform-
 
 > **Archiv:** Der ursprüngliche Ren'Py-Arbeitsstand ist vollständig im Branch `archiv/renpy-2026` gesichert.
 
-## Projektstruktur (Stand nach AP 6)
+## Projektstruktur (Stand nach AP 7a)
 
 ```text
 content/                      Single Source of Truth für alle Spielinhalte & WebP-Medien (per Gradle Sync eingebunden)
@@ -19,18 +19,19 @@ content/                      Single Source of Truth für alle Spielinhalte & We
   medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen
   media/                      Optimierte WebP-Assets (`portraits/`, `kapitel/`, `schauplaetze/`, `szenen/`)
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
-  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController, Archivpapier-Theme (inkl. WCAG-Kontrast & reduzierte Übergänge), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`), UI-Baukasten & vollständige Spiel-Screens (1914–1919)
-  src/commonTest/             52 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Übergänge, UI-Mapping, Spieldurchläufe, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre)
-  src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard & dezentes AudioTrack)
+  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController (inkl. Zurück-Leitplanke), Archivpapier-Theme (WCAG-Kontrast & reduzierte Übergänge), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`), UI-Baukasten & vollständige Spiel-Screens (1914–1919)
+  src/commonTest/             55 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Übergänge, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre/Hintergrund-Pause)
+  src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard, BackHandler & AudioTrack mit Hintergrund-Pause)
   src/desktopMain/            Windows/Desktop-Einstieg (JVM) inkl. Browser-Druckansicht/Speichern & dezentes Sound-Audio
   src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback)
   src/wasmJsMain/ & jsMain/   Web-Plattformbrücken (Browser-Druck/Download/Clipboard & Web Audio API)
-androidApp/                   Android-App-Modul (`MainActivity` + Manifest)
+androidApp/                   Auslieferungsfertiges Android-Modul (`MainActivity` mit Edge-to-Edge/Safe-Area & Audio-Lebenszyklus, Archivpapier-Adaptive-Icon, R8/ProGuard `proguard-rules.pro` & optionale Release-Signierung für `.apk`/`.aab`)
 tools/
   validate_content.py         Automatische Inhalts-, Quellen-/Vollbeleg-, Referenz-, Balance-, Sprach- und WebP-Medienprüfung
   prepare_media.py            WebP-Aufbereitung (320×320 / 1280×720), Master-Sicherung & Medienplan-Abgleich
 docs/
-  ARBEITSPLAN.md              Übersicht aller 7 Arbeitspakete (AP 1 – AP 7)
+  ARBEITSPLAN.md              Übersicht aller 7 Arbeitspakete (AP 1 – AP 7a erledigt; AP 5b & AP 7b offen)
+  ANDROID_AUSLIEFERUNG.md     Praxisanleitung für Android-Installation (Schul-Tablets/APK), Keystore-Signierung & Play-Store-AAB
   bildwelt/                   Stil-A-Leitfaden, Prompt-Bibel (`prompt_bibel.json`) & hochauflösende Master-Referenzen (`masters/`)
 ```
 
@@ -44,13 +45,16 @@ python3 tools/validate_content.py
 # 2. Neue Stil-A-Rohbilder als optimierte WebP-Assets aufbereiten & Medienplan abgleichen
 python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --update-plan
 
-# 3. Alle 52 Kotlin-Tests, Export-/Audio-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
+# 3. Alle 55 Kotlin-Tests, Export-/Audio-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
 ./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest
 
-# 4. Alle drei Zielplattformen bauen
-./gradlew :androidApp:assembleDebug
+# 4. Android-Release (.apk & .aab) sowie Desktop & Web bauen
+./gradlew :androidApp:assembleDebug :androidApp:assembleRelease :androidApp:bundleRelease
 ./gradlew :composeApp:desktopJar
 ./gradlew :composeApp:composeCompatibilityBrowserDistribution
 ```
 
-Alle Prüfungen, Tests und Multiplatform-Builds laufen automatisch bei jedem Pull Request über GitHub Actions (`.github/workflows/content-ci.yml`).
+### Android-Auslieferung (Schul-Tablets & Play Store)
+- **Direktinstallation & Signierung:** Vollständige Anleitung für Lehrkräfte, Schul-Tablets (APK-Sideloading/MDM) und eigene Play-Store-Signierung unter [`docs/ANDROID_AUSLIEFERUNG.md`](docs/ANDROID_AUSLIEFERUNG.md).
+- **Automatisierte Releases:** Der GitHub-Actions-Workflow [`.github/workflows/android-release.yml`](.github/workflows/android-release.yml) erstellt per manuellem Start (`workflow_dispatch`) oder Tag (`v*`) geprüfte `.apk`- und `.aab`-Pakete inkl. `SHA256SUMS.txt` (optional signiert über Repository-Secrets, sonst mit direkt installierbarem Test-Fallback).
+- **CI bei jedem Pull Request:** Alle Prüfungen, Tests sowie Android Debug/Release, Desktop JVM und WebApp laufen automatisch über [`.github/workflows/content-ci.yml`](.github/workflows/content-ci.yml).

@@ -60,6 +60,7 @@ fun KapitelAbschlussScreen(
     onAnalyseModusToggle: () -> Unit,
     onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
+    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
@@ -88,6 +89,7 @@ fun KapitelAbschlussScreen(
             onAnalyseModusToggle = onAnalyseModusToggle,
             onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
+            onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
         )
 
         Box(
@@ -100,6 +102,7 @@ fun KapitelAbschlussScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
                 verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),

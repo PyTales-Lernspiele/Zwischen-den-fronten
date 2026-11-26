@@ -1,0 +1,212 @@
+name: Release — Android Auslieferung (.apk & .aab)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.0.0)"
+        required: false
+        default: ""
+      version_code:
+        description: "Numerischer versionCode (optional, Standard 10000)"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    name: Qualitätsprüfung (Content-CI & Kotlin-Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python 3.12 einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spielinhalte, Vollbelege & WebP-Medien prüfen
+        run: python3 tools/validate_content.py
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Alle JUnit-Tests (JVM + Android Unit) ausführen
+        run: ./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest --no-daemon
+
+  android-release:
+    name: Android Release bauen (.apk & .aab)
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Release-Version ermitteln
+        id: version
+        shell: bash
+        run: |
+          VERSION_NAME="${{ inputs.version_name }}"
+          VERSION_CODE="${{ inputs.version_code }}"
+
+          if [ -z "$VERSION_NAME" ] && [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION_NAME="${GITHUB_REF#refs/tags/v}"
+          fi
+          if [ -z "$VERSION_NAME" ]; then
+            VERSION_NAME="1.0.0"
+          fi
+
+          echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+
+      - name: Optionale Release-Signierung vorbereiten
+        id: signing
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ZDF_KEYSTORE_BASE64 }}
+          KEYSTORE_PW: ${{ secrets.ZDF_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZDF_KEY_ALIAS }}
+          KEY_PW: ${{ secrets.ZDF_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PW" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PW" ]; then
+            KEYSTORE_FILE="${RUNNER_TEMP}/zdf-release.keystore"
+            printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]' | base64 --decode > "$KEYSTORE_FILE"
+            chmod 600 "$KEYSTORE_FILE"
+            echo "keystore_path=${KEYSTORE_FILE}" >> "$GITHUB_OUTPUT"
+            echo "mode=release-signiert" >> "$GITHUB_OUTPUT"
+            echo "suffix=release" >> "$GITHUB_OUTPUT"
+            echo "Release-Keystore aus Repository-Secrets bereitgestellt."
+          else
+            echo "keystore_path=" >> "$GITHUB_OUTPUT"
+            echo "mode=test-signiert" >> "$GITHUB_OUTPUT"
+            echo "suffix=test-signed" >> "$GITHUB_OUTPUT"
+            echo "Hinweis: Keine vollständigen Release-Signier-Secrets gesetzt — verwende Debug-Signier-Fallback (geeignet für Schul-Tablet-Tests/Sideloading, nicht für Play Store)."
+          fi
+
+      - name: Android Release APK & Play-Store AAB bauen
+        shell: bash
+        env:
+          ZDF_KEYSTORE_PATH: ${{ steps.signing.outputs.keystore_path }}
+          ZDF_KEYSTORE_PASSWORD: ${{ secrets.ZDF_KEYSTORE_PASSWORD }}
+          ZDF_KEY_ALIAS: ${{ secrets.ZDF_KEY_ALIAS }}
+          ZDF_KEY_PASSWORD: ${{ secrets.ZDF_KEY_PASSWORD }}
+          ZDF_VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          ZDF_VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          # Bei Test-Signierung keine teilweisen Secret-Env-Vars an Gradle weiterreichen
+          if [ -z "$ZDF_KEYSTORE_PATH" ]; then
+            unset ZDF_KEYSTORE_PATH ZDF_KEYSTORE_PASSWORD ZDF_KEY_ALIAS ZDF_KEY_PASSWORD
+          fi
+          if [ -z "$ZDF_VERSION_CODE" ]; then
+            unset ZDF_VERSION_CODE
+          fi
+          ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease --no-daemon
+
+      - name: Auslieferungs-Dateien & SHA-256-Prüfsummen bündeln
+        shell: bash
+        run: |
+          mkdir -p release-assets
+          VERSION="${{ steps.version.outputs.version_name }}"
+          SUFFIX="${{ steps.signing.outputs.suffix }}"
+
+          APK_SRC=$(find androidApp/build/outputs/apk/release -maxdepth 1 -name '*.apk' | head -n 1)
+          AAB_SRC=$(find androidApp/build/outputs/bundle/release -maxdepth 1 -name '*.aab' | head -n 1)
+
+          if [ -z "$APK_SRC" ] || [ -z "$AAB_SRC" ]; then
+            echo "Fehler: Release-APK oder Release-AAB wurde nicht gefunden." >&2
+            exit 1
+          fi
+
+          APK_OUT="release-assets/zwischen-den-fronten-v${VERSION}-${SUFFIX}.apk"
+          AAB_OUT="release-assets/zwischen-den-fronten-v${VERSION}-${SUFFIX}.aab"
+          cp "$APK_SRC" "$APK_OUT"
+          cp "$AAB_SRC" "$AAB_OUT"
+
+          (cd release-assets && sha256sum *.apk *.aab > SHA256SUMS.txt)
+          ls -lh release-assets/
+          cat release-assets/SHA256SUMS.txt
+
+      - name: Temporären Keystore sicher entfernen
+        if: always()
+        shell: bash
+        run: rm -f "${RUNNER_TEMP}/zdf-release.keystore"
+
+      - name: Android-Release-Artefakte hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: zwischen-den-fronten-android-v${{ steps.version.outputs.version_name }}-${{ steps.signing.outputs.suffix }}
+          path: release-assets/
+          retention-days: 90
+
+      - name: Build-Übersicht schreiben
+        shell: bash
+        run: |
+          {
+            echo "## Android-Auslieferung: Zwischen den Fronten v${{ steps.version.outputs.version_name }}"
+            echo ""
+            echo "- **Signierung:** \`${{ steps.signing.outputs.mode }}\`"
+            echo "- **Dateien:**"
+            for f in release-assets/*; do
+              echo "  - \`$(basename "$f")\` ($(du -h "$f" | cut -f1))"
+            done
+            echo ""
+            echo '```text'
+            cat release-assets/SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: GitHub Release bei Tag (v*) erstellen oder aktualisieren
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          SIGNING_MODE="${{ steps.signing.outputs.mode }}"
+          NOTES=$(cat <<EOF
+          ## Zwischen den Fronten — Android-Auslieferung (${TAG})
+
+          Historisches Zwei-Entscheidungs-Lernspiel (Alltag 1914–1919, 8. Klasse Oberschule).
+
+          ### Enthaltene Dateien
+          - **\`.apk\`**: Direkte Installation / Sideloading auf Android-Tablets und -Smartphones (Android 7.0+ / API 24+).
+          - **\`.aab\`**: Android App Bundle für Google Play Store.
+          - **\`SHA256SUMS.txt\`**: Prüfsummen zur Verifikation.
+
+          ### Hinweise
+          - **Signierungsstatus:** \`${SIGNING_MODE}\` (bei \`test-signiert\` eignet sich die APK für direkte Tests/Schul-Tablets; für Play Store bitte die vier Repository-Secrets \`ZDF_KEYSTORE_BASE64\`, \`ZDF_KEYSTORE_PASSWORD\`, \`ZDF_KEY_ALIAS\`, \`ZDF_KEY_PASSWORD\` hinterlegen — siehe \`docs/ANDROID_AUSLIEFERUNG.md\`).
+          - **Offline & Datenschutz:** Die App läuft vollständig offline ohne Tracking und ohne gefährliche Berechtigungen.
+          - **Bildwelt (AP 5b):** Enthält die ersten 8 Stil-A-Kernbilder; die übrigen 55 Stufe-1-Bilder werden unabhängig nachgezogen und fließen automatisch in künftige Builds ein.
+          EOF
+          )
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-assets/* --clobber
+          else
+            gh release create "$TAG" release-assets/* \
+              --title "Zwischen den Fronten ${TAG} (Android)" \
+              --notes "$NOTES"
+          fi

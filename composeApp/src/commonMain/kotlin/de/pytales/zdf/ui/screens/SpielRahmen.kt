@@ -12,13 +12,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -44,15 +49,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import de.pytales.zdf.audio.AudioSperrGrund
 import de.pytales.zdf.audio.AudioZustand
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
+import de.pytales.zdf.ui.components.ArchivTrennlinie
 import de.pytales.zdf.ui.components.KopfLeiste
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
+import de.pytales.zdf.ui.components.archivEscapeAktion
 import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.components.archivFokusRahmen
+import de.pytales.zdf.ui.components.archivLiveHinweis
 import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.media.ArchivKapitelBild
 import de.pytales.zdf.ui.media.BildAufloeser
@@ -67,7 +77,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
 /**
  * Dunkles Archiv-Kopfband für Bildschirme ohne Befindensleiste
  * (`Start`, `HerkunftWahl` und `Abgeschlossen`) mit klar sichtbarem Stummschalter,
- * Analysemodus-Schalter und dreistufiger Schriftgröße (alle Touch-Ziele ≥ 48 dp).
+ * Analysemodus-Schalter, dreistufiger Schriftgröße (alle Touch-Ziele ≥ 48 dp)
+ * und Safe-Area-Insets für Statusleiste & Kamera-Notch.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -101,6 +112,9 @@ internal fun ArchivKopfBand(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                    )
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -232,6 +246,7 @@ internal fun SpielKopfLeiste(
     onAnalyseModusToggle: () -> Unit,
     onAudioToggle: () -> Unit,
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
+    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val gameState = uiState.gameState
@@ -254,6 +269,8 @@ internal fun SpielKopfLeiste(
         analyseModus = uiState.analyseModus,
         ausgewaehlterWert = uiState.ausgewaehlterWert,
         onAusgewaehlterWertChange = onWertErklaerungChange,
+        emotionDetailsOffen = uiState.emotionDetailsOffen,
+        onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
         zusatzAktionen = {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -740,6 +757,131 @@ internal fun KapitelbildRahmen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Ergänzt sichere horizontale und untere Safe-Area-Abstände (`WindowInsets.safeDrawing`)
+ * für scrollbare Inhaltsbereiche unterhalb der Kopfleiste, damit Karten und Schaltflächen
+ * niemals hinter Navigationsleiste, Gesten-Balken oder seitlicher Kamera-Notch verschwinden.
+ */
+@Composable
+internal fun Modifier.archivInhaltsSafeArea(): Modifier =
+    this.windowInsetsPadding(
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+    )
+
+/**
+ * Ruhige Sicherheitsabfrage im Archivpapier-Stil für die Android-Zurück-Taste während eines
+ * Durchgangs (wahrt die „Kein Zurück“-Leitplanke und verhindert versehentliches Abbrechen).
+ */
+@Composable
+internal fun VerlassenSicherheitsDialog(
+    istAbgeschlossen: Boolean,
+    onBleiben: () -> Unit,
+    onZumStartmenue: () -> Unit,
+    onAppBeenden: (() -> Unit)? = null,
+) {
+    val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+
+    Dialog(
+        onDismissRequest = onBleiben,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .archivEscapeAktion(aktiv = true, onEscape = onBleiben),
+            contentAlignment = Alignment.Center,
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 480.dp)
+                    .archivFokusGruppe()
+                    .archivLiveHinweis(),
+                color = farben.papierHell,
+                shape = RoundedCornerShape(4.dp),
+                border = BorderStroke(1.25.dp, farben.tinte),
+                shadowElevation = 6.dp,
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .background(farben.akzent),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(metrik.kartenInnenAbstand),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        ArchivStempel(
+                            text = if (istAbgeschlossen) "LEBENSLAUF · HINWEIS" else "KEIN ZURÜCK · DURCHGANG",
+                            farbe = farben.akzent,
+                            hintergrund = farben.papier,
+                        )
+                        Text(
+                            text = if (istAbgeschlossen) {
+                                "Abgeschlossenen Durchgang verlassen?"
+                            } else {
+                                "Laufenden Durchgang wirklich verlassen?"
+                            },
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
+                        )
+                        Text(
+                            text = if (istAbgeschlossen) {
+                                "Dein 4-Fächer-Lebenslauf ist fertig. Wenn du jetzt zum Startmenü wechselst oder die App schließt, wird dieser Durchgang zurückgesetzt."
+                            } else {
+                                "In „Zwischen den Fronten“ lässt sich keine Entscheidung rückgängig machen. Wenn du jetzt zum Startmenü wechselst oder die App schließt, geht der laufende Durchgang verloren."
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = farben.tinte,
+                        )
+
+                        ArchivTrennlinie(farbe = farben.linieFein)
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ArchivPrimaerKnopf(
+                                label = if (istAbgeschlossen) "Beim Lebenslauf bleiben" else "Im Durchgang bleiben",
+                                onClick = onBleiben,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            ArchivSekundaerKnopf(
+                                label = if (istAbgeschlossen) {
+                                    "Zum Startmenü (Neuer Durchgang)"
+                                } else {
+                                    "Durchgang beenden & zum Startmenü"
+                                },
+                                onClick = onZumStartmenue,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            if (onAppBeenden != null) {
+                                ArchivSekundaerKnopf(
+                                    label = "App schließen",
+                                    onClick = onAppBeenden,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

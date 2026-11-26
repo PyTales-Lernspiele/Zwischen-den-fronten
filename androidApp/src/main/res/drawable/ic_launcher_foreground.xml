@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Alle tragenden Elemente liegen streng innerhalb der 66-dp-Schutzzone ([21..87]) -->
+
+    <!-- Sanfter Papier-Schlagschatten -->
+    <path
+        android:fillColor="#C8BFA9"
+        android:pathData="M35.5,32.5 H75.5 A1.5,1.5 0 0,1 77,34 V78.5 A1.5,1.5 0 0,1 75.5,80 H35.5 A1.5,1.5 0 0,1 34,78.5 V34 A1.5,1.5 0 0,1 35.5,32.5 Z" />
+
+    <!-- Helles Archivblatt (#F7F3EA) -->
+    <path
+        android:fillColor="#F7F3EA"
+        android:pathData="M33,30 H75 V78 H33 Z" />
+
+    <!-- Dunkle Archiv-Kopfleiste (#15130F) -->
+    <path
+        android:fillColor="#15130F"
+        android:pathData="M33,30 H75 V39 H33 Z" />
+
+    <!-- Vier dezente Befindens-Segmente & kleine Portrait-Kachel in der Kopfleiste -->
+    <path
+        android:fillColor="#8BB07F"
+        android:pathData="M36.5,33.6 H42.5 V35.8 H36.5 Z" />
+    <path
+        android:fillColor="#D3A75C"
+        android:pathData="M44.2,33.6 H50.2 V35.8 H44.2 Z" />
+    <path
+        android:fillColor="#DC8B5F"
+        android:pathData="M51.9,33.6 H57.9 V35.8 H51.9 Z" />
+    <path
+        android:fillColor="#DED7C9"
+        android:pathData="M59.6,33.6 H65.6 V35.8 H59.6 Z" />
+    <path
+        android:fillColor="#EFE9DC"
+        android:pathData="M68.2,32.4 H72.0 V36.8 H68.2 Z" />
+
+    <!-- Rostroter Archiv-Akzentstreifen (#8A3324) -->
+    <path
+        android:fillColor="#8A3324"
+        android:pathData="M33,39 H75 V41.2 H33 Z" />
+
+    <!-- Linke und rechte Spalte: Zwei gleichwertige Entscheidungen ("Zwischen den Fronten") -->
+    <path
+        android:fillColor="#EFE9DC"
+        android:pathData="M36.5,66.0 H51.2 V74.5 H36.5 Z" />
+    <path
+        android:fillColor="#EFE9DC"
+        android:pathData="M56.8,66.0 H71.5 V74.5 H56.8 Z" />
+    <path
+        android:pathData="M36.5,66.0 H51.2 V74.5 H36.5 Z M56.8,66.0 H71.5 V74.5 H56.8 Z"
+        android:strokeWidth="1.0"
+        android:strokeColor="#8D8578" />
+
+    <!-- Feine Tinte-Zeilen links und rechts (Dokument-Anmutung ohne Kleinschrift) -->
+    <path
+        android:pathData="M37,45.5 H49.5 M58.5,45.5 H71"
+        android:strokeWidth="2.0"
+        android:strokeColor="#1F1C18"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M37,49.8 H47.5 M58.5,49.8 H69.0 M37,53.6 H44.0 M58.5,53.6 H65.5"
+        android:strokeWidth="1.4"
+        android:strokeColor="#57514A"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M39.5,70.2 H48.2 M59.8,70.2 H68.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#1F1C18"
+        android:strokeLineCap="round" />
+
+    <!-- Mittlere Trennlinie zwischen beiden Fronten / Entscheidungen -->
+    <path
+        android:pathData="M54,41.2 V78"
+        android:strokeWidth="1.6"
+        android:strokeColor="#1F1C18" />
+
+    <!-- Außenrahmen des Archivblatts in tiefer Sepia-Tinte (#1F1C18) -->
+    <path
+        android:pathData="M33,30 H75 V78 H33 Z"
+        android:strokeWidth="2.0"
+        android:strokeColor="#1F1C18"
+        android:strokeLineJoin="miter" />
+
+    <!-- Zentrales rostrotes Archiv-Siegel auf der Trennlinie (Entscheidungs-Wendepunkt) -->
+    <path
+        android:fillColor="#F7F3EA"
+        android:pathData="M54,49.5 A8.5,8.5 0 1,0 54,66.5 A8.5,8.5 0 1,0 54,49.5 Z" />
+    <path
+        android:fillColor="#8A3324"
+        android:pathData="M54,50.8 A7.2,7.2 0 1,0 54,65.2 A7.2,7.2 0 1,0 54,50.8 Z" />
+    <path
+        android:pathData="M54,52.8 A5.2,5.2 0 1,0 54,63.2 A5.2,5.2 0 1,0 54,52.8 Z"
+        android:strokeWidth="1.1"
+        android:strokeColor="#F7F3EA" />
+    <!-- Ruhige Kompass-/Archiv-Raute im Siegelkern -->
+    <path
+        android:fillColor="#F7F3EA"
+        android:pathData="M54,55.0 L57.0,58.0 L54,61.0 L51.0,58.0 Z" />
+</vector>

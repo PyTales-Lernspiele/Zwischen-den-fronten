@@ -6,9 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,7 +34,8 @@ import de.pytales.zdf.ui.theme.ArchivTheme
 
 /**
  * Vollständige responsive Kopfleiste von „Zwischen den Fronten“:
- * - Dunkler Archiv-Kopf (`dunkel`) mit Jahr/Pfad-Orientierung
+ * - Dunkler Archiv-Kopf (`dunkel`) mit Jahr/Pfad-Orientierung und Safe-Area-Insets
+ *   (Statusleiste & Kamera-Notch schneiden niemals Inhalte ab)
  * - Obere [BefindensLeiste] (4 Werte, 5-Segment-Balken, Delta, Touch-/Klick-Erklärkarte)
  * - [LiveEmotionsKachel] rechts oben (bei [LayoutKlasse.MITTEL] und [LayoutKlasse.BREIT])
  *   bzw. kompakt über der 2×2-Befindensleiste (bei [LayoutKlasse.KOMPAKT])
@@ -45,20 +51,47 @@ fun KopfLeiste(
     analyseModus: Boolean = false,
     ausgewaehlterWert: WertSchluessel? = null,
     onAusgewaehlterWertChange: ((WertSchluessel?) -> Unit)? = null,
+    emotionDetailsOffen: Boolean? = null,
+    onEmotionDetailsOffenChange: ((Boolean) -> Unit)? = null,
     zusatzAktionen: (@Composable () -> Unit)? = null,
     portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
     var internerWert by remember { mutableStateOf<WertSchluessel?>(null) }
-    var emotionDetailsOffen by remember { mutableStateOf(false) }
+    var internEmotionOffen by remember { mutableStateOf(false) }
 
     val aktiverWertSchluessel = if (onAusgewaehlterWertChange != null) {
         ausgewaehlterWert
     } else {
         internerWert
     }
+    val aktiveEmotionOffen = if (onEmotionDetailsOffenChange != null && emotionDetailsOffen != null) {
+        emotionDetailsOffen
+    } else {
+        internEmotionOffen
+    }
+
+    val setzeEmotionOffen: (Boolean) -> Unit = { offen ->
+        if (offen) {
+            if (onAusgewaehlterWertChange != null) {
+                onAusgewaehlterWertChange(null)
+            } else {
+                internerWert = null
+            }
+        }
+        if (onEmotionDetailsOffenChange != null) {
+            onEmotionDetailsOffenChange(offen)
+        } else {
+            internEmotionOffen = offen
+        }
+    }
+
     val setzeWert: (WertSchluessel?) -> Unit = { neu ->
         if (neu != null) {
-            emotionDetailsOffen = false
+            if (onEmotionDetailsOffenChange != null) {
+                onEmotionDetailsOffenChange(false)
+            } else {
+                internEmotionOffen = false
+            }
         }
         if (onAusgewaehlterWertChange != null) {
             onAusgewaehlterWertChange(neu)
@@ -70,7 +103,16 @@ fun KopfLeiste(
     val ausgewaehlterStatus = werte.firstOrNull { it.schluessel == aktiverWertSchluessel }
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val detailOffen = ausgewaehlterStatus != null || emotionDetailsOffen
+    val detailOffen = ausgewaehlterStatus != null || aktiveEmotionOffen
+
+    // Im ungesteuerten Modus (z. B. UI-Vorschau) schließt die Android-Zurück-Taste
+    // geöffnete Erklärkarten direkt vor dem Verlassen der Vorschau.
+    if (onAusgewaehlterWertChange == null && onEmotionDetailsOffenChange == null) {
+        PlattformZurueckHandler(aktiv = detailOffen) {
+            setzeWert(null)
+            setzeEmotionOffen(false)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -78,10 +120,10 @@ fun KopfLeiste(
             .archivFokusGruppe()
             .archivEscapeAktion(aktiv = detailOffen) {
                 setzeWert(null)
-                emotionDetailsOffen = false
+                setzeEmotionOffen(false)
             },
     ) {
-        // Dunkle Haupt-Kopfleiste
+        // Dunkle Haupt-Kopfleiste (Archiv-Dunkel reicht randabfallend hinter Statusbar & Notch)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,6 +133,9 @@ fun KopfLeiste(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                    )
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -153,12 +198,8 @@ fun KopfLeiste(
                             emotion = emotion,
                             aufDunkel = true,
                             kompakt = false,
-                            detailsOffen = emotionDetailsOffen,
-                            onTippen = {
-                                val neu = !emotionDetailsOffen
-                                emotionDetailsOffen = neu
-                                if (neu) setzeWert(null)
-                            },
+                            detailsOffen = aktiveEmotionOffen,
+                            onTippen = { setzeEmotionOffen(!aktiveEmotionOffen) },
                             portraitContent = portraitContent,
                             modifier = Modifier.widthIn(min = 230.dp, max = 310.dp),
                         )
@@ -169,12 +210,8 @@ fun KopfLeiste(
                         emotion = emotion,
                         aufDunkel = true,
                         kompakt = true,
-                        detailsOffen = emotionDetailsOffen,
-                        onTippen = {
-                            val neu = !emotionDetailsOffen
-                            emotionDetailsOffen = neu
-                            if (neu) setzeWert(null)
-                        },
+                        detailsOffen = aktiveEmotionOffen,
+                        onTippen = { setzeEmotionOffen(!aktiveEmotionOffen) },
                         portraitContent = portraitContent,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -195,7 +232,7 @@ fun KopfLeiste(
         HorizontalDivider(thickness = 1.dp, color = farben.linie)
 
         // Aufgeklappte Touch-/Klick-Erklärkarte bzw. Figuren-Detailkarte direkt unter der Kopfleiste
-        if (ausgewaehlterStatus != null || emotionDetailsOffen) {
+        if (ausgewaehlterStatus != null || aktiveEmotionOffen) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,6 +242,7 @@ fun KopfLeiste(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                         .widthIn(max = metrik.maxInhaltsBreite)
                         .padding(horizontal = metrik.aussenAbstand, vertical = 10.dp),
                 ) {
@@ -214,9 +252,9 @@ fun KopfLeiste(
                     )
                     LiveEmotionDetailKarte(
                         emotion = emotion,
-                        sichtbar = emotionDetailsOffen && ausgewaehlterStatus == null,
+                        sichtbar = aktiveEmotionOffen && ausgewaehlterStatus == null,
                         analyseModus = analyseModus,
-                        onSchliessen = { emotionDetailsOffen = false },
+                        onSchliessen = { setzeEmotionOffen(false) },
                         portraitContent = portraitContent,
                     )
                 }

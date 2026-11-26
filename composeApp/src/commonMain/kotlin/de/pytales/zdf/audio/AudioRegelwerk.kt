@@ -229,6 +229,11 @@ class AudioKoordinator(
     var letzterZustand: AudioZustand? = null
         private set
 
+    var imHintergrundPausiert: Boolean = false
+        private set
+
+    private var ausgabeLaeuft: Boolean = false
+
     fun synchronisiere(
         gameState: GameState,
         audioAktiv: Boolean,
@@ -247,31 +252,76 @@ class AudioKoordinator(
         val bisher = letzterZustand
         letzterZustand = zustand
 
-        // Doppelte Schutzschranke: bei Sperre, Stille oder Stummschaltung immer strikt stoppen
-        if (!zustand.spieltGerade || zustand.musikGesperrt || zustand.aktiveSpur == AudioSpur.STILLE) {
-            if (bisher == null || bisher.spieltGerade || zustand.musikGesperrt) {
+        // Hintergrund-Lebenszyklus (z. B. Android onPause/onStop): Audio strikt gestoppt halten
+        if (imHintergrundPausiert) {
+            if (ausgabeLaeuft || bisher == null || zustand.musikGesperrt) {
                 ausgabe.stoppe()
+                ausgabeLaeuft = false
             }
             return
         }
 
-        val unveraendert = bisher != null &&
+        // Doppelte Schutzschranke: bei Sperre, Stille oder Stummschaltung immer strikt stoppen
+        if (!zustand.spieltGerade || zustand.musikGesperrt || zustand.aktiveSpur == AudioSpur.STILLE) {
+            if (ausgabeLaeuft || bisher == null || bisher.spieltGerade || zustand.musikGesperrt) {
+                ausgabe.stoppe()
+                ausgabeLaeuft = false
+            }
+            return
+        }
+
+        val unveraendert = ausgabeLaeuft &&
+            bisher != null &&
             bisher.spieltGerade &&
             bisher.aktiveSpur == zustand.aktiveSpur &&
             bisher.lautstaerke == zustand.lautstaerke
         if (!unveraendert) {
             ausgabe.aktualisiere(zustand.aktiveSpur, zustand.lautstaerke)
+            ausgabeLaeuft = true
+        }
+    }
+
+    /**
+     * Pausiert bzw. stummt die Audio-Ausgabe sofort beim Wechsel der App in den Hintergrund
+     * (`pausiert = true`, z. B. Android `onPause`/`onStop`) und nimmt sie bei Rückkehr in den
+     * Vordergrund (`pausiert = false`) nur dann wieder auf, wenn der letzte Zustand explizit
+     * abspielbar und nicht gesperrt ist (Front/Etappe/Auffangnetz bleiben strikt stumm).
+     */
+    fun setzeHintergrundPausiert(pausiert: Boolean) {
+        if (imHintergrundPausiert == pausiert) {
+            if (pausiert && ausgabeLaeuft) {
+                ausgabe.stoppe()
+                ausgabeLaeuft = false
+            }
+            return
+        }
+        imHintergrundPausiert = pausiert
+        if (pausiert) {
+            ausgabe.stoppe()
+            ausgabeLaeuft = false
+        } else {
+            val zustand = letzterZustand ?: return
+            if (zustand.spieltGerade && !zustand.musikGesperrt && zustand.aktiveSpur != AudioSpur.STILLE) {
+                ausgabe.aktualisiere(zustand.aktiveSpur, zustand.lautstaerke)
+                ausgabeLaeuft = true
+            } else {
+                ausgabe.stoppe()
+                ausgabeLaeuft = false
+            }
         }
     }
 
     fun stoppe() {
         letzterZustand = letzterZustand?.copy(aktiveSpur = AudioSpur.STILLE)
         ausgabe.stoppe()
+        ausgabeLaeuft = false
     }
 
     fun freigeben() {
         ausgabe.stoppe()
         ausgabe.freigeben()
+        ausgabeLaeuft = false
+        imHintergrundPausiert = false
         letzterZustand = null
     }
 }

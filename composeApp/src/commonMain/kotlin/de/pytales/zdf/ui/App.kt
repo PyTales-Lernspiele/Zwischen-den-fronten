@@ -5,9 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,7 +46,10 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
  * direkt in das echte Spiel (`GamePhase.Start` bis 1919 bzw. Auffangnetz).
  */
 @Composable
-fun App() {
+fun App(
+    appImVordergrund: Boolean = true,
+    onAppBeenden: (() -> Unit)? = null,
+) {
     var content by remember { mutableStateOf<GameContent?>(null) }
     var fehler by remember { mutableStateOf<String?>(null) }
 
@@ -83,7 +92,11 @@ fun App() {
                     istFehler = false,
                 )
 
-                else -> SpielScreen(controller = controller)
+                else -> SpielScreen(
+                    controller = controller,
+                    appImVordergrund = appImVordergrund,
+                    onAppBeenden = onAppBeenden,
+                )
             }
         }
     }
@@ -96,37 +109,51 @@ private fun LadeStatusKarte(
     istFehler: Boolean,
 ) {
     val farben = ArchivTheme.farben
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(farben.papier)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center,
+            .background(farben.papier),
     ) {
-        Surface(
-            modifier = Modifier.widthIn(max = 520.dp),
-            color = farben.papierHell,
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.dp, if (istFehler) farben.akzent else farben.linie),
+        // Konsistente dunkle Statusleisten-Fläche auch während des kurzen Lademoments
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(farben.dunkel)
+                .windowInsetsTopHeight(WindowInsets.safeDrawing),
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(24.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+            Surface(
+                modifier = Modifier.widthIn(max = 520.dp),
+                color = farben.papierHell,
+                shape = RoundedCornerShape(4.dp),
+                border = BorderStroke(1.dp, if (istFehler) farben.akzent else farben.linie),
             ) {
-                Text(
-                    text = titel,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = if (istFehler) farben.akzent else farben.tinte,
-                    textAlign = TextAlign.Center,
-                )
-                ArchivTrennlinie(farbe = farben.linieFein)
-                Text(
-                    text = untertitel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = farben.tinteMatt,
-                    textAlign = TextAlign.Center,
-                )
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(
+                        text = titel,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = if (istFehler) farben.akzent else farben.tinte,
+                        textAlign = TextAlign.Center,
+                    )
+                    ArchivTrennlinie(farbe = farben.linieFein)
+                    Text(
+                        text = untertitel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = farben.tinteMatt,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }
