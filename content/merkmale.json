@@ -1,0 +1,619 @@
+{
+  "textPrioritaet": [
+    "offizier",
+    "adel",
+    "buergertum",
+    "lazarett",
+    "ruestung",
+    "landwirtschaft",
+    "verwaltung",
+    "wohlfahrt",
+    "haushalt",
+    "ehemann_im_feld",
+    "vater_im_feld",
+    "bruder_im_feld",
+    "arbeiterschaft",
+    "landbevoelkerung"
+  ],
+  "register": {
+    "wirtshaus_widersprochen": {
+      "gruppe": "tat",
+      "name": "Am Wirtshaustisch widersprochen",
+      "rang": 86,
+      "nachklang": {
+        "jahr": 1922,
+        "datum": "1922",
+        "text": "Im Betrieb wird gestritten, wer schuld war. Zwei sagen, du seist der Einzige gewesen, der damals widersprochen hat. Sie sagen es nicht als Lob."
+      }
+    },
+    "wirtshaus_geschwiegen": {
+      "gruppe": "tat",
+      "name": "Am Wirtshaustisch geschwiegen",
+      "rang": 84,
+      "nachklang": {
+        "jahr": 1924,
+        "datum": "1924",
+        "text": "Zum zehnten Jahrestag steht in der Zeitung derselbe Satz wie damals im Wirtshaus. Du liest ihn zu Ende und legst das Blatt weg. Es ist nicht das erste Mal, dass du nichts sagst."
+      }
+    },
+    "verbruederung": {
+      "gruppe": "tat",
+      "name": "An Weihnachten 1914 hinübergegangen",
+      "rang": 80,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "1919",
+        "text": "Wenn jemand behauptet, drüben hätten keine Menschen gelegen, sagst du nichts. Du hast einem von ihnen die Hand gegeben. Du weißt, dass dir das kaum jemand glauben würde."
+      }
+    },
+    "kamerad_gedeckt": {
+      "gruppe": "tat",
+      "name": "Einen Kameraden gedeckt",
+      "rang": 78,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "Frühjahr 1919",
+        "text": "Ein Brief aus Rotterdam. Er hat es hinübergeschafft und fragt, ob er zurückkommen kann, jetzt, wo niemand mehr sucht. Unterschrieben hat er mit dem Namen, den er damals im Zivilanzug getragen hat."
+      }
+    },
+    "kamerad_gemeldet": {
+      "gruppe": "tat",
+      "name": "Einen Kameraden gemeldet",
+      "rang": 78,
+      "nachklang": {
+        "jahr": 1921,
+        "datum": "1921",
+        "text": "Auf der Straße erkennst du jemanden aus der Kompanie. Er sieht dich, geht weiter und grüßt nicht. Du drehst dich nicht um."
+      }
+    },
+    "vorangegangen": {
+      "gruppe": "tat",
+      "name": "Bei einer Arbeitsniederlegung vorangegangen",
+      "rang": 76,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "November 1918",
+        "text": "Im Betrieb wird ein Arbeiterrat gewählt. Man kennt deinen Namen von damals, und man setzt ihn auf die Liste. Der Beamte, der dich 1916 aufgeschrieben hat, sitzt inzwischen woanders."
+      }
+    },
+    "zaehlung_ausgefuellt": {
+      "gruppe": "tat",
+      "name": "Die Zählung von 1916 ausgefüllt",
+      "rang": 74,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Das Ergebnis der Zählung ist nie veröffentlicht worden. Trotzdem behaupten Verbände und Zeitungen, sie habe bewiesen, was sie ohnehin sagen wollten. Du weißt, wer die Liste geschrieben hat."
+      }
+    },
+    "kriegsfreiwillig": {
+      "gruppe": "haltung",
+      "name": "Kriegsfreiwillig gemeldet",
+      "rang": 60,
+      "nachklang": {
+        "jahr": 1924,
+        "datum": "1924",
+        "text": "Zum zehnten Jahrestag laden die Verbände die Freiwilligen von 1914 ein. Es wird von Begeisterung gesprochen und von Opferbereitschaft. Du erkennst im Saal drei Gesichter."
+      }
+    },
+    "einberufen": {
+      "gruppe": "haltung",
+      "name": "Auf den Einberufungsbefehl gewartet",
+      "rang": 30,
+      "nachklang": null
+    },
+    "offizier": {
+      "gruppe": "stellung",
+      "name": "Offiziersaspirant",
+      "rang": 58,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Das Heer wird auf hunderttausend Mann verkleinert, so steht es im Vertrag. Für dich ist darin kein Platz. Dein Rang steht noch auf einem Papier, das niemand mehr sehen will."
+      }
+    },
+    "uk": {
+      "gruppe": "stellung",
+      "name": "Unabkömmlich gestellt",
+      "rang": 52,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "1919",
+        "text": "Zurückgekommene fragen, wo du gewesen bist. Du sagst: im Werk. Sie sagen nichts darauf und meinen trotzdem etwas."
+      }
+    },
+    "zurueckgestellt": {
+      "gruppe": "stellung",
+      "name": "Jahrgang nicht aufgerufen",
+      "rang": 28,
+      "nachklang": null
+    },
+    "gemustert": {
+      "gruppe": "stellung",
+      "name": "Gemustert",
+      "rang": 10,
+      "nachklang": null
+    },
+    "ruestung": {
+      "gruppe": "erwerb",
+      "name": "Im Rüstungsbetrieb",
+      "rang": 50,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "Frühjahr 1919",
+        "text": "Das Werk stellt auf Friedensware um. Entlassen wird zuerst, wer zuletzt gekommen ist. Die Haut an deinen Händen ist immer noch gelb, und der Arzt sagt, das gehe wieder weg."
+      }
+    },
+    "lazarett": {
+      "gruppe": "erwerb",
+      "name": "Im Lazarettdienst",
+      "rang": 50,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Du kennst inzwischen jeden Verband und jede Prothese. In der Stadt gibt es mehr Männer ohne Bein als Ärzte, die damit umgehen können."
+      }
+    },
+    "landwirtschaft": {
+      "gruppe": "erwerb",
+      "name": "Auf Hof und Feld",
+      "rang": 48,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "Sommer 1919",
+        "text": "Im Sommer stehen wieder Städter mit Rucksäcken auf dem Hof. Ihr habt zu essen. In der Stadt habt ihr niemanden mehr, der euch grüßt."
+      }
+    },
+    "verwaltung": {
+      "gruppe": "erwerb",
+      "name": "In Kontor und Amtsstube",
+      "rang": 46,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Aus der Kriegsgesellschaft wird eine Behörde. Die Listen bleiben, die Namen darauf ändern sich, und deiner steht weiter unten am Rand."
+      }
+    },
+    "haushalt": {
+      "gruppe": "erwerb",
+      "name": "Haushalt und Heimarbeit",
+      "rang": 54,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "19. Januar 1919",
+        "text": "Du gehst zum ersten Mal wählen. Die Schlange vor dem Wahllokal ist kürzer als die vor der Ausgabestelle, und sie bewegt sich schneller."
+      }
+    },
+    "wohlfahrt": {
+      "gruppe": "erwerb",
+      "name": "In der Kriegsfürsorge",
+      "rang": 46,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Die Sammlungen gehen weiter, jetzt für Kriegswaisen. Es sind mehr, als eine Stadt zählen möchte."
+      }
+    },
+    "arbeiterschaft": {
+      "gruppe": "herkunft",
+      "name": "Arbeiterschaft",
+      "rang": 34,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "1919",
+        "text": "Der Achtstundentag steht seit November auf dem Papier. Im Betrieb wird darüber gestritten, ob er auch für deine Abteilung gilt."
+      }
+    },
+    "buergertum": {
+      "gruppe": "herkunft",
+      "name": "Bürgertum",
+      "rang": 34,
+      "nachklang": {
+        "jahr": 1923,
+        "datum": "Herbst 1923",
+        "text": "Was die Familie gespart hatte, lag in Kriegsanleihen. Im Herbst 1923 reicht die Summe für ein Brot, wenn du dich beeilst."
+      }
+    },
+    "landbevoelkerung": {
+      "gruppe": "herkunft",
+      "name": "Landbevölkerung",
+      "rang": 32,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Die Zwangsbewirtschaftung läuft weiter. Wer abliefert, verliert; wer nicht abliefert, bekommt Besuch von einer Kommission."
+      }
+    },
+    "adel": {
+      "gruppe": "herkunft",
+      "name": "Adel",
+      "rang": 34,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "August 1919",
+        "text": "Die Fürstenhöfe sind fort. Die neue Verfassung erklärt Adelsbezeichnungen zum Bestandteil des Namens, mehr nicht. Das Gut bleibt, der Vorrang nicht."
+      }
+    },
+    "kinder": {
+      "gruppe": "lage",
+      "name": "Kinder im Haushalt",
+      "rang": 40,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Der Schularzt schreibt bei deinem Kind Unterernährung in den Bogen. Es ist ein Wort, das er an diesem Vormittag oft schreibt."
+      }
+    },
+    "aeltere_kinder": {
+      "gruppe": "lage",
+      "name": "Schulpflichtige Kinder",
+      "rang": 38,
+      "nachklang": null
+    },
+    "ehemann_im_feld": {
+      "gruppe": "lage",
+      "name": "Der Mann im Feld",
+      "rang": 44,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Die Familienunterstützung läuft aus. An ihre Stelle tritt eine Versorgung nach Gesetz, berechnet nach Sätzen und Punkten. Vier Jahre lang hast du entschieden, was gekauft und was geflickt wird. Jetzt sitzt wieder jemand am Tisch, der gefragt werden will."
+      }
+    },
+    "vater_im_feld": {
+      "gruppe": "lage",
+      "name": "Der Vater im Feld",
+      "rang": 42,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "1919",
+        "text": "Er kommt im Februar zurück, magerer und langsamer. Er fragt nach der Schule und nach dem Hof, und du merkst, dass er die Antworten nicht mehr einordnen kann. Vier Jahre lang hast du seine Arbeit getan. Er bedankt sich nicht dafür, und du verlangst es auch nicht."
+      }
+    },
+    "bruder_im_feld": {
+      "gruppe": "lage",
+      "name": "Der Bruder im Feld",
+      "rang": 40,
+      "nachklang": {
+        "jahr": 1920,
+        "datum": "1920",
+        "text": "Er ist zurück und redet nicht darüber. Beim Essen sitzt ihr nebeneinander wie früher. Einmal fragt er, warum du nicht gezogen bist, und du erklärst ihm den Bescheid, den du damals bekommen hast. Er nickt und wechselt das Thema."
+      }
+    },
+    "ohne_mantel": {
+      "gruppe": "tat",
+      "name": "Den Mantel zurückgelassen",
+      "rang": 34,
+      "nachklang": {
+        "jahr": 1919,
+        "datum": "1919",
+        "text": "Der Husten aus dem zweiten Kriegswinter ist geblieben. Im Oktober fängt er wieder an, und im März hört er auf."
+      }
+    },
+    "rotstift_gefuehrt": {
+      "gruppe": "tat",
+      "name": "Einen Bogen durchgesehen",
+      "rang": 22,
+      "nachklang": null
+    },
+    "geteilt": {
+      "gruppe": "tat",
+      "name": "Brot aufgeteilt",
+      "rang": 22,
+      "nachklang": null
+    },
+    "gehamstert": {
+      "gruppe": "tat",
+      "name": "Aufs Land gefahren",
+      "rang": 22,
+      "nachklang": null
+    },
+    "tornister_erleichtert": {
+      "gruppe": "tat",
+      "name": "Den Tornister erleichtert",
+      "rang": 22,
+      "nachklang": null
+    },
+    "antrag_gestellt": {
+      "gruppe": "tat",
+      "name": "Einen Antrag gestellt",
+      "rang": 22,
+      "nachklang": null
+    }
+  },
+  "lebenslauf": {
+    "faecher": [
+      {
+        "titel": "Woher du kamst",
+        "gruppen": [
+          "herkunft",
+          "lage"
+        ]
+      },
+      {
+        "titel": "Wohin es dich brachte",
+        "gruppen": [
+          "haltung",
+          "stellung",
+          "erwerb"
+        ]
+      },
+      {
+        "titel": "Was du entschieden hast",
+        "gruppen": [
+          "tat"
+        ]
+      },
+      {
+        "titel": "Wie es ausging",
+        "gruppen": []
+      }
+    ],
+    "schlussMerkmale": [
+      "wirtshaus_widersprochen",
+      "wirtshaus_geschwiegen"
+    ],
+    "kriegsende": {
+      "front": {
+        "jahr": 1918,
+        "datum": "November 1918",
+        "text": "Der Rückmarsch dauert Wochen. In den Dörfern hängen Fahnen, in Berlin werden die Truppen mit dem Satz begrüßt, kein Feind habe sie überwunden. In deiner Kompanie sind von den Männern des letzten Sommers elf übrig."
+      },
+      "etappe": {
+        "jahr": 1918,
+        "datum": "November 1918",
+        "text": "Die Formation löst sich auf, bevor der Befehl dazu eintrifft. Züge werden von Soldatenräten eingeteilt, Vorräte verschwinden über Nacht. Du fährst nach Hause mit dem, was in einen Brotbeutel passt."
+      },
+      "heimat": {
+        "jahr": 1918,
+        "datum": "November 1918",
+        "text": "Im Ort werden Arbeiter- und Soldatenräte gebildet. Am Rathaus hängt eine rote Fahne, dann wieder keine. Die Läden bleiben leer, aber zum ersten Mal seit vier Jahren fährt kein Zug mehr an die Front."
+      }
+    },
+    "politischeLage": [
+      {
+        "id": "dolchstoss",
+        "bedingung": {
+          "pfade": [
+            "front",
+            "etappe"
+          ]
+        },
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "November 1919",
+          "text": "Vor einem Untersuchungsausschuss des Reichstags sagt Hindenburg, das deutsche Heer sei von hinten erdolcht worden. Der Satz steht am nächsten Tag in jeder Zeitung. Wer im Feld war, wird von nun an gefragt, auf welcher Seite er dabei gestanden hat."
+        }
+      },
+      {
+        "id": "verfassung",
+        "bedingung": {
+          "einesDerMerkmale": [
+            "haushalt",
+            "wohlfahrt",
+            "arbeiterschaft",
+            "ruestung",
+            "verwaltung"
+          ]
+        },
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "August 1919",
+          "text": "Am 11. August wird die neue Verfassung unterschrieben. Sie gibt allen ab zwanzig das Wahlrecht, Männern wie Frauen. Ob die Republik hält, entscheidet sich an anderen Stellen als in der Wahlkabine."
+        }
+      },
+      {
+        "id": "denkmal",
+        "bedingung": {
+          "immer": true
+        },
+        "eintrag": {
+          "jahr": 1922,
+          "datum": "1922",
+          "text": "Im Ort wird ein Denkmal eingeweiht. Auf der Tafel stehen vierundsechzig Namen aus einer Gemeinde mit achthundert Einwohnern. Ein Pfarrer spricht, ein Verband legt einen Kranz, danach geht man nach Hause."
+        }
+      }
+    ],
+    "versailles": {
+      "jahr": 1919,
+      "datum": "28. Juni 1919",
+      "text": "In Versailles unterschreibt die deutsche Abordnung einen Vertrag, über den sie nicht verhandeln durfte. Er nimmt dem Reich Gebiete, das Heer und sehr viel Geld. In Artikel 231 steht, wer den Krieg zu verantworten habe. In den Zeitungen heißt er von der ersten Zeile an das Diktat."
+    },
+    "ausgaenge": [
+      {
+        "id": "gezeichnet",
+        "titel": "Gezeichnet",
+        "rang": 90,
+        "bedingung": {
+          "minStufe": {
+            "versorgung": 3
+          }
+        },
+        "deutung": "Der Krieg ist zu Ende. Dein Hunger ist es nicht.",
+        "eintrag": {
+          "jahr": 1920,
+          "datum": "1919 bis 1921",
+          "text": "Du wiegst weniger als im August 1914 und nimmst nicht zu, auch als es wieder Brot gibt. Ein Arzt schreibt Hungerödem in den Bogen und gibt dir eine Bescheinigung, mit der du nichts anfangen kannst. Zwei Winter später hustest du immer noch."
+        },
+        "lehrplan": "Kl. 8, WB 2: Langzeitfolgen der Mangelernährung, Tuberkulose in den Nachkriegsjahren."
+      },
+      {
+        "id": "nervenkrank",
+        "titel": "Nicht mehr derselbe Mensch",
+        "rang": 88,
+        "bedingung": {
+          "minStufe": {
+            "belastung": 3
+          }
+        },
+        "deutung": "Der Körper ist zurückgekommen. Etwas anderes nicht.",
+        "eintrag": {
+          "jahr": 1920,
+          "datum": "1920",
+          "text": "Du zuckst zusammen, wenn eine Tür ins Schloss fällt, und du bekommst es nicht abgestellt. In der Akte des Versorgungsamts steht Kriegsneurose. Ob dafür eine Rente gezahlt wird, entscheidet ein Gutachter, der dich zwanzig Minuten sieht."
+        },
+        "lehrplan": "Kl. 8, WB 1/2: Kriegszitterer, Reichsversorgungsgesetz 1920, Gutachterpraxis. Zeitgenössischer Begriff: Kriegsneurose."
+      },
+      {
+        "id": "aktenkundig",
+        "titel": "Aktenkundig",
+        "rang": 86,
+        "bedingung": {
+          "minStufe": {
+            "aufmerksamkeit": 3
+          }
+        },
+        "deutung": "Man hat dich nicht geholt. Aufgeschrieben hat man dich trotzdem.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Das stellvertretende Generalkommando wird aufgelöst, deine Akte nicht. Sie wandert in ein Regal der Polizeibehörde und bleibt dort liegen. Eine Stelle im öffentlichen Dienst bekommst du nicht, und niemand sagt dir, warum."
+        },
+        "lehrplan": "Kl. 8: Belagerungszustandsgesetz 1851, Schutzhaft, Fortbestand der Akten über 1918 hinaus."
+      },
+      {
+        "id": "vereinsamt",
+        "titel": "Allein zurück",
+        "rang": 84,
+        "bedingung": {
+          "minStufe": {
+            "rueckhalt": 3
+          }
+        },
+        "deutung": "Du hast überlebt. Es ist niemand mehr da, dem das etwas bedeutet.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Die Wohnung ist dieselbe, die Menschen darin sind es nicht. Im Treppenhaus wird gegrüßt, mehr nicht. Es gibt niemanden, dem du diese Jahre erzählen müsstest. Nach einer Weile hörst du auf, es zu versuchen."
+        },
+        "lehrplan": "Kl. 8, WB 2: Zerfall von Nachbarschaft und Familie unter Mangel, Denunziation und Verlust."
+      },
+      {
+        "id": "nicht_angekommen",
+        "titel": "Zurück, aber nicht angekommen",
+        "rang": 70,
+        "bedingung": {
+          "pfade": [
+            "front",
+            "etappe"
+          ],
+          "minStufeEines": {
+            "belastung": 2,
+            "rueckhalt": 2
+          }
+        },
+        "deutung": "Du bist heimgekommen. Angekommen bist du woanders.",
+        "eintrag": {
+          "jahr": 1920,
+          "datum": "1920",
+          "text": "In der Wirtschaft am Markt treffen sich die, die dabei waren. Dort wird erzählt, das Heer sei im Feld unbesiegt geblieben und zu Hause verraten worden. Du weißt, wie der Napf aussah und was in den Gräben lag. Du widersprichst nicht, weil es die Einzigen sind, die überhaupt fragen."
+        },
+        "lehrplan": "Kl. 9, LB 2: Entstehung der Dolchstoßlegende aus der Erfahrung der Heimkehrer, Frontkämpferverbände."
+      },
+      {
+        "id": "in_der_bewegung",
+        "titel": "In der Bewegung",
+        "rang": 68,
+        "bedingung": {
+          "einesDerMerkmale": [
+            "arbeiterschaft",
+            "ruestung"
+          ],
+          "oderMerkmal": [
+            "vorangegangen"
+          ],
+          "oderMinStufe": {
+            "aufmerksamkeit": 2
+          }
+        },
+        "deutung": "Was im Betrieb angefangen hat, hört mit dem Krieg nicht auf.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Im Werk wird ein Rat gewählt, und dein Name steht auf der Liste. Es gibt den Achtstundentag und Verhandlungen mit der Werkleitung. Ob davon etwas bleibt, weiß in diesem Frühjahr niemand; gestritten wird darüber schon jetzt mit Waffen."
+        },
+        "lehrplan": "Kl. 9, LB 1: Novemberrevolution, Räte, Stinnes-Legien-Abkommen, Betriebsrätegesetz 1920."
+      },
+      {
+        "id": "auf_eigenen_beinen",
+        "titel": "Auf eigenen Beinen",
+        "rang": 66,
+        "bedingung": {
+          "geschlecht": "w",
+          "einesDerMerkmale": [
+            "ruestung",
+            "verwaltung",
+            "lazarett",
+            "haushalt",
+            "wohlfahrt"
+          ],
+          "maxStufe": {
+            "belastung": 2
+          }
+        },
+        "deutung": "Du hast vier Jahre lang getragen, was sonst andere getragen hätten.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Am 19. Januar gehst du zum ersten Mal wählen. Im selben Frühjahr kommen die Verordnungen über die Demobilmachung: Stellen, die Frauen im Krieg übernommen haben, sollen an Heimkehrer zurück. Du bekommst eine Abfindung von zwei Wochenlöhnen und die Auskunft, das sei gerecht."
+        },
+        "lehrplan": "Kl. 9, LB 1: Frauenwahlrecht 19.1.1919, Weimarer Verfassung; zugleich Verdrängung der Frauen aus der Erwerbsarbeit 1919/20."
+      },
+      {
+        "id": "bewahrt_und_verloren",
+        "titel": "Bewahrt und verloren",
+        "rang": 64,
+        "bedingung": {
+          "einesDerMerkmale": [
+            "buergertum",
+            "adel"
+          ],
+          "maxStufe": {
+            "versorgung": 1
+          }
+        },
+        "deutung": "Ihr seid durchgekommen, ohne etwas zu entbehren. Behalten habt ihr es nicht.",
+        "eintrag": {
+          "jahr": 1923,
+          "datum": "1923",
+          "text": "Die Familie hat den Krieg mit ihrem Vermögen überstanden. Neun Zehntel davon liegen in Kriegsanleihen, gezeichnet aus Überzeugung. Im Herbst 1923 reicht die Summe für ein Brot, wenn du dich beeilst."
+        },
+        "lehrplan": "Kl. 9, LB 2: Kriegsanleihen, Inflation 1923, Enttäuschung des Bürgertums als Mentalitätsfaktor."
+      },
+      {
+        "id": "zusammengeblieben",
+        "titel": "Zusammengeblieben",
+        "rang": 40,
+        "bedingung": {
+          "maxStufe": {
+            "rueckhalt": 1,
+            "belastung": 2,
+            "versorgung": 2
+          }
+        },
+        "deutung": "Ihr seid vollzählig. In dieser Straße ist das die Ausnahme.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Am Sonntag sitzt ihr am Tisch, und es ist genug für alle da. Über die vier Jahre wird nicht gesprochen. Die Nachbarin gegenüber hat zwei Söhne verloren und kommt nicht mehr herüber."
+        },
+        "lehrplan": "Kl. 8, WB 2: Ungleichheit der Kriegserfahrung; Überleben war auch eine Frage von Milieu und Zufall."
+      },
+      {
+        "id": "weitergelebt",
+        "titel": "Weitergelebt",
+        "rang": 0,
+        "bedingung": {
+          "immer": true
+        },
+        "deutung": "Der Krieg ist vorbei, und es geht weiter. Etwas anderes ist nicht vorgesehen.",
+        "eintrag": {
+          "jahr": 1919,
+          "datum": "1919",
+          "text": "Du gehst wieder arbeiten, weil es weitergehen muss. Später wirst du gefragt, wie es gewesen ist, und du merkst, dass die Antwort nicht in einen Satz passt. Also sagst du: Es war Krieg."
+        },
+        "lehrplan": "Auffangausgang. Erscheint, wenn keine Lage besonders heraussticht."
+      }
+    ]
+  }
+}

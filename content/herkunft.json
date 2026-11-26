@@ -1,0 +1,567 @@
+{
+  "jahrgaenge": [
+    {
+      "alter": 18,
+      "marke": "Gerade volljährig, ungebunden"
+    },
+    {
+      "alter": 35,
+      "marke": "Mitten im Leben, Verantwortung"
+    }
+  ],
+  "altersgruppen": [
+    {
+      "von": 17,
+      "bis": 19,
+      "schluessel": "landsturm_jung",
+      "bezeichnung": "Landsturm ersten Aufgebots"
+    },
+    {
+      "von": 20,
+      "bis": 22,
+      "schluessel": "aktiv",
+      "bezeichnung": "aktive Dienstpflicht"
+    },
+    {
+      "von": 23,
+      "bis": 27,
+      "schluessel": "aktiv",
+      "bezeichnung": "Reserve"
+    },
+    {
+      "von": 28,
+      "bis": 32,
+      "schluessel": "landwehr",
+      "bezeichnung": "Landwehr ersten Aufgebots"
+    },
+    {
+      "von": 33,
+      "bis": 38,
+      "schluessel": "landwehr",
+      "bezeichnung": "Landwehr zweiten Aufgebots"
+    },
+    {
+      "von": 39,
+      "bis": 45,
+      "schluessel": "landsturm_alt",
+      "bezeichnung": "Landsturm zweiten Aufgebots"
+    }
+  ],
+  "herkuenfte": [
+    {
+      "id": "arbeiterschaft",
+      "titel": "Arbeiterschaft",
+      "zusatz": "Mietshaus, vierter Hof, zwei Zimmer",
+      "text": "Der Lohn kommt am Freitag und ist am Mittwoch verbraucht. Im Haus wohnen vierzehn Parteien, man kennt sich und hilft sich aus. Die Polizei weiß genau, welche Straßen sie im Auge behält.",
+      "folge": "Wenig Vorrat, viele Nachbarn, ein wachsames Revier.",
+      "werte": {
+        "versorgung": -1,
+        "rueckhalt": 1,
+        "aufmerksamkeit": 1
+      },
+      "merkmale": [
+        "arbeiterschaft"
+      ],
+      "berufe": {
+        "m": [
+          "Dreher in der Maschinenfabrik",
+          "Former in der Gießerei",
+          "Bauhilfsarbeiter",
+          "Schlosser"
+        ],
+        "w": [
+          "Näherin in der Konfektion",
+          "Wäscherin",
+          "Arbeiterin in der Zigarettenfabrik",
+          "Dienstmädchen"
+        ]
+      },
+      "vornamen": {
+        "m": [
+          "Otto",
+          "Wilhelm",
+          "Fritz",
+          "Emil",
+          "Hermann",
+          "Paul",
+          "August"
+        ],
+        "w": [
+          "Martha",
+          "Frieda",
+          "Anna",
+          "Else",
+          "Minna",
+          "Hedwig",
+          "Emma"
+        ]
+      },
+      "familiennamen": [
+        "Müller",
+        "Krause",
+        "Lehmann",
+        "Schulz",
+        "Neumann",
+        "Wenzel",
+        "Pietsch"
+      ]
+    },
+    {
+      "id": "buergertum",
+      "titel": "Bürgertum",
+      "zusatz": "Beamten- und Kaufmannshaushalt, vier Zimmer",
+      "text": "Ein eigenes Zimmer, ein Konto und eine Stellung mit Ansehen. Über Geld spricht man leise und über das Vaterland laut. Wer hier auffällt, verliert mehr als nur den guten Ruf.",
+      "folge": "Rücklagen und Ansehen, dafür Abstand zu den anderen.",
+      "werte": {
+        "versorgung": 1,
+        "aufmerksamkeit": -1
+      },
+      "merkmale": [
+        "buergertum"
+      ],
+      "berufe": {
+        "m": [
+          "Kaufmannsgehilfe",
+          "Volksschullehrer",
+          "Student der Rechte",
+          "Bankbeamter"
+        ],
+        "w": [
+          "Töchterschülerin",
+          "Kontoristin",
+          "Lehrerin",
+          "Tochter aus dem Haus"
+        ]
+      },
+      "vornamen": {
+        "m": [
+          "Heinrich",
+          "Ernst",
+          "Walter",
+          "Richard",
+          "Gustav",
+          "Rudolf"
+        ],
+        "w": [
+          "Elisabeth",
+          "Charlotte",
+          "Marie",
+          "Helene",
+          "Käthe",
+          "Dorothea"
+        ]
+      },
+      "familiennamen": [
+        "Brandt",
+        "Grunewald",
+        "Hartmann",
+        "Reinhold",
+        "Sommerfeld",
+        "Keßler"
+      ]
+    },
+    {
+      "id": "landbevoelkerung",
+      "titel": "Landbevölkerung",
+      "zusatz": "Hof am Dorfrand, sechs Hektar",
+      "text": "Im Keller liegen Kartoffeln, im Stall stehen zwei Kühe. Dafür beginnt der Tag um vier, und liegen bleibt, wofür die Hände fehlen. Bis zur Kreisstadt sind es zwei Stunden zu Fuß.",
+      "folge": "Mehr auf dem Tisch, weniger Schlaf, wenig Behörde.",
+      "werte": {
+        "versorgung": 2,
+        "belastung": 1,
+        "aufmerksamkeit": -1
+      },
+      "merkmale": [
+        "landbevoelkerung"
+      ],
+      "berufe": {
+        "m": [
+          "Bauernsohn auf dem elterlichen Hof",
+          "Knecht auf dem Gutshof",
+          "Stellmacher",
+          "Fuhrmann"
+        ],
+        "w": [
+          "Bauerntochter",
+          "Magd auf dem Gutshof",
+          "Bäuerin auf dem eigenen Hof",
+          "Melkerin"
+        ]
+      },
+      "vornamen": {
+        "m": [
+          "Johann",
+          "Georg",
+          "Jakob",
+          "Andreas",
+          "Peter",
+          "Christian"
+        ],
+        "w": [
+          "Katharina",
+          "Barbara",
+          "Margarete",
+          "Rosa",
+          "Maria",
+          "Klara"
+        ]
+      },
+      "familiennamen": [
+        "Bauer",
+        "Kern",
+        "Ackermann",
+        "Rieger",
+        "Stadler",
+        "Wieland"
+      ]
+    },
+    {
+      "id": "adel",
+      "titel": "Adel",
+      "zusatz": "Gutshaus, Pachtland, ein Name mit von",
+      "text": "Der Keller ist voll, und der Landrat kommt zum Essen. Von diesem Haus wird erwartet, dass es vorangeht, wenn der Krieg beginnt. Im Dorf grüßt man zuerst und redet hinterher.",
+      "folge": "Vorräte und Verbindungen, dafür Erwartungen und Abstand.",
+      "werte": {
+        "versorgung": 2,
+        "belastung": -1,
+        "aufmerksamkeit": -2,
+        "rueckhalt": -1
+      },
+      "merkmale": [
+        "adel"
+      ],
+      "berufe": {
+        "m": [
+          "Erbe des Guts",
+          "Fahnenjunker außer Dienst",
+          "Student der Forstwissenschaft",
+          "Referendar"
+        ],
+        "w": [
+          "Tochter des Hauses",
+          "Stiftsdame",
+          "Vorsitzende des Frauenvereins",
+          "Gutsherrin"
+        ]
+      },
+      "vornamen": {
+        "m": [
+          "Botho",
+          "Curt",
+          "Detlev",
+          "Friedrich-Wilhelm",
+          "Hans-Joachim"
+        ],
+        "w": [
+          "Adelheid",
+          "Irmgard",
+          "Viktoria",
+          "Sophie-Charlotte",
+          "Elisabeth"
+        ]
+      },
+      "familiennamen": [
+        "von Stetten",
+        "von Thal",
+        "von Rodenberg",
+        "von Osterloh",
+        "von Quernheim"
+      ]
+    }
+  ],
+  "erwerbslagen": [
+    {
+      "id": "ruestung",
+      "titel": "Rüstungsbetrieb",
+      "zusatz": "Granatendreherei, zwölf Stunden Schicht",
+      "text": "Die Werke suchen Leute, weil die Männer fehlen. Es gibt Lohn, Schwerarbeiterzulage und eine Kantine. Der Sprengstoff färbt die Haut gelb, und der Vorarbeiter führt eine Liste über jeden.",
+      "folge": "Mehr Geld und Essen, dafür Erschöpfung und Aufsicht.",
+      "bezeichnung": {
+        "m": "Granatendreher",
+        "w": "Granatendreherin"
+      },
+      "werte": {
+        "versorgung": 1,
+        "belastung": 2,
+        "aufmerksamkeit": 1
+      },
+      "merkmale": [
+        "ruestung"
+      ],
+      "brauchtHerkunft": [],
+      "nurGeschlecht": null,
+      "verbietetMerkmal": [],
+      "hinweisFuer": [
+        "adel"
+      ],
+      "etappeMoeglich": false
+    },
+    {
+      "id": "lazarett",
+      "titel": "Lazarettdienst",
+      "zusatz": "Reservelazarett in der Stadt",
+      "text": "Verbände auswaschen, Eimer tragen, Nachtwachen halten. Du erfährst schnell, was in keiner Zeitung steht, und du bist unter Menschen, die dasselbe sehen wie du.",
+      "folge": "Nähe zu anderen, dafür Bilder, die bleiben.",
+      "bezeichnung": {
+        "m": "Lazarettgehilfe",
+        "w": "Lazarettschwester"
+      },
+      "werte": {
+        "versorgung": -1,
+        "belastung": 1,
+        "rueckhalt": 1
+      },
+      "merkmale": [
+        "lazarett"
+      ],
+      "brauchtHerkunft": [],
+      "nurGeschlecht": null,
+      "verbietetMerkmal": [],
+      "hinweisFuer": [],
+      "etappeMoeglich": true
+    },
+    {
+      "id": "landwirtschaft",
+      "titel": "Hof und Feld",
+      "zusatz": "Die Arbeit bleibt, die Männer nicht",
+      "text": "Zwei Kühe, sechs Hektar und niemand, der den Pflug führt. Was hier wächst, ist erst einmal da. Wie viel davon du behalten darfst, entscheidet ab jetzt eine Verordnung.",
+      "folge": "Volle Vorratskammer, dafür Arbeit ohne Ende.",
+      "bezeichnung": {
+        "m": "Landwirt",
+        "w": "Landwirtin"
+      },
+      "werte": {
+        "versorgung": 1,
+        "belastung": 2,
+        "aufmerksamkeit": -1
+      },
+      "merkmale": [
+        "landwirtschaft"
+      ],
+      "brauchtHerkunft": [
+        "landbevoelkerung",
+        "adel"
+      ],
+      "nurGeschlecht": null,
+      "verbietetMerkmal": [],
+      "hinweisFuer": [],
+      "etappeMoeglich": false
+    },
+    {
+      "id": "verwaltung",
+      "titel": "Kontor und Amtsstube",
+      "zusatz": "Schreibtisch, Listen, Stempel",
+      "text": "Meldeämter, Kriegsgesellschaften und Betriebe brauchen Leute, die sauber schreiben können. Die Arbeit ist ruhig, warm und schlechter bezahlt, als sie aussieht.",
+      "folge": "Ruhe und Unauffälligkeit, dafür wenig Nähe.",
+      "bezeichnung": {
+        "m": "Kontorist",
+        "w": "Kontoristin"
+      },
+      "werte": {
+        "belastung": -1,
+        "aufmerksamkeit": -1,
+        "rueckhalt": -1
+      },
+      "merkmale": [
+        "verwaltung"
+      ],
+      "brauchtHerkunft": [
+        "buergertum",
+        "adel",
+        "arbeiterschaft"
+      ],
+      "nurGeschlecht": null,
+      "verbietetMerkmal": [],
+      "hinweisFuer": [],
+      "etappeMoeglich": false
+    },
+    {
+      "id": "haushalt",
+      "titel": "Haushalt und Heimarbeit",
+      "zusatz": "Karten, Schlange, Nähmaschine",
+      "text": "Die Wohnung, die Lebensmittelkarten und die Reihe vor dem Laden. Dazu Näharbeit im Akkord, wenn die Kinder schlafen. Bezahlt wird davon nur die Näharbeit.",
+      "folge": "Du hältst den Haushalt zusammen und zahlst dafür mit Schlaf.",
+      "bezeichnung": {
+        "m": "Haushalt, Heimarbeit",
+        "w": "Haushalt, Heimarbeit"
+      },
+      "werte": {
+        "versorgung": -1,
+        "belastung": 1,
+        "rueckhalt": 1
+      },
+      "merkmale": [
+        "haushalt"
+      ],
+      "brauchtHerkunft": [],
+      "nurGeschlecht": "w",
+      "verbietetMerkmal": [
+        "uk"
+      ],
+      "hinweisFuer": [],
+      "etappeMoeglich": false
+    },
+    {
+      "id": "wohlfahrt",
+      "titel": "Kriegsfürsorge",
+      "zusatz": "Sammlungen, Suppenküche, Vereinslazarett",
+      "text": "Wollsachen sammeln, Listen führen, bei Verwundetentransporten zufassen. Es bringt kein Geld und viel Ansehen, und man sieht dich dabei.",
+      "folge": "Ansehen und Verbindungen, dafür lange Tage ohne Lohn.",
+      "bezeichnung": {
+        "m": "Kriegsfürsorge",
+        "w": "Kriegsfürsorge"
+      },
+      "werte": {
+        "belastung": 1,
+        "aufmerksamkeit": -1,
+        "rueckhalt": 1
+      },
+      "merkmale": [
+        "wohlfahrt"
+      ],
+      "brauchtHerkunft": [
+        "adel",
+        "buergertum"
+      ],
+      "nurGeschlecht": "w",
+      "verbietetMerkmal": [
+        "uk"
+      ],
+      "hinweisFuer": [],
+      "etappeMoeglich": false
+    }
+  ],
+  "musterung": {
+    "grade": {
+      "kv": {
+        "kurz": "k. v.",
+        "lang": "kriegsverwendungsfähig",
+        "erklaerung": "Tauglich für den Dienst im Felde. Du wirst einem Feldtruppenteil überwiesen und kommst an die Front.",
+        "befunde": [
+          "ohne Befund",
+          "kräftiger Körperbau, ohne Befund",
+          "Zähne mangelhaft, sonst ohne Befund"
+        ]
+      },
+      "gv": {
+        "kurz": "g. v.",
+        "lang": "garnisonsverwendungsfähig",
+        "erklaerung": "Tauglich für den Dienst in der Garnison und hinter der Front, nicht für den Kampf in vorderster Linie.",
+        "befunde": [
+          "Kurzsichtigkeit beiderseits",
+          "Plattfüße",
+          "Brustumfang unter dem Maß",
+          "Krampfadern am linken Bein"
+        ]
+      },
+      "av": {
+        "kurz": "a. v.",
+        "lang": "arbeitsverwendungsfähig",
+        "erklaerung": "Nur für Arbeitsleistungen tauglich. Du bleibst im Reich und wirst zu Arbeiten herangezogen.",
+        "befunde": [
+          "allgemeine Körperschwäche",
+          "Leistenbruch",
+          "Herzfehler leichten Grades",
+          "erhebliches Untergewicht"
+        ]
+      },
+      "du": {
+        "kurz": "d. u.",
+        "lang": "dauernd untauglich",
+        "erklaerung": "Für den Militärdienst untauglich. Du wirst aus der Liste gestrichen und bleibst zu Hause.",
+        "befunde": [
+          "schweres Herzleiden",
+          "Lungenspitzenkatarrh",
+          "Verlust zweier Finger der rechten Hand",
+          "hochgradige Kurzsichtigkeit"
+        ]
+      }
+    },
+    "vermerke": {
+      "uk": {
+        "kurz": "u. k.",
+        "lang": "unabkömmlich gestellt",
+        "erklaerung": "Du bist tauglich, wirst aber in deinem Betrieb gebraucht. Die Einberufung wird zurückgestellt, solange du auf dieser Stelle bleibst. Wer die Stelle verlässt, verliert die Zurückstellung."
+      },
+      "zurueck": {
+        "kurz": "zurückgestellt",
+        "lang": "Jahrgang noch nicht aufgerufen",
+        "erklaerung": "Dein Jahrgang ist noch nicht aufgerufen. Du wartest auf den Einberufungsbefehl. Das ist der Regelfall und kein Makel."
+      }
+    },
+    "grundwerte": {
+      "landsturm_jung": {
+        "kv": 40,
+        "gv": 20,
+        "av": 10,
+        "du": 5,
+        "zurueck": 25
+      },
+      "aktiv": {
+        "kv": 58,
+        "gv": 18,
+        "av": 12,
+        "du": 7,
+        "zurueck": 5
+      },
+      "landwehr": {
+        "kv": 44,
+        "gv": 24,
+        "av": 16,
+        "du": 11,
+        "zurueck": 5
+      },
+      "landsturm_alt": {
+        "kv": 24,
+        "gv": 28,
+        "av": 26,
+        "du": 17,
+        "zurueck": 5
+      }
+    },
+    "herkunftEinfluss": {
+      "arbeiterschaft": {
+        "kv": -8,
+        "av": 6,
+        "du": 2
+      },
+      "buergertum": {
+        "kv": 2,
+        "gv": 2,
+        "av": -4
+      },
+      "landbevoelkerung": {
+        "kv": 8,
+        "av": -4,
+        "du": -4
+      },
+      "adel": {
+        "kv": 6,
+        "gv": 2,
+        "av": -4,
+        "du": -4
+      }
+    },
+    "strenge": {
+      "august_1914": {
+        "kv": -6,
+        "du": 4,
+        "zurueck": 6
+      },
+      "einberufung": {
+        "kv": 4,
+        "zurueck": -4
+      }
+    },
+    "ukWahrscheinlichkeit": {
+      "arbeiterschaft": 18,
+      "buergertum": 10,
+      "landbevoelkerung": 22,
+      "adel": 14
+    }
+  },
+  "direktwahlOption": {
+    "aktiv": true,
+    "beschreibung": "Optionaler Unterrichts-Schalter: Ermöglicht die direkte Auswahl eines Pfades (Front, Etappe, Heimat) nach der Herkunftswahl."
+  }
+}

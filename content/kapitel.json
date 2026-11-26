@@ -1,0 +1,332 @@
+{
+  "epilogJahr": 1919,
+  "bogenZuschlag": 10,
+  "kapitel": [
+    {
+      "jahr": 1914,
+      "istEpilog": false,
+      "zeitraum": "August bis Dezember 1914",
+      "ueberschrift": "Der Krieg beginnt",
+      "text": "Am 1. August wird die Mobilmachung angeordnet. In den Zeitungen steht, dass alle Parteien zusammenstehen; man nennt das den Burgfrieden. Vor den Meldestellen stehen die Männer bis auf die Straße, und fast alle rechnen mit einem Feldzug von wenigen Monaten.",
+      "stichworte": [
+        "Mobilmachung",
+        "Burgfrieden",
+        "Marne"
+      ],
+      "rueckblick": "Im September wird der Vormarsch an der Marne gestoppt. Bis Dezember gräbt sich die Front von der Nordsee bis zur Schweiz ein. Aus dem Feldzug von wenigen Monaten ist ein Krieg ohne Bewegung geworden. Die Verlustlisten in den Zeitungen werden von Woche zu Woche länger.",
+      "bildId": "kapitel_1914",
+      "ziehungen": {
+        "kurz": 1,
+        "lang": 2
+      },
+      "wirkungAllgemein": {},
+      "wirkungNachPfad": {},
+      "wirkungText": null,
+      "bogen": {
+        "front": {
+          "frage": "Wie weit gehst du mit, solange alle mitgehen?",
+          "kippt": "Aus dem Feldzug von wenigen Monaten ist ein Krieg ohne Bewegung geworden.",
+          "traeger": [
+            "front_1914_marsch",
+            "front_1914_erster_toter"
+          ]
+        },
+        "etappe": {
+          "frage": "Wie weit gehst du mit, solange alle mitgehen?",
+          "kippt": "Du bist Teil des Heeres geworden, ohne je im Graben gelegen zu haben.",
+          "traeger": [
+            "front_feldpost"
+          ]
+        },
+        "heimat": {
+          "frage": "Wie weit gehst du mit, solange alle mitgehen?",
+          "kippt": "Wer fort ist, ist fort. Der Haushalt rechnet ab jetzt ohne ihn.",
+          "traeger": [
+            "heimat_brotschlange",
+            "heimat_1914_liebesgaben"
+          ]
+        }
+      }
+    },
+    {
+      "jahr": 1915,
+      "istEpilog": false,
+      "zeitraum": "Januar bis Dezember 1915",
+      "ueberschrift": "Der Krieg wird Gewohnheit",
+      "text": "Die Fronten haben sich eingegraben, von der Nordsee bis zur Schweizer Grenze. Im Februar werden in Berlin die ersten Brotkarten ausgegeben. Im April lässt die Heeresleitung bei Ypern zum ersten Mal Chlorgas abblasen. Die Rechnung mit dem kurzen Krieg ist nicht aufgegangen.",
+      "stichworte": [
+        "Stellungskrieg",
+        "Brotkarte",
+        "Gaskrieg"
+      ],
+      "rueckblick": "Nach dem Brot kommen Mehl, Butter und Kartoffeln unter Bewirtschaftung. Höchstpreise sollen die Preise halten und treiben die Ware in den Schwarzhandel. An der Front bleiben die Linien fast dort, wo sie im Januar lagen.",
+      "bildId": "kapitel_1915",
+      "ziehungen": {
+        "kurz": 1,
+        "lang": 2
+      },
+      "wirkungAllgemein": {
+        "versorgung": -1
+      },
+      "wirkungNachPfad": {},
+      "wirkungText": "Die Rationen werden kleiner, und der Krieg wird länger, als alle gerechnet haben.",
+      "bogen": {
+        "front": {
+          "frage": "Was tust du, wenn das erste Mal etwas fehlt?",
+          "kippt": "Der Krieg hat eine Waffe bekommen, gegen die Mut nichts hilft.",
+          "traeger": [
+            "front_gas",
+            "front_kamerad"
+          ]
+        },
+        "etappe": {
+          "frage": "Was tust du, wenn das erste Mal etwas fehlt?",
+          "kippt": "Du siehst, was vorn ankommt, und was vorher unterwegs verschwindet.",
+          "traeger": [
+            "front_feldpost",
+            "heimat_lazarettzug"
+          ]
+        },
+        "heimat": {
+          "frage": "Was tust du, wenn das erste Mal etwas fehlt?",
+          "kippt": "Über das Essen entscheidet ab jetzt die Karte, nicht das Geld.",
+          "traeger": [
+            "heimat_1915_brotkarte",
+            "heimat_hamsterfahrt"
+          ]
+        }
+      }
+    },
+    {
+      "jahr": 1916,
+      "istEpilog": false,
+      "zeitraum": "Januar bis Dezember 1916",
+      "ueberschrift": "Das Jahr der Materialschlachten",
+      "text": "Verdun seit Februar, die Somme seit Juli. Beide Schlachten zusammen kosten mehr als eine Million Männer das Leben oder die Gesundheit, und keine Frontlinie verschiebt sich weit. Im August übernehmen Hindenburg und Ludendorff die Oberste Heeresleitung; ihr Rüstungsprogramm zieht noch mehr Menschen und Kohle aus dem Land. Zu Hause entscheidet nicht mehr das Geld über das Essen, sondern die Karte und der Platz in der Schlange.",
+      "stichworte": [
+        "Verdun",
+        "Somme",
+        "Hilfsdienstgesetz"
+      ],
+      "rueckblick": "Verdun endet im Dezember ungefähr dort, wo es im Februar begonnen hat. Im selben Monat beschließt der Reichstag das Vaterländische Hilfsdienstgesetz. Jeder Mann zwischen 17 und 60 kann zur Arbeit verpflichtet werden, wenn er nicht Soldat ist. Die Kartoffelernte fällt aus. Der Winter, der jetzt beginnt, wird später der Steckrübenwinter heißen.",
+      "bildId": "kapitel_1916",
+      "ziehungen": {
+        "kurz": 2,
+        "lang": 3
+      },
+      "wirkungAllgemein": {
+        "versorgung": -1,
+        "belastung": 1,
+        "aufmerksamkeit": 1
+      },
+      "wirkungNachPfad": {},
+      "wirkungText": "Zwei Materialschlachten und ein Rüstungsprogramm, das Menschen, Kohle und Kartoffeln verbraucht.",
+      "bogen": {
+        "front": {
+          "frage": "Wem gehört dein Leben - dir oder der Stellung?",
+          "kippt": "Der Krieg zählt keine Männer mehr, sondern Material und Meter.",
+          "traeger": [
+            "front_1916_verdun",
+            "front_1916_gefangener"
+          ]
+        },
+        "etappe": {
+          "frage": "Wem gehört deine Arbeit - dir oder der Verwaltung?",
+          "kippt": "Was du aufschreibst, gilt. Was du weglässt, hat es nicht gegeben.",
+          "traeger": [
+            "front_1916_zaehlung",
+            "front_urlaub"
+          ]
+        },
+        "heimat": {
+          "frage": "Wem gehört deine Arbeit - dir oder der Verwaltung?",
+          "kippt": "Die Kartoffelernte fällt aus. Der Winter, der kommt, hat schon einen Namen.",
+          "traeger": [
+            "heimat_1916_rueben",
+            "heimat_1916_kohle"
+          ]
+        }
+      }
+    },
+    {
+      "jahr": 1917,
+      "istEpilog": false,
+      "zeitraum": "Januar bis Dezember 1917",
+      "ueberschrift": "Hunger, Streik und ein neuer Gegner",
+      "text": "Der Winter 1916 auf 1917 heißt später der Steckrübenwinter: Die Kartoffelernte ist verfault, und die Zuteilung besteht wochenlang aus Kohlrüben. Im April wird die Brotration gekürzt; in Berlin und Leipzig legen Hunderttausende die Arbeit nieder. Im selben Monat erklären die Vereinigten Staaten dem Deutschen Reich den Krieg. In Russland stürzt im März der Zar, im November übernehmen die Bolschewiki die Macht.",
+      "stichworte": [
+        "Steckrübenwinter",
+        "Aprilstreik",
+        "Revolution in Russland"
+      ],
+      "rueckblick": "Im Juli fordert der Reichstag mit der Friedensresolution einen Frieden ohne Eroberungen; die Oberste Heeresleitung geht darüber hinweg. Im Dezember beginnen in Brest-Litowsk die Verhandlungen mit Russland. Wer im Westen liegt, hört, dass Truppen aus dem Osten kommen sollen.",
+      "bildId": "kapitel_1917",
+      "ziehungen": {
+        "kurz": 2,
+        "lang": 2
+      },
+      "wirkungAllgemein": {
+        "versorgung": -1,
+        "belastung": 1
+      },
+      "wirkungNachPfad": {
+        "front": {
+          "belastung": 1
+        },
+        "etappe": {
+          "belastung": 1
+        },
+        "heimat": {
+          "versorgung": -1
+        }
+      },
+      "wirkungText": "Der Steckrübenwinter, gekürzte Rationen und ein Belagerungszustand, der genauer hinsieht.",
+      "bogen": {
+        "front": {
+          "frage": "Woher nimmst du, was du brauchst, wenn nichts mehr da ist?",
+          "kippt": "Aus dem Osten kommen Truppen. Alle wissen, wofür sie gebraucht werden.",
+          "traeger": [
+            "front_1917_steckruebe",
+            "front_1917_geruecht_osten"
+          ]
+        },
+        "etappe": {
+          "frage": "Woher nimmst du, was du brauchst, wenn nichts mehr da ist?",
+          "kippt": "Die Etappe verwaltet den Mangel, statt den Nachschub zu verteilen.",
+          "traeger": [
+            "etappe_1917_nachschubstockung",
+            "etappe_verpflegungsausgabe"
+          ]
+        },
+        "heimat": {
+          "frage": "Woher nimmst du, was du brauchst, wenn nichts mehr da ist?",
+          "kippt": "Zum ersten Mal legen Hunderttausende die Arbeit nieder, und es geht ums Brot.",
+          "traeger": [
+            "heimat_1917_kohlennot",
+            "heimat_1917_metallsammlung"
+          ]
+        }
+      }
+    },
+    {
+      "jahr": 1918,
+      "istEpilog": false,
+      "zeitraum": "Januar bis November 1918",
+      "ueberschrift": "Das letzte Jahr",
+      "text": "Im März greift das Heer im Westen noch einmal an, mit Truppen, die im Osten frei geworden sind. Bis zum Sommer ist der Angriff verbraucht. Seit dem Frühjahr geht eine Grippe um, an der besonders junge und ausgezehrte Menschen sterben. Anfang November meutern die Matrosen in Kiel. Am 9. November wird die Abdankung des Kaisers bekannt gegeben, am 11. November schweigen die Waffen.",
+      "stichworte": [
+        "Frühjahrsoffensive",
+        "Grippe",
+        "Novemberrevolution"
+      ],
+      "rueckblick": "Am 11. November wird in einem Eisenbahnwagen bei Compiègne der Waffenstillstand unterschrieben. Innerhalb weniger Tage entstehen Arbeiter- und Soldatenräte, die Front löst sich in Marschkolonnen auf. In vier Jahren sind rund zwei Millionen deutsche Soldaten gefallen. Wie viele Menschen in der Heimat an Unterernährung starben, wird bis heute geschätzt.",
+      "bildId": "kapitel_1918",
+      "ziehungen": {
+        "kurz": 2,
+        "lang": 2
+      },
+      "wirkungAllgemein": {
+        "belastung": 1,
+        "rueckhalt": -1
+      },
+      "wirkungNachPfad": {
+        "front": {
+          "versorgung": -1
+        },
+        "etappe": {
+          "versorgung": -1
+        },
+        "heimat": {
+          "aufmerksamkeit": 1
+        }
+      },
+      "wirkungText": "Kohlenmangel, Grippe und ein Frühjahr, das noch einmal alles verlangt.",
+      "bogen": {
+        "front": {
+          "frage": "Was gilt noch, wenn die Ordnung selbst ins Rutschen kommt?",
+          "kippt": "Der letzte Angriff ist verbraucht. Ab jetzt geht es zurück.",
+          "traeger": [
+            "front_1918_offensive",
+            "front_1918_kokarde"
+          ]
+        },
+        "etappe": {
+          "frage": "Was gilt noch, wenn die Ordnung selbst ins Rutschen kommt?",
+          "kippt": "Die Formation löst sich auf, bevor ein Befehl dazu eintrifft.",
+          "traeger": [
+            "etappe_1918_raeumung",
+            "etappe_1918_grippe"
+          ]
+        },
+        "heimat": {
+          "frage": "Was gilt noch, wenn die Ordnung selbst ins Rutschen kommt?",
+          "kippt": "Am 9. November ist der Kaiser fort, und niemand hält ihn.",
+          "traeger": [
+            "heimat_1918_januarstreik",
+            "heimat_1918_matrosen"
+          ]
+        }
+      }
+    },
+    {
+      "jahr": 1919,
+      "istEpilog": true,
+      "zeitraum": "November 1918 bis Dezember 1919",
+      "ueberschrift": "Was bleibt",
+      "text": "Die Waffen schweigen, die Seeblockade nicht. Erst im März werden begrenzte Lebensmitteleinfuhren zugelassen, aufgehoben wird die Blockade im Juli. Am 19. Januar wählen Frauen zum ersten Mal, im Februar tritt in Weimar die Nationalversammlung zusammen. Für dich beginnt in diesem Jahr das, was danach kommt.",
+      "stichworte": [
+        "Nationalversammlung",
+        "Versailles",
+        "Dolchstoßlegende"
+      ],
+      "rueckblick": null,
+      "bildId": "kapitel_1919",
+      "ziehungen": {
+        "kurz": 1,
+        "lang": 2
+      },
+      "wirkungAllgemein": {
+        "rueckhalt": -1,
+        "aufmerksamkeit": -2
+      },
+      "wirkungNachPfad": {
+        "front": {
+          "belastung": 1
+        },
+        "etappe": {
+          "belastung": 1
+        },
+        "heimat": {
+          "belastung": 1
+        }
+      },
+      "wirkungText": "Der Krieg ist vorbei. Das Jahr danach ist es nicht.",
+      "bogen": {
+        "front": {
+          "frage": "Wie erzählst du das, was war?",
+          "kippt": "Was du gesehen hast, passt nicht zu dem, was erzählt wird.",
+          "traeger": [
+            "epilog_1919_heimkehr",
+            "epilog_1919_vertrag"
+          ]
+        },
+        "etappe": {
+          "frage": "Wie erzählst du das, was war?",
+          "kippt": "Du warst dabei und wirst gefragt, ob du wirklich dabei warst.",
+          "traeger": [
+            "epilog_1919_papiere",
+            "epilog_1919_heimkehr"
+          ]
+        },
+        "heimat": {
+          "frage": "Wie erzählst du das, was war?",
+          "kippt": "Die Waffen schweigen. Auf dem Tisch ändert das zunächst nichts.",
+          "traeger": [
+            "epilog_1919_rueckkehrer",
+            "epilog_1919_blockade"
+          ]
+        }
+      }
+    }
+  ]
+}

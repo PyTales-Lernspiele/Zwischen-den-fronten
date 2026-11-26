@@ -1,0 +1,23 @@
+name: Inhaltsprüfung (Content CI)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-content:
+    name: JSON-Inhalte, 2-Wahl-Regel & Sprachmaß prüfen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python 3.12 einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spielinhalte prüfen
+        run: python3 tools/validate_content.py

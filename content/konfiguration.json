@@ -1,0 +1,275 @@
+{
+  "spielTitel": "Zwischen den Fronten",
+  "untertitel": "Alltag im Ersten Weltkrieg 1914–1919",
+  "zielgruppe": "Klasse 8 Oberschule (13–14 Jahre)",
+  "farbwelt": {
+    "papier": "#efe9dc",
+    "papierHell": "#f7f3ea",
+    "papierDunkel": "#e2dbca",
+    "tinte": "#1f1c18",
+    "tinteMatt": "#57514a",
+    "linie": "#8d8578",
+    "linieFein": "#b6ae9e",
+    "akzent": "#8a3324",
+    "akzentMatt": "#a85c4a",
+    "dunkel": "#15130f",
+    "dunkelHell": "#241f19",
+    "segmentLeer": "#cfc7b6",
+    "segmentDunkel": "#39332b",
+    "textHell": "#ded7c9",
+    "stufen": [
+      "#3f5b3a",
+      "#6d6a3a",
+      "#8a6a2c",
+      "#8f4a20",
+      "#7c1d14"
+    ],
+    "stufenHell": [
+      "#8bb07f",
+      "#c0b871",
+      "#d3a75c",
+      "#dc8b5f",
+      "#d76a5e"
+    ]
+  },
+  "werte": {
+    "reihenfolge": [
+      "versorgung",
+      "belastung",
+      "aufmerksamkeit",
+      "rueckhalt"
+    ],
+    "minimum": 0,
+    "maximum": 12,
+    "segmenteJeBalken": 5,
+    "balkenVollIstGut": true,
+    "definitionen": {
+      "versorgung": {
+        "bezeichnung": "Hunger",
+        "hochIstGut": true,
+        "erklaerung": "Zeigt, wie satt du wirst. Lebensmittelkarten, lange Schlangen und teure Ware aus dem Schwarzhandel entscheiden darüber, was auf dem Tisch steht.",
+        "folge": "Je voller die Anzeige, desto weniger hast du zu essen. Ist sie ganz voll, endet der Durchgang.",
+        "stufenNamen": [
+          "Satt",
+          "Knapp",
+          "Hungrig",
+          "Ausgezehrt",
+          "Verhungernd"
+        ],
+        "stufenKurz": [
+          "Du wirst jeden Tag satt.",
+          "Es reicht, wenn du gut einteilst.",
+          "Du hast ständig Hunger.",
+          "Du wirst schwach und schwindlig.",
+          "Ohne Hilfe geht es nicht mehr weiter."
+        ],
+        "zustandssaetze": [
+          "Es reicht. Heute denkst du nicht ans Essen.",
+          "Du teilst dir das Brot ein und rechnest bis zum Wochenende.",
+          "Der Gürtel sitzt zwei Löcher enger als im August 1914.",
+          "Beim Aufstehen wird dir schwarz vor Augen.",
+          "Deine Beine tragen dich kaum noch über die Straße."
+        ]
+      },
+      "belastung": {
+        "bezeichnung": "Erschöpfung",
+        "hochIstGut": false,
+        "erklaerung": "Zeigt, wie sehr Angst, Trauer, Gewalt und harte Arbeit an dir zehren. Schlaf, Ruhe und Menschen, die dir zuhören, bauen dich wieder auf.",
+        "folge": "Je voller die Anzeige, desto schwerer trägst du. Ist sie ganz voll, brichst du zusammen.",
+        "stufenNamen": [
+          "Ausgeruht",
+          "Angespannt",
+          "Erschöpft",
+          "Am Ende",
+          "Gebrochen"
+        ],
+        "stufenKurz": [
+          "Du schläfst und kommst zur Ruhe.",
+          "Du bist nervös, hältst aber durch.",
+          "Angst und Müdigkeit sind immer da.",
+          "Du hältst kaum noch etwas aus.",
+          "Du bist zusammengebrochen."
+        ],
+        "zustandssaetze": [
+          "Du schläfst durch und wachst ohne Schrecken auf.",
+          "Du liegst lange wach, aber am Morgen stehst du auf.",
+          "Du zuckst zusammen, wenn eine Tür ins Schloss fällt.",
+          "Deine Hände zittern, und du bekommst es nicht abgestellt.",
+          "Du antwortest Stimmen, die niemand sonst hört."
+        ]
+      },
+      "aufmerksamkeit": {
+        "bezeichnung": "Verdacht",
+        "hochIstGut": false,
+        "erklaerung": "Zeigt, wie genau Behörden, Militär und Nachbarn auf dich achten. Wer gegen Verbote verstößt oder auffällt, landet in Listen und Akten.",
+        "folge": "Je voller die Anzeige, desto genauer sieht man hin. Auf den letzten Stufen wirst du abgeholt.",
+        "stufenNamen": [
+          "Unbekannt",
+          "Aufgefallen",
+          "Beobachtet",
+          "In den Akten",
+          "Gesucht"
+        ],
+        "stufenKurz": [
+          "Niemand achtet auf dich.",
+          "Dein Name ist notiert worden.",
+          "Man schaut dir genauer zu.",
+          "Über dich wird eine Akte geführt.",
+          "Man kommt, um dich zu holen."
+        ],
+        "zustandssaetze": [
+          "Bei keiner Behörde kennt jemand deinen Namen.",
+          "Dein Name steht in einer Liste, die jemand angelegt hat.",
+          "Man grüßt dich und sieht dabei einen Moment zu lange hin.",
+          "Über dich liegt eine Akte, und sie wird dicker.",
+          "Man fragt nach dir. Es ist eine Frage von Tagen."
+        ]
+      },
+      "rueckhalt": {
+        "bezeichnung": "Einsamkeit",
+        "hochIstGut": true,
+        "erklaerung": "Zeigt, wie viele Menschen zu dir halten: Familie, Kameraden, Nachbarn. Teilen, helfen und ehrlich sein bringen dir Rückhalt, Verrat kostet ihn.",
+        "folge": "Eine volle Anzeige beendet den Durchgang nicht. Sie macht aber alles andere schwerer.",
+        "stufenNamen": [
+          "Nicht allein",
+          "Ein paar Leute",
+          "Oft allein",
+          "Ganz allein",
+          "Ausgestoßen"
+        ],
+        "stufenKurz": [
+          "Viele Menschen stehen zu dir.",
+          "Einige halten noch zu dir.",
+          "Du bist oft auf dich allein gestellt.",
+          "Niemand fragt mehr nach dir.",
+          "Alle gehen dir aus dem Weg."
+        ],
+        "zustandssaetze": [
+          "Es gibt Menschen, die für dich einstehen würden.",
+          "Ein paar Menschen halten zu dir, wenn du fragst.",
+          "Die Grüße werden kürzer, die Gespräche seltener.",
+          "Du gehst durch volle Straßen und sprichst mit niemandem.",
+          "Man weicht dir aus. Niemand fragt mehr, wie es dir geht."
+        ]
+      }
+    }
+  },
+  "stimmungen": {
+    "beschreibung": "Live-Reaktion der kleinen Figuren-Kachel rechts oben auf den aktuellen Zustand.",
+    "standard": "neutral",
+    "alle": [
+      "neutral",
+      "hungrig",
+      "erschoepft",
+      "angst",
+      "einsam"
+    ],
+    "abStufe": 2,
+    "ausWert": {
+      "versorgung": "hungrig",
+      "belastung": "erschoepft",
+      "aufmerksamkeit": "angst",
+      "rueckhalt": "einsam"
+    }
+  },
+  "pfade": {
+    "reihenfolge": [
+      "front",
+      "etappe",
+      "heimat"
+    ],
+    "definitionen": {
+      "front": {
+        "marke": "An der Front",
+        "ort": "Westfront",
+        "basisWerte": {
+          "versorgung": 8,
+          "belastung": 2,
+          "aufmerksamkeit": 1,
+          "rueckhalt": 8
+        }
+      },
+      "etappe": {
+        "marke": "In der Etappe",
+        "ort": "Etappengebiet",
+        "basisWerte": {
+          "versorgung": 8,
+          "belastung": 1,
+          "aufmerksamkeit": 2,
+          "rueckhalt": 8
+        }
+      },
+      "heimat": {
+        "marke": "In der Heimat",
+        "ort": "Deutsches Kaiserreich",
+        "basisWerte": {
+          "versorgung": 6,
+          "belastung": 2,
+          "aufmerksamkeit": 1,
+          "rueckhalt": 8
+        }
+      }
+    }
+  },
+  "modi": {
+    "kurz": {
+      "bezeichnung": "Kurzer Verlauf",
+      "zielzahl": 8,
+      "nurKern": true,
+      "umfang": "Acht Entscheidungen entlang der wichtigsten Stationen von 1914 bis 1918, dazu der Epilog 1919.",
+      "dauer": "Etwa 15 bis 20 Minuten. Passt in eine Einzelstunde mit Zeit für den Lebenslauf."
+    },
+    "lang": {
+      "bezeichnung": "Langer Verlauf",
+      "zielzahl": 11,
+      "nurKern": false,
+      "umfang": "Elf Entscheidungen aus dem gesamten Vorrat von 1914 bis 1918, dazu zwei im Epilog 1919.",
+      "dauer": "Etwa 25 bis 35 Minuten. Ideal für eine Doppelstunde oder Vertiefung."
+    }
+  },
+  "onboarding": {
+    "aufforderung": "Tippe oder klicke auf einen der drei Sätze, wenn du mehr dazu wissen willst.",
+    "grundsaetze": [
+      {
+        "id": "zurueck",
+        "satz": "Es gibt kein Zurück.",
+        "mehr": "Was du gewählt hast, bleibt gewählt — auch dann, wenn es sich später als Fehler herausstellt."
+      },
+      {
+        "id": "spielstand",
+        "satz": "Es gibt keinen Spielstand.",
+        "mehr": "Du kannst nicht speichern und nicht laden: Ein Durchgang wird von Anfang bis Ende in einem Zug gespielt."
+      },
+      {
+        "id": "antwort",
+        "satz": "Es gibt keine richtige Antwort.",
+        "mehr": "Beide Wege sind vertretbar, und wer damals entschied, wusste nicht, was im nächsten Jahr kommen würde."
+      }
+    ]
+  },
+  "harteEnden": {
+    "schwellen": {
+      "versorgung_unter": 1,
+      "belastung_ab": 12,
+      "aufmerksamkeit_ab": 12
+    },
+    "texte": {
+      "ende_verhungert": {
+        "titel": "Verhungert",
+        "text": "Die Kräfte reichen nicht mehr für den Weg zur Ausgabestelle. Eines Morgens stehst du nicht mehr auf. In der Sterbeurkunde steht Herzschwäche."
+      },
+      "ende_zusammenbruch": {
+        "titel": "Zusammengebrochen",
+        "text": "Du hörst nicht mehr auf zu zittern. Ein Arzt schreibt Kriegsneurose in die Akte, ein anderer schreibt Simulation. Behandelt wird beides gleich."
+      },
+      "ende_verhaftet": {
+        "titel": "Abgeholt",
+        "text": "Zwei Beamte stehen morgens vor der Tür. Das stellvertretende Generalkommando hat Schutzhaft angeordnet, gestützt auf das Gesetz über den Belagerungszustand. Ein Gericht kommt darin nicht vor, und über die Dauer entscheidet niemand, den du fragen könntest."
+      },
+      "ende_gefallen": {
+        "titel": "Gefallen",
+        "text": "Ein Pfeifen, ein Schlag, sonst nichts. Die Meldung geht drei Wochen später hinaus. Auf dem Formular ist der Name eingetragen, alles andere ist vorgedruckt."
+      }
+    }
+  }
+}
