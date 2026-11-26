@@ -1,13 +1,14 @@
 package de.pytales.zdf.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,27 +20,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.content.ContentLoader
 import de.pytales.zdf.content.GameContent
-import de.pytales.zdf.engine.GameEngine
-
-private val PapierFarbe = Color(0xFFEFE9DC)
-private val TinteFarbe = Color(0xFF1F1C18)
-private val TinteMattFarbe = Color(0xFF57514A)
-private val AkzentFarbe = Color(0xFF8A3324)
+import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.theme.ArchivPapierTheme
+import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
- * Minimaler AP-2-Startbildschirm (Platzhalter).
- * Prüft das plattformübergreifende Laden der JSON-Dateien aus `content/` und die Initialisierung der [GameEngine].
- * Die eigentliche Archivpapier-Oberfläche folgt in AP 3.
+ * Gemeinsamer Einstiegspunkt für Android, Windows Desktop (JVM) und WebApp (`wasmJs` + JS).
+ *
+ * Lädt die geprüften JSON-Inhalte aus `content/`, initialisiert das [ArchivPapierTheme]
+ * direkt aus `konfiguration.json` und startet die interaktive AP-3-Komponenten-Vorschau
+ * als direkte Grundlage für den vollständigen Spieldurchgang in AP 4.
  */
 @Composable
 fun App() {
     var content by remember { mutableStateOf<GameContent?>(null) }
     var fehler by remember { mutableStateOf<String?>(null) }
+    var schriftgroesse by remember { mutableStateOf(Schriftgroesse.MITTEL) }
 
     LaunchedEffect(Unit) {
         try {
@@ -49,85 +50,77 @@ fun App() {
         }
     }
 
-    MaterialTheme {
+    ArchivPapierTheme(
+        farbwelt = content?.konfiguration?.farbwelt,
+        schriftgroesse = schriftgroesse,
+    ) {
+        val farben = ArchivTheme.farben
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = PapierFarbe,
+            color = farben.papier,
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(PapierFarbe)
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center,
+            val geladen = content
+            when {
+                fehler != null -> LadeStatusKarte(
+                    titel = "Fehler beim Laden der Spielinhalte",
+                    untertitel = fehler.orEmpty(),
+                    istFehler = true,
+                )
+
+                geladen == null -> LadeStatusKarte(
+                    titel = "Zwischen den Fronten",
+                    untertitel = "Archivdaten (1914–1919) werden geladen …",
+                    istFehler = false,
+                )
+
+                else -> UiBaukastenDemo(
+                    content = geladen,
+                    schriftgroesse = schriftgroesse,
+                    onSchriftgroesseChange = { schriftgroesse = it },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LadeStatusKarte(
+    titel: String,
+    untertitel: String,
+    istFehler: Boolean,
+) {
+    val farben = ArchivTheme.farben
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(farben.papier)
+            .padding(24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            modifier = Modifier.widthIn(max = 520.dp),
+            color = farben.papierHell,
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(1.dp, if (istFehler) farben.akzent else farben.linie),
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    val geladen = content
-                    when {
-                        fehler != null -> {
-                            Text(
-                                text = "Fehler beim Laden der Spielinhalte",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = AkzentFarbe,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = fehler.orEmpty(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TinteFarbe,
-                            )
-                        }
-
-                        geladen == null -> {
-                            Text(
-                                text = "Zwischen den Fronten",
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = TinteFarbe,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = "Spielinhalte werden geladen …",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TinteMattFarbe,
-                            )
-                        }
-
-                        else -> {
-                            val engine = remember(geladen) { GameEngine(geladen) }
-                            val startZustand = remember(engine) { engine.neuesSpiel() }
-                            val stimmung = engine.liveEmotion(startZustand).stimmung
-
-                            Text(
-                                text = geladen.konfiguration.spielTitel,
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = TinteFarbe,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = geladen.konfiguration.untertitel,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = AkzentFarbe,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "${geladen.ereignisse.ereignisse.size} Ereignisse · " +
-                                    "${geladen.kapitel.kapitel.size} Kapitel · " +
-                                    "${geladen.merkmale.register.size} Merkmale · " +
-                                    "${geladen.medienplan.portraits.size} Live-Portraits",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TinteFarbe,
-                            )
-                            Text(
-                                text = "Engine bereit (Jahr ${startZustand.jahr}, Stimmung: ${stimmung.code}) — UI folgt in AP 3.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TinteMattFarbe,
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = titel,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = if (istFehler) farben.akzent else farben.tinte,
+                    textAlign = TextAlign.Center,
+                )
+                ArchivTrennlinie(farbe = farben.linieFein)
+                Text(
+                    text = untertitel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = farben.tinteMatt,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }
