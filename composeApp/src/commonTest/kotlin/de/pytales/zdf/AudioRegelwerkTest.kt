@@ -246,4 +246,61 @@ class AudioRegelwerkTest {
         }
         assertTrue(maxAbs in 1..(Short.MAX_VALUE / 4), "Pegel muss dezent bleiben, gefunden maxAbs=$maxAbs")
     }
+
+    @Test
+    fun koordinatorPausiertImHintergrundUndRespektiertMusiksperreBeiRueckkehr() {
+        val fakeAusgabe = FakeAudioAusgabe()
+        val koordinator = AudioKoordinator(fakeAusgabe)
+
+        val controller = SpielController(
+            content = content,
+            random = KotlinRandomSource(Random(91)),
+            initialAudioAktiv = true,
+        )
+
+        // 1. Startmenü spielt ruhig
+        koordinator.synchronisiereZustand(controller.aktuellerZustand.audioZustand)
+        assertEquals(1, fakeAusgabe.abgespielteSpuren.size)
+        assertEquals(AudioSpur.START_RUHIG, fakeAusgabe.abgespielteSpuren.last().first)
+
+        // 2. App geht in Hintergrund (onPause / onStop) -> Audio stoppt sofort
+        val stoppsVorPause = fakeAusgabe.stoppAufrufe
+        koordinator.setzeHintergrundPausiert(true)
+        assertTrue(koordinator.imHintergrundPausiert)
+        assertTrue(fakeAusgabe.stoppAufrufe > stoppsVorPause)
+
+        // Zustandswechsel in erlaubte Heimat während Hintergrund darf kein Audio starten
+        controller.setzeDirektwahlAktiv(true)
+        controller.durchgangBeginnen()
+        controller.waehlePerson("arbeiterschaft", Geschlecht.WEIBLICH, 18, direktwahlPfad = Pfad.HEIMAT)
+        koordinator.synchronisiereZustand(controller.aktuellerZustand.audioZustand)
+        assertEquals(1, fakeAusgabe.abgespielteSpuren.size)
+
+        // 3. Rückkehr in Vordergrund (onResume) in erlaubter Heimat -> dezente Heimat-Begleitung startet
+        koordinator.setzeHintergrundPausiert(false)
+        assertFalse(koordinator.imHintergrundPausiert)
+        assertEquals(2, fakeAusgabe.abgespielteSpuren.size)
+        assertEquals(AudioSpur.HEIMAT_RUHIG, fakeAusgabe.abgespielteSpuren.last().first)
+
+        // 4. Hintergrund + Wechsel auf Front (Musiksperre) -> Rückkehr bleibt strikt stumm
+        koordinator.setzeHintergrundPausiert(true)
+        val frontController = SpielController(
+            content = content,
+            random = KotlinRandomSource(Random(92)),
+            initialAudioAktiv = true,
+        )
+        frontController.setzeDirektwahlAktiv(true)
+        frontController.durchgangBeginnen()
+        frontController.waehlePerson("buergertum", Geschlecht.MAENNLICH, 18, direktwahlPfad = Pfad.FRONT)
+        koordinator.synchronisiereZustand(frontController.aktuellerZustand.audioZustand)
+        koordinator.setzeHintergrundPausiert(false)
+        assertEquals(2, fakeAusgabe.abgespielteSpuren.size, "Nach Rückkehr auf Front darf keine Musik starten.")
+
+        // 5. Stummgeschaltet im Hintergrund -> Rückkehr bleibt stumm
+        controller.setzeAudioAktiv(false)
+        koordinator.synchronisiereZustand(controller.aktuellerZustand.audioZustand)
+        koordinator.setzeHintergrundPausiert(true)
+        koordinator.setzeHintergrundPausiert(false)
+        assertEquals(2, fakeAusgabe.abgespielteSpuren.size, "Stummgeschalteter Ton darf nach Rückkehr nicht starten.")
+    }
 }

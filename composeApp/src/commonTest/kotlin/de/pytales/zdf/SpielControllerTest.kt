@@ -12,6 +12,7 @@ import de.pytales.zdf.model.SpielModus
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.state.SpielController
 import de.pytales.zdf.ui.state.UiStateMapper
+import de.pytales.zdf.ui.state.ZurueckErgebnis
 import de.pytales.zdf.ui.theme.Schriftgroesse
 import kotlin.random.Random
 import kotlin.test.Test
@@ -478,6 +479,101 @@ class SpielControllerTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun zurueckTasteSchliesstErklaerKartenUndWahrtKeinZurueckLeitplanke() {
+        val controller = SpielController(
+            content = content,
+            random = KotlinRandomSource(Random(701)),
+            initialSchriftgroesse = Schriftgroesse.GROSS,
+            initialAnalyseModus = true,
+            initialReduzierteAnimationen = true,
+            initialAudioAktiv = true,
+        )
+
+        // 1. Im Startmenü ohne Überlagerungen greift System-Zurück
+        assertFalse(controller.aktuellerZustand.sollZurueckAbfangen)
+        assertEquals(ZurueckErgebnis.SYSTEM_STANDARD, controller.verarbeiteZurueckTaste())
+
+        // 2. Geöffnete UI-Vorschau schließt sich über Zurück sauber
+        assertTrue(controller.uiVorschauOeffnen())
+        assertTrue(controller.aktuellerZustand.sollZurueckAbfangen)
+        assertEquals(ZurueckErgebnis.UI_VORSCHAU_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.zeigeUiVorschau)
+
+        // 3. Laufenden Durchgang starten bis in ein Ereignis
+        assertTrue(controller.waehleModus(SpielModus.LANG))
+        assertTrue(controller.setzeDirektwahlAktiv(true))
+        assertTrue(controller.durchgangBeginnen())
+        assertTrue(controller.waehlePerson("buergertum", Geschlecht.MAENNLICH, 18, direktwahlPfad = Pfad.FRONT))
+        assertTrue(controller.starteKapitel())
+        val ereignisPhase = assertIs<GamePhase.EreignisAnzeige>(controller.aktuellerZustand.gameState.phase)
+        assertTrue(controller.aktuellerZustand.istImLaufendenDurchgang)
+        assertTrue(controller.aktuellerZustand.sollZurueckAbfangen)
+
+        // 4. Geöffnete Wert-Erklärkarte schließt sich auf Zurück sauber (ohne Dialog)
+        controller.waehleWertErklaerung(WertSchluessel.VERSORGUNG)
+        assertTrue(controller.aktuellerZustand.hatOffeneErklaerKarte)
+        assertFalse(controller.aktuellerZustand.emotionDetailsOffen)
+        assertEquals(ZurueckErgebnis.ERKLAERKARTE_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertNull(controller.aktuellerZustand.ausgewaehlterWert)
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(ereignisPhase, controller.aktuellerZustand.gameState.phase)
+
+        // 5. Geöffnete Figuren-Detailkarte schließt sich auf Zurück ebenfalls sauber
+        controller.setzeEmotionDetailsOffen(true)
+        assertTrue(controller.aktuellerZustand.emotionDetailsOffen)
+        assertNull(controller.aktuellerZustand.ausgewaehlterWert)
+        assertEquals(ZurueckErgebnis.ERKLAERKARTE_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.emotionDetailsOffen)
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+
+        // 6. Ohne offene Erklärkarte öffnet Zurück die ruhige Sicherheitsabfrage (kein Zurück zur letzten Karte!)
+        assertFalse(controller.durchgangNachBestaetigungVerlassen(), "Verlassen darf ohne offene Abfrage nicht greifen.")
+        assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
+        assertTrue(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(ereignisPhase, controller.aktuellerZustand.gameState.phase)
+
+        // Erneutes Zurück schließt den Dialog sicher und bleibt im Durchgang
+        assertEquals(ZurueckErgebnis.DIALOG_GESCHLOSSEN, controller.verarbeiteZurueckTaste())
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(ereignisPhase, controller.aktuellerZustand.gameState.phase)
+
+        // 7. Ausdrücklich bestätigtes Verlassen kehrt sauber ins Startmenü zurück & bewahrt Einstellungen
+        assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
+        assertTrue(controller.durchgangNachBestaetigungVerlassen())
+        assertIs<GamePhase.Start>(controller.aktuellerZustand.gameState.phase)
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(Schriftgroesse.GROSS, controller.aktuellerZustand.schriftgroesse)
+        assertTrue(controller.aktuellerZustand.analyseModus)
+        assertTrue(controller.aktuellerZustand.reduzierteAnimationen)
+        assertTrue(controller.aktuellerZustand.audioAktiv)
+        assertEquals(SpielModus.LANG, controller.aktuellerZustand.gameState.modus)
+        assertTrue(controller.aktuellerZustand.gameState.direktwahlAktiv)
+    }
+
+    @Test
+    fun zurueckTasteSchuetztAuchAbgeschlossenenLebenslaufVorVersehentlichemVerlassen() {
+        val controller = SpielController(content, KotlinRandomSource(Random(702)))
+        assertTrue(controller.setzeDirektwahlAktiv(true))
+        assertTrue(controller.durchgangBeginnen())
+        assertTrue(controller.waehlePerson("landbevoelkerung", Geschlecht.WEIBLICH, 18, direktwahlPfad = Pfad.HEIMAT))
+        spieleBisAbschlussMitUiPruefung(controller, riskant = false)
+
+        val abschluss = assertIs<GamePhase.Abgeschlossen>(controller.aktuellerZustand.gameState.phase)
+        assertFalse(controller.aktuellerZustand.istImLaufendenDurchgang)
+        assertTrue(controller.aktuellerZustand.sollZurueckAbfangen)
+
+        // Erstes Zurück öffnet die ruhige Abfrage, damit der fertige Lebenslauf vor Druck/Export geschützt bleibt
+        assertEquals(ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET, controller.verarbeiteZurueckTaste())
+        assertTrue(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(abschluss, controller.aktuellerZustand.gameState.phase)
+
+        // Bleiben schließt Dialog ohne Datenverlust
+        assertTrue(controller.verlassenDialogSchliessen())
+        assertFalse(controller.aktuellerZustand.verlassenDialogOffen)
+        assertEquals(abschluss, controller.aktuellerZustand.gameState.phase)
     }
 
     // -------------------------------------------------------------------------

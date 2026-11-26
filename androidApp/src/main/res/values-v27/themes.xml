@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ZwischenDenFronten" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/archiv_papier</item>
+        <item name="android:statusBarColor">@color/archiv_dunkel</item>
+        <item name="android:navigationBarColor">@color/archiv_papier</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

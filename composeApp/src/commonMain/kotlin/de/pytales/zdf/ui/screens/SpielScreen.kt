@@ -12,6 +12,7 @@ import de.pytales.zdf.audio.AudioKoordinator
 import de.pytales.zdf.audio.erstellePlattformAudioAusgabe
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.ui.UiBaukastenDemo
+import de.pytales.zdf.ui.components.PlattformZurueckHandler
 import de.pytales.zdf.ui.state.SpielController
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
@@ -37,23 +38,34 @@ private sealed interface BildschirmSchluessel {
 /**
  * Durchgängiger Spielbildschirm-Router für alle Phasen von 1914 bis 1919
  * (inkl. ruhiger, abschaltbarer Phasenwechsel, optionalem dezentem Audio mit harter
- * Musiksperre an Front & Etappe sowie optionalem Zugang zur AP-3-Komponenten-Vorschau).
+ * Musiksperre an Front & Etappe, Hintergrund-Pausierung, Android-Zurück-Leitplanke
+ * sowie optionalem Zugang zur AP-3-Komponenten-Vorschau).
  */
 @Composable
 fun SpielScreen(
     controller: SpielController,
     modifier: Modifier = Modifier,
+    appImVordergrund: Boolean = true,
+    onAppBeenden: (() -> Unit)? = null,
 ) {
     val uiState by controller.uiState.collectAsState()
     val reduzierteAnimationen = ArchivTheme.reduzierteAnimationen
 
+    // Android-Zurück-Taste / Zurück-Geste: Erklärkarten sauber schließen und während eines
+    // Durchgangs die „Kein Zurück“-Leitplanke über eine ruhige Sicherheitsabfrage wahren.
+    PlattformZurueckHandler(aktiv = uiState.sollZurueckAbfangen) {
+        controller.verarbeiteZurueckTaste()
+    }
+
     // Plattformübergreifende Audio-Steuerung mit harter Musiksperre an Front & Etappe
+    // sowie sauberer Pausierung beim Wechsel der App in den Hintergrund (`onPause`/`onStop`).
     val audioKoordinator = remember {
         AudioKoordinator(erstellePlattformAudioAusgabe())
     }
     val audioZustand = uiState.audioZustand
-    LaunchedEffect(audioZustand, uiState.zeigeUiVorschau) {
-        if (uiState.zeigeUiVorschau) {
+    LaunchedEffect(audioZustand, uiState.zeigeUiVorschau, appImVordergrund) {
+        audioKoordinator.setzeHintergrundPausiert(!appImVordergrund)
+        if (!appImVordergrund || uiState.zeigeUiVorschau) {
             audioKoordinator.stoppe()
         } else {
             audioKoordinator.synchronisiereZustand(audioZustand)
@@ -138,6 +150,7 @@ fun SpielScreen(
                     onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
+                    onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
             }
 
@@ -153,6 +166,7 @@ fun SpielScreen(
                     onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
+                    onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
             }
 
@@ -167,6 +181,7 @@ fun SpielScreen(
                     onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
+                    onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
             }
 
@@ -179,6 +194,7 @@ fun SpielScreen(
                 onAnalyseModusToggle = controller::toggleAnalyseModus,
                 onAudioToggle = controller::toggleAudioAktiv,
                 onWertErklaerungChange = controller::waehleWertErklaerung,
+                onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
             )
 
             is BildschirmSchluessel.KapitelAbschluss -> {
@@ -192,6 +208,7 @@ fun SpielScreen(
                     onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
+                    onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
             }
 
@@ -211,5 +228,19 @@ fun SpielScreen(
                 )
             }
         }
+    }
+
+    if (uiState.verlassenDialogOffen) {
+        VerlassenSicherheitsDialog(
+            istAbgeschlossen = uiState.gameState.phase is GamePhase.Abgeschlossen,
+            onBleiben = controller::verlassenDialogSchliessen,
+            onZumStartmenue = controller::durchgangNachBestaetigungVerlassen,
+            onAppBeenden = onAppBeenden?.let { beenden ->
+                {
+                    controller.verlassenDialogSchliessen()
+                    beenden()
+                }
+            },
+        )
     }
 }

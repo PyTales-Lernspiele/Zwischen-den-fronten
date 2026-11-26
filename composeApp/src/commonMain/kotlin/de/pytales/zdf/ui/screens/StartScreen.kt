@@ -112,6 +112,7 @@ fun StartScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
                     .archivFokusGruppe(),

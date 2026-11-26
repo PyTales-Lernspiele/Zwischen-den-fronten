@@ -38,6 +38,29 @@ data class HerkunftEntwurf(
 }
 
 /**
+ * Ergebnis einer System-Zurück-Aktion (z. B. Android-Zurück-Taste / Zurück-Geste).
+ *
+ * Setzt die pädagogische Leitplanke „Kein Zurück“ auch auf Android konsequent durch:
+ * Es wird niemals zu einer vorherigen Karte oder Entscheidung zurückgesprungen.
+ */
+enum class ZurueckErgebnis {
+    /** Offene Verlassen-Sicherheitsabfrage wurde ruhig geschlossen. */
+    DIALOG_GESCHLOSSEN,
+
+    /** Die AP-3-Komponenten-Vorschau wurde geschlossen (zurück ins Startmenü). */
+    UI_VORSCHAU_GESCHLOSSEN,
+
+    /** Eine geöffnete Befindens- oder Figuren-Erklärkarte wurde geschlossen. */
+    ERKLAERKARTE_GESCHLOSSEN,
+
+    /** Eine ruhige Sicherheitsabfrage zum Verlassen des Durchgangs wurde geöffnet. */
+    SICHERHEITSABFRAGE_GEOEFFNET,
+
+    /** Im Startmenü ohne offene Überlagerung greift das normale System-Zurück (App verlassen). */
+    SYSTEM_STANDARD,
+}
+
+/**
  * Unveränderlicher Gesamt-UI-Zustand rund um [GameState] und globale UI-Einstellungen.
  */
 @Immutable
@@ -51,6 +74,8 @@ data class SpielUiState(
     val zeigeUiVorschau: Boolean = false,
     val aufgeklappteGrundsaetze: Set<String> = emptySet(),
     val ausgewaehlterWert: WertSchluessel? = null,
+    val emotionDetailsOffen: Boolean = false,
+    val verlassenDialogOffen: Boolean = false,
     val herkunftEntwurf: HerkunftEntwurf = HerkunftEntwurf(),
     val ausgewaehlterErwerbId: String? = null,
     val auffangnetzBestaetigt: Boolean = false,
@@ -62,6 +87,24 @@ data class SpielUiState(
                 phase.hartesEnde != null &&
                 !auffangnetzBestaetigt
         }
+
+    /** `true`, wenn in der Kopfleiste eine Befindens- oder Figuren-Erklärkarte geöffnet ist. */
+    val hatOffeneErklaerKarte: Boolean
+        get() = ausgewaehlterWert != null || emotionDetailsOffen
+
+    /** `true` ab Einstieg (`HerkunftWahl`) bis vor dem Abschluss (`Abgeschlossen`). */
+    val istImLaufendenDurchgang: Boolean
+        get() = gameState.phase !is GamePhase.Start && gameState.phase !is GamePhase.Abgeschlossen
+
+    /**
+     * Gibt an, ob die System-Zurück-Taste abgefangen werden muss.
+     * Im Startmenü ohne offene Vorschau/Dialog bleibt sie frei für normales App-Verlassen.
+     */
+    val sollZurueckAbfangen: Boolean
+        get() = verlassenDialogOffen ||
+            zeigeUiVorschau ||
+            hatOffeneErklaerKarte ||
+            gameState.phase !is GamePhase.Start
 
     /**
      * Effektiver Audio-Zustand inkl. harter Musiksperre auf `front`, `etappe` und im Auffangnetz.
@@ -166,7 +209,106 @@ class SpielController(
     }
 
     fun waehleWertErklaerung(schluessel: WertSchluessel?) {
-        _uiState.update { it.copy(ausgewaehlterWert = schluessel) }
+        _uiState.update {
+            it.copy(
+                ausgewaehlterWert = schluessel,
+                emotionDetailsOffen = if (schluessel != null) false else it.emotionDetailsOffen,
+            )
+        }
+    }
+
+    fun setzeEmotionDetailsOffen(offen: Boolean) {
+        _uiState.update {
+            it.copy(
+                emotionDetailsOffen = offen,
+                ausgewaehlterWert = if (offen) null else it.ausgewaehlterWert,
+            )
+        }
+    }
+
+    /**
+     * Schließt geöffnete Befindens- oder Figuren-Erklärkarten in der Kopfleiste.
+     * Gibt `true` zurück, wenn mindestens eine Karte geöffnet war.
+     */
+    fun schliesseErklaerKarten(): Boolean {
+        val aktuell = _uiState.value
+        if (!aktuell.hatOffeneErklaerKarte) return false
+        _uiState.value = aktuell.copy(
+            ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+        )
+        return true
+    }
+
+    /**
+     * Verarbeitet die System-Zurück-Taste (insbesondere Android `BackHandler`) gemäß der
+     * „Kein Zurück“-Leitplanke:
+     * 1. Offene Sicherheitsabfrage schließen (sichere Standardaktion: im Durchgang bleiben).
+     * 2. AP-3-UI-Vorschau schließen.
+     * 3. Geöffnete Befindens- oder Figuren-Erklärkarte schließen.
+     * 4. Während eines laufenden oder abgeschlossenen Durchgangs niemals rückwärts navigieren,
+     *    sondern eine ruhige Sicherheitsabfrage öffnen.
+     * 5. Im Startmenü ohne Überlagerungen greift das normale System-Zurück.
+     */
+    fun verarbeiteZurueckTaste(): ZurueckErgebnis {
+        val aktuell = _uiState.value
+        return when {
+            aktuell.verlassenDialogOffen -> {
+                _uiState.value = aktuell.copy(verlassenDialogOffen = false)
+                ZurueckErgebnis.DIALOG_GESCHLOSSEN
+            }
+
+            aktuell.zeigeUiVorschau -> {
+                _uiState.value = aktuell.copy(zeigeUiVorschau = false)
+                ZurueckErgebnis.UI_VORSCHAU_GESCHLOSSEN
+            }
+
+            aktuell.hatOffeneErklaerKarte -> {
+                _uiState.value = aktuell.copy(
+                    ausgewaehlterWert = null,
+                    emotionDetailsOffen = false,
+                )
+                ZurueckErgebnis.ERKLAERKARTE_GESCHLOSSEN
+            }
+
+            aktuell.gameState.phase is GamePhase.Start -> ZurueckErgebnis.SYSTEM_STANDARD
+
+            else -> {
+                _uiState.value = aktuell.copy(verlassenDialogOffen = true)
+                ZurueckErgebnis.SICHERHEITSABFRAGE_GEOEFFNET
+            }
+        }
+    }
+
+    fun verlassenDialogSchliessen(): Boolean {
+        val aktuell = _uiState.value
+        if (!aktuell.verlassenDialogOffen) return false
+        _uiState.value = aktuell.copy(verlassenDialogOffen = false)
+        return true
+    }
+
+    /**
+     * Bricht einen Durchgang ausschließlich nach ausdrücklicher Bestätigung in der
+     * ruhigen Verlassen-Sicherheitsabfrage ab und kehrt sauber ins Startmenü zurück.
+     * Globale Unterrichts- und Zugänglichkeits-Einstellungen bleiben erhalten.
+     */
+    fun durchgangNachBestaetigungVerlassen(): Boolean {
+        val aktuell = _uiState.value
+        if (!aktuell.verlassenDialogOffen) return false
+        _uiState.value = aktuell.copy(
+            gameState = engine.neuesSpiel(
+                modus = aktuell.gameState.modus,
+                direktwahlAktiv = aktuell.gameState.direktwahlAktiv,
+            ),
+            zeigeUiVorschau = false,
+            ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
+            herkunftEntwurf = HerkunftEntwurf(),
+            ausgewaehlterErwerbId = null,
+            auffangnetzBestaetigt = false,
+        )
+        return true
     }
 
     /**
@@ -244,6 +386,8 @@ class SpielController(
             gameState = naechster,
             zeigeUiVorschau = false,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             herkunftEntwurf = HerkunftEntwurf(),
             ausgewaehlterErwerbId = null,
             auffangnetzBestaetigt = false,
@@ -335,6 +479,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             ausgewaehlterErwerbId = null,
         )
         return true
@@ -347,6 +493,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             ausgewaehlterErwerbId = null,
         )
         return true
@@ -373,6 +521,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             ausgewaehlterErwerbId = null,
         )
         return true
@@ -389,6 +539,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             auffangnetzBestaetigt = false,
         )
         return true
@@ -402,6 +554,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             auffangnetzBestaetigt = false,
         )
         return true
@@ -414,6 +568,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             auffangnetzBestaetigt = false,
         )
         return true
@@ -426,6 +582,8 @@ class SpielController(
         _uiState.value = aktuell.copy(
             gameState = naechster,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
         )
         return true
     }
@@ -438,7 +596,10 @@ class SpielController(
         val aktuell = _uiState.value
         val phase = aktuell.gameState.phase as? GamePhase.Abgeschlossen ?: return false
         if (phase.hartesEnde == null || aktuell.auffangnetzBestaetigt) return false
-        _uiState.value = aktuell.copy(auffangnetzBestaetigt = true)
+        _uiState.value = aktuell.copy(
+            auffangnetzBestaetigt = true,
+            verlassenDialogOffen = false,
+        )
         return true
     }
 
@@ -458,6 +619,8 @@ class SpielController(
             ),
             zeigeUiVorschau = false,
             ausgewaehlterWert = null,
+            emotionDetailsOffen = false,
+            verlassenDialogOffen = false,
             herkunftEntwurf = HerkunftEntwurf(),
             ausgewaehlterErwerbId = null,
             auffangnetzBestaetigt = false,

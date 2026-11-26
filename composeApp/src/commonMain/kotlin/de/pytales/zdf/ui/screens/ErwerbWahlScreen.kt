@@ -71,6 +71,7 @@ fun ErwerbWahlScreen(
     onAnalyseModusToggle: () -> Unit,
     onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
+    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
@@ -96,6 +97,7 @@ fun ErwerbWahlScreen(
             onAnalyseModusToggle = onAnalyseModusToggle,
             onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
+            onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
         )
 
         Box(
@@ -108,6 +110,7 @@ fun ErwerbWahlScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
                     .archivFokusGruppe(),

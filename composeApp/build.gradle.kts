@@ -101,6 +101,10 @@ kotlin {
             implementation(libs.kotlin.test)
         }
 
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+        }
+
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

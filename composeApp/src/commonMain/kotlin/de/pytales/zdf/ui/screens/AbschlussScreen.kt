@@ -174,6 +174,7 @@ private fun AuffangnetzAnsicht(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = 760.dp)
                     .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
                     .archivFokusGruppe(),
@@ -404,6 +405,7 @@ private fun LebenslaufAnsicht(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite)
                     .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
                     .archivFokusGruppe(),

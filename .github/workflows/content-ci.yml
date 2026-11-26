@@ -60,6 +60,9 @@ jobs:
       - name: Android Debug APK bauen
         run: ./gradlew :androidApp:assembleDebug --no-daemon
 
+      - name: Android Release APK bauen (R8/ProGuard prüfen)
+        run: ./gradlew :androidApp:assembleRelease --no-daemon
+
       - name: Desktop JVM JAR bauen
         run: ./gradlew :composeApp:desktopJar --no-daemon
 

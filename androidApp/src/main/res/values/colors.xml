@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="archiv_papier">#EFE9DC</color>
+    <color name="archiv_papier_hell">#F7F3EA</color>
+    <color name="archiv_papier_dunkel">#E2DBCA</color>
+    <color name="archiv_tinte">#1F1C18</color>
+    <color name="archiv_akzent">#8A3324</color>
+    <color name="archiv_dunkel">#15130F</color>
+</resources>

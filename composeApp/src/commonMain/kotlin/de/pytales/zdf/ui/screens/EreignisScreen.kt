@@ -60,6 +60,7 @@ fun EreignisScreen(
     onAnalyseModusToggle: () -> Unit,
     onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
+    onEmotionDetailsOffenChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val gameState = uiState.gameState
@@ -150,6 +151,7 @@ fun EreignisScreen(
             onAnalyseModusToggle = onAnalyseModusToggle,
             onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
+            onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
         )
 
         Box(
@@ -165,6 +167,7 @@ fun EreignisScreen(
                 label = "ereignisKartenWechsel",
                 modifier = Modifier
                     .fillMaxWidth()
+                    .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite),
             ) { _ ->
                 Column(
