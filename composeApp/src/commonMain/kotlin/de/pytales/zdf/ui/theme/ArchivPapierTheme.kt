@@ -26,11 +26,11 @@ val LocalReduzierteAnimationen = staticCompositionLocalOf { false }
  * Ruhige, kantige Archiv-Formen (Papierbögen, Stempel, Aktenblätter statt runder Spiel-Pills).
  */
 val ArchivShapes = Shapes(
-    extraSmall = RoundedCornerShape(2.dp),
-    small = RoundedCornerShape(3.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(6.dp),
-    extraLarge = RoundedCornerShape(8.dp),
+    extraSmall = RoundedCornerShape(3.dp),
+    small = RoundedCornerShape(5.dp),
+    medium = RoundedCornerShape(6.dp),
+    large = RoundedCornerShape(8.dp),
+    extraLarge = RoundedCornerShape(10.dp),
 )
 
 /**
@@ -70,8 +70,8 @@ object ArchivTheme {
  * - Skaliert die gesamte Typografie über die 3 Stufen [Schriftgroesse.KLEIN], [Schriftgroesse.MITTEL]
  *   und [Schriftgroesse.GROSS] (Beamer-Modus).
  * - Steuert ruhige Übergänge bzw. reduzierte Animationen zentral über [reduzierteAnimationen].
- * - Erkennt die [LayoutKlasse] automatisch anhand der verfügbaren Fensterbreite, sofern kein
- *   explizites [layoutKlasseOverride] gesetzt wird.
+ * - Erkennt die [LayoutKlasse] und Querformat-Höhe automatisch anhand der verfügbaren Fenstergröße,
+ *   sofern kein explizites [layoutKlasseOverride] gesetzt wird.
  */
 @Composable
 fun ArchivPapierTheme(
@@ -108,8 +108,9 @@ fun ArchivPapierTheme(
     } else {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val ermittelteKlasse = LayoutKlasse.vonBreite(maxWidth)
-            val metrik = remember(ermittelteKlasse, schriftgroesse) {
-                layoutMetrikFuer(ermittelteKlasse, schriftgroesse)
+            val hoeheDp = maxHeight.value
+            val metrik = remember(ermittelteKlasse, schriftgroesse, hoeheDp) {
+                layoutMetrikFuer(ermittelteKlasse, schriftgroesse, hoeheDp = hoeheDp)
             }
             CompositionLocalProvider(
                 LocalArchivFarben provides farben,

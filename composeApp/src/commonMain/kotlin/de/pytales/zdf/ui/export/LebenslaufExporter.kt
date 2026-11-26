@@ -41,7 +41,6 @@ object LebenslaufExporter {
         gameState: GameState,
         phase: GamePhase.Abgeschlossen,
         mitProtokoll: Boolean = true,
-        analyseModus: Boolean = false,
     ): LebenslaufExportDokument {
         val lebenslauf = phase.lebenslauf
         val person = gameState.person
@@ -85,7 +84,6 @@ object LebenslaufExporter {
             modusBezeichnung = modusBezeichnung,
             musterungText = musterungText,
             protokollUi = protokollUi,
-            analyseModus = analyseModus,
         )
 
         val druckHtml = baueDruckHtml(
@@ -100,7 +98,6 @@ object LebenslaufExporter {
             modusBezeichnung = modusBezeichnung,
             musterungText = musterungText,
             protokollUi = protokollUi,
-            analyseModus = analyseModus,
         )
 
         return LebenslaufExportDokument(
@@ -162,7 +159,6 @@ object LebenslaufExporter {
         modusBezeichnung: String,
         musterungText: String?,
         protokollUi: List<ProtokollUiEintrag>,
-        analyseModus: Boolean,
     ): String = buildString {
         val konf = content.konfiguration
         val lebenslauf = phase.lebenslauf
@@ -206,10 +202,6 @@ object LebenslaufExporter {
                 appendLine("„${ausgang.deutung}“")
                 appendLine()
                 appendLine(lebenslauf.fazit)
-                if (analyseModus && ausgang.lehrplan.isNotBlank()) {
-                    appendLine()
-                    appendLine("Lehrplanbezug: ${ausgang.lehrplan}")
-                }
             }
 
             hartesEnde != null -> {
@@ -252,8 +244,7 @@ object LebenslaufExporter {
             appendLine("5. ENTSCHEIDUNGSPROTOKOLL (${protokollUi.size} STATIONEN)")
             appendLine("----------------------------------------------------------------------")
             protokollUi.forEachIndexed { idx, eintrag ->
-                val archivSuffix = if (analyseModus) " [${eintrag.ereignisId}]" else ""
-                appendLine("${idx + 1}. ${eintrag.jahr} · ${eintrag.station}$archivSuffix: ${eintrag.wahl}")
+                appendLine("${idx + 1}. ${eintrag.jahr} · ${eintrag.station}: ${eintrag.wahl}")
             }
             appendLine()
         }
@@ -291,7 +282,6 @@ object LebenslaufExporter {
         modusBezeichnung: String,
         musterungText: String?,
         protokollUi: List<ProtokollUiEintrag>,
-        analyseModus: Boolean,
     ): String {
         val konf = content.konfiguration
         val fw = konf.farbwelt
@@ -385,9 +375,6 @@ object LebenslaufExporter {
                     appendLine("      <h2>Historischer Ausgang (1919): ${e(ausgang.titel)}</h2>")
                     appendLine("      <p class=\"deutung\">„${e(ausgang.deutung)}“</p>")
                     appendLine("      <p>${e(lebenslauf.fazit)}</p>")
-                    if (analyseModus && ausgang.lehrplan.isNotBlank()) {
-                        appendLine("      <div class=\"hinweis-box\"><strong>Lehrplanbezug:</strong> ${e(ausgang.lehrplan)}</div>")
-                    }
                 }
 
                 hartesEnde != null -> {
@@ -455,14 +442,9 @@ object LebenslaufExporter {
                 appendLine("        <thead><tr><th>Nr.</th><th>Jahr</th><th>Station</th><th>Gewählter Weg</th></tr></thead>")
                 appendLine("        <tbody>")
                 protokollUi.forEachIndexed { idx, eintrag ->
-                    val stationText = if (analyseModus) {
-                        "${eintrag.station} (${eintrag.ereignisId})"
-                    } else {
-                        eintrag.station
-                    }
                     appendLine(
                         "          <tr><td>${idx + 1}</td><td>${eintrag.jahr}</td>" +
-                            "<td>${e(stationText)}</td><td><strong>${e(eintrag.wahl)}</strong></td></tr>",
+                            "<td>${e(eintrag.station)}</td><td><strong>${e(eintrag.wahl)}</strong></td></tr>",
                     )
                 }
                 appendLine("        </tbody>")

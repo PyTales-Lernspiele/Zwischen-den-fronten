@@ -130,9 +130,9 @@ Der Workflow [`.github/workflows/android-release.yml`](../.github/workflows/andr
 
 ## 5. Hinweis zum Nachziehen der Bildwelt (AP 5b)
 
-Im aktuellen Stand sind die ersten **8 Stil-A-Kernbilder** (7 Basis-Portraits + `schauplatz_brotschlange`) fest als WebP-Assets in der App gebündelt; fehlende Motive zeigen sauber den Basis-Portrait- bzw. Archivtafel-Fallback (`de.pytales.zdf.ui.media.BildAufloeser`).
+Im aktuellen Stand (`v1.1.0`, `versionCode = 10100`, festes Querformat `sensorLandscape`) sind bereits **19 von 63 Stil-A-Kernbildern** fest als WebP-Assets in der App gebündelt (alle 8 Basis-Portraits komplett, 10 Live-Emotions-Portraits aus Batch 1 sowie `schauplatz_brotschlange`); fehlende Motive zeigen sauber den Basis-Portrait- bzw. Archivtafel-Fallback (`de.pytales.zdf.ui.media.BildAufloeser`).
 
-Sobald die übrigen **55 Stufe-1-Bilder** aus AP 5b ergänzt werden:
+Sobald die übrigen **44 Stufe-1-Bilder** (Batches 2–5) aus AP 5b ergänzt werden:
 1. Bilder wie in [`docs/bildwelt/PROMPT_BIBEL.md`](bildwelt/PROMPT_BIBEL.md) beschrieben über `python3 tools/prepare_media.py --input <ordner> --save-master --update-plan` einpflegen.
 2. Mit `python3 tools/validate_content.py --require-all-stufe1` prüfen.
-3. Einen neuen Android-Release-Build bzw. ein neues Tag (z. B. `v1.1.0`) auslösen — **eine Änderung am Android- oder Kotlin-Code ist dafür nicht erforderlich**, da Gradle alle WebP-Dateien aus `content/media/` automatisch in die App packt.
+3. Einen neuen Android-Release-Build bzw. ein neues Tag (z. B. `v1.2.0`) auslösen — **eine Änderung am Android- oder Kotlin-Code ist dafür nicht erforderlich**, da Gradle alle WebP-Dateien aus `content/media/` automatisch in die App packt.

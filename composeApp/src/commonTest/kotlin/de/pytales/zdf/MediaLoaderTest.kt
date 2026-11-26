@@ -155,8 +155,8 @@ class MediaLoaderTest {
         )
 
         assertTrue(
-            erwarteteVorhandeneIds.size >= 8,
-            "Erwartet mindestens die 8 Stil-A-Kernbilder aus AP 5a, gefunden ${erwarteteVorhandeneIds.size}.",
+            erwarteteVorhandeneIds.size >= 19,
+            "Erwartet mindestens 19 Stil-A-Kernbilder (AP 5a + AP 5b Batch 1), gefunden ${erwarteteVorhandeneIds.size}.",
         )
         assertEquals(
             erwarteteVorhandeneIds,
@@ -179,6 +179,15 @@ class MediaLoaderTest {
             verfuegbareIds = ComposeMedienRegister.verfuegbareIds,
         )
         assertTrue(arbeiterinHungrig.istVorhanden)
+        assertEquals("portrait_arbeiterschaft_w_hungrig", arbeiterinHungrig.aufgeloesteId)
+        assertEquals(BildEbene.PORTRAIT_STUFE1, arbeiterinHungrig.ebene)
+
+        val adelWeiblichNeutral = BildAufloeser.loesePortrait(
+            portraitId = "portrait_adel_w_neutral",
+            verfuegbareIds = ComposeMedienRegister.verfuegbareIds,
+        )
+        assertTrue(adelWeiblichNeutral.istVorhanden)
+        assertEquals(BildEbene.PORTRAIT_STUFE1, adelWeiblichNeutral.ebene)
     }
 
     private fun leseWebpMasse(data: ByteArray): Pair<Int, Int> {

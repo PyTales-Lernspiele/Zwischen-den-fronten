@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import de.pytales.zdf.audio.AudioKoordinator
 import de.pytales.zdf.audio.erstellePlattformAudioAusgabe
 import de.pytales.zdf.engine.GamePhase
-import de.pytales.zdf.ui.UiBaukastenDemo
 import de.pytales.zdf.ui.components.PlattformZurueckHandler
 import de.pytales.zdf.ui.state.SpielController
 import de.pytales.zdf.ui.theme.ArchivTheme
@@ -23,7 +22,6 @@ import de.pytales.zdf.ui.theme.ArchivUebergaenge
  * des Ausgangs ruhig innerhalb von [EreignisScreen] geschieht, ohne die Kopfleiste flackern zu lassen.
  */
 private sealed interface BildschirmSchluessel {
-    data object UiVorschau : BildschirmSchluessel
     data object Start : BildschirmSchluessel
     data object HerkunftWahl : BildschirmSchluessel
     data object MusterungErgebnis : BildschirmSchluessel
@@ -39,7 +37,7 @@ private sealed interface BildschirmSchluessel {
  * Durchgängiger Spielbildschirm-Router für alle Phasen von 1914 bis 1919
  * (inkl. ruhiger, abschaltbarer Phasenwechsel, optionalem dezentem Audio mit harter
  * Musiksperre an Front & Etappe, Hintergrund-Pausierung, Android-Zurück-Leitplanke
- * sowie optionalem Zugang zur AP-3-Komponenten-Vorschau).
+ * sowie aufgeräumtem Einstellungs- und Grundsätze-Dialog).
  */
 @Composable
 fun SpielScreen(
@@ -51,8 +49,8 @@ fun SpielScreen(
     val uiState by controller.uiState.collectAsState()
     val reduzierteAnimationen = ArchivTheme.reduzierteAnimationen
 
-    // Android-Zurück-Taste / Zurück-Geste: Erklärkarten sauber schließen und während eines
-    // Durchgangs die „Kein Zurück“-Leitplanke über eine ruhige Sicherheitsabfrage wahren.
+    // Android-Zurück-Taste / Zurück-Geste: schließt Dialoge & Erklärkarten sauber und
+    // wahrt während eines Durchgangs die „Kein Zurück“-Leitplanke über die Sicherheitsabfrage.
     PlattformZurueckHandler(aktiv = uiState.sollZurueckAbfangen) {
         controller.verarbeiteZurueckTaste()
     }
@@ -63,9 +61,9 @@ fun SpielScreen(
         AudioKoordinator(erstellePlattformAudioAusgabe())
     }
     val audioZustand = uiState.audioZustand
-    LaunchedEffect(audioZustand, uiState.zeigeUiVorschau, appImVordergrund) {
+    LaunchedEffect(audioZustand, appImVordergrund) {
         audioKoordinator.setzeHintergrundPausiert(!appImVordergrund)
-        if (!appImVordergrund || uiState.zeigeUiVorschau) {
+        if (!appImVordergrund) {
             audioKoordinator.stoppe()
         } else {
             audioKoordinator.synchronisiereZustand(audioZustand)
@@ -77,24 +75,21 @@ fun SpielScreen(
         }
     }
 
-    val schluessel: BildschirmSchluessel = when {
-        uiState.zeigeUiVorschau -> BildschirmSchluessel.UiVorschau
-        else -> when (val phase = uiState.gameState.phase) {
-            is GamePhase.Start -> BildschirmSchluessel.Start
-            is GamePhase.HerkunftWahl -> BildschirmSchluessel.HerkunftWahl
-            is GamePhase.MusterungErgebnis -> BildschirmSchluessel.MusterungErgebnis
-            is GamePhase.ErwerbWahl -> BildschirmSchluessel.ErwerbWahl
-            is GamePhase.KapitelStart -> BildschirmSchluessel.KapitelStart(phase.kapitel.jahr)
-            is GamePhase.EreignisAnzeige,
-            is GamePhase.EreignisAusgang,
-            -> BildschirmSchluessel.Ereignis
+    val schluessel: BildschirmSchluessel = when (val phase = uiState.gameState.phase) {
+        is GamePhase.Start -> BildschirmSchluessel.Start
+        is GamePhase.HerkunftWahl -> BildschirmSchluessel.HerkunftWahl
+        is GamePhase.MusterungErgebnis -> BildschirmSchluessel.MusterungErgebnis
+        is GamePhase.ErwerbWahl -> BildschirmSchluessel.ErwerbWahl
+        is GamePhase.KapitelStart -> BildschirmSchluessel.KapitelStart(phase.kapitel.jahr)
+        is GamePhase.EreignisAnzeige,
+        is GamePhase.EreignisAusgang,
+        -> BildschirmSchluessel.Ereignis
 
-            is GamePhase.KapitelAbschluss -> BildschirmSchluessel.KapitelAbschluss(phase.kapitel.jahr)
-            is GamePhase.Abgeschlossen -> if (uiState.istImAuffangnetz) {
-                BildschirmSchluessel.Auffangnetz
-            } else {
-                BildschirmSchluessel.Lebenslauf
-            }
+        is GamePhase.KapitelAbschluss -> BildschirmSchluessel.KapitelAbschluss(phase.kapitel.jahr)
+        is GamePhase.Abgeschlossen -> if (uiState.istImAuffangnetz) {
+            BildschirmSchluessel.Auffangnetz
+        } else {
+            BildschirmSchluessel.Lebenslauf
         }
     }
 
@@ -105,25 +100,14 @@ fun SpielScreen(
         modifier = modifier,
     ) { ziel ->
         when (ziel) {
-            BildschirmSchluessel.UiVorschau -> UiBaukastenDemo(
-                content = controller.content,
-                schriftgroesse = uiState.schriftgroesse,
-                onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                onZurueckZumSpiel = controller::uiVorschauSchliessen,
-            )
-
             BildschirmSchluessel.Start -> StartScreen(
                 content = controller.content,
                 uiState = uiState,
                 onModusWaehlen = controller::waehleModus,
-                onGrundsatzToggle = controller::toggleOnboardingGrundsatz,
-                onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                onAnalyseModusToggle = controller::toggleAnalyseModus,
-                onReduzierteAnimationenToggle = controller::toggleReduzierteAnimationen,
                 onAudioToggle = controller::toggleAudioAktiv,
-                onDirektwahlChange = controller::setzeDirektwahlAktiv,
+                onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                onGrundsaetzeOeffnen = controller::grundsaetzeOeffnen,
                 onDurchgangBeginnen = controller::durchgangBeginnen,
-                onUiVorschauOeffnen = controller::uiVorschauOeffnen,
             )
 
             BildschirmSchluessel.HerkunftWahl -> HerkunftWahlScreen(
@@ -134,9 +118,8 @@ fun SpielScreen(
                 onAlterWaehlen = controller::waehleAlterEntwurf,
                 onDirektPfadWaehlen = controller::waehleDirektPfadEntwurf,
                 onBestaetigen = controller::bestaetigePerson,
-                onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                onAnalyseModusToggle = controller::toggleAnalyseModus,
                 onAudioToggle = controller::toggleAudioAktiv,
+                onEinstellungenOeffnen = controller::einstellungenOeffnen,
             )
 
             BildschirmSchluessel.MusterungErgebnis -> {
@@ -146,9 +129,9 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onBestaetigen = controller::bestaetigeMusterung,
-                    onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                    onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
+                    onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                    onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
                     onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
@@ -162,9 +145,9 @@ fun SpielScreen(
                     phase = phase,
                     onErwerbMarkieren = controller::markiereErwerb,
                     onBestaetigen = controller::bestaetigeAusgewaehltenErwerb,
-                    onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                    onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
+                    onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                    onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
                     onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
@@ -177,9 +160,9 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onStarteKapitel = controller::starteKapitel,
-                    onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                    onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
+                    onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                    onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
                     onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
@@ -190,9 +173,9 @@ fun SpielScreen(
                 uiState = uiState,
                 onOptionWaehlen = controller::waehleOption,
                 onWeiterNachAusgang = controller::weiterNachAusgang,
-                onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                onAnalyseModusToggle = controller::toggleAnalyseModus,
                 onAudioToggle = controller::toggleAudioAktiv,
+                onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                 onWertErklaerungChange = controller::waehleWertErklaerung,
                 onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
             )
@@ -204,9 +187,9 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onNaechstesKapitel = controller::naechstesKapitelStarten,
-                    onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                    onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
+                    onEinstellungenOeffnen = controller::einstellungenOeffnen,
+                    onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
                     onEmotionDetailsOffenChange = controller::setzeEmotionDetailsOffen,
                 )
@@ -222,14 +205,37 @@ fun SpielScreen(
                     phase = phase,
                     onAuffangnetzBestaetigen = controller::auffangnetzBestaetigen,
                     onNeuerDurchgang = controller::neuerDurchgang,
-                    onSchriftgroesseChange = controller::setzeSchriftgroesse,
-                    onAnalyseModusToggle = controller::toggleAnalyseModus,
                     onAudioToggle = controller::toggleAudioAktiv,
+                    onEinstellungenOeffnen = controller::einstellungenOeffnen,
                 )
             }
         }
     }
 
+    // Ruhiger Einstellungs-Dialog (jederzeit über das Zahnrad-Symbol erreichbar)
+    if (uiState.einstellungenOffen) {
+        EinstellungenDialog(
+            content = controller.content,
+            uiState = uiState,
+            onSchriftgroesseChange = controller::setzeSchriftgroesse,
+            onReduzierteAnimationenToggle = controller::toggleReduzierteAnimationen,
+            onAudioToggle = controller::toggleAudioAktiv,
+            onDirektwahlChange = controller::setzeDirektwahlAktiv,
+            onSchliessen = controller::einstellungenSchliessen,
+        )
+    }
+
+    // Grundsätze-Dialog im Startmenü
+    if (uiState.grundsaetzeOffen) {
+        GrundsaetzeDialog(
+            grundsaetze = controller.content.konfiguration.onboarding.grundsaetze,
+            aufgeklappteIds = uiState.aufgeklappteGrundsaetze,
+            onGrundsatzToggle = controller::toggleOnboardingGrundsatz,
+            onSchliessen = controller::grundsaetzeSchliessen,
+        )
+    }
+
+    // Ruhige Sicherheitsabfrage beim Verlassen eines laufenden oder abgeschlossenen Durchgangs
     if (uiState.verlassenDialogOffen) {
         VerlassenSicherheitsDialog(
             istAbgeschlossen = uiState.gameState.phase is GamePhase.Abgeschlossen,

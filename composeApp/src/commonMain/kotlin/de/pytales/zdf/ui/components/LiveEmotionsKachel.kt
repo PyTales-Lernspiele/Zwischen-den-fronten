@@ -1,6 +1,5 @@
 package de.pytales.zdf.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -11,13 +10,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,20 +50,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.model.Stimmung
 import de.pytales.zdf.ui.media.ArchivPortraitBild
-import de.pytales.zdf.ui.media.BildAufloeser
-import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.LiveEmotionUiState
 import de.pytales.zdf.ui.theme.ArchivFarben
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
 
 /**
- * Live-Emotions-Kachel rechts oben:
+ * Kompakte Live-Emotions-Kachel rechts oben in der Kopfleiste:
  * - Reagiert live auf `GameEngine.liveEmotion(state)` (`neutral`, `hungrig`, `erschoepft`, `angst`, `einsam`).
- * - Zeigt Name, Stand, Pfad und aktuelle Stimmung der Figur.
- * - Lädt standardmäßig die Rollen-Portraits (`portrait_<herkunft>_<geschlecht>_<stimmung>`, WebP)
- *   über [ArchivPortraitBild] mit automatischem Basis-Portrait- und Archiv-Platzhalter-Fallback;
- *   über den optionalen [portraitContent]-Slot lässt sich die Darstellung gezielt überschreiben.
+ * - Zeigt das Stil-A-Portrait (`portrait_<herkunft>_<geschlecht>_<stimmung>`, WebP)
+ *   über [ArchivPortraitBild] sowie Name und Stimmung.
+ * - Bei [nurPortrait] = true (sehr schmale Querformat-Displays) zeigt sie platzsparend
+ *   nur das gerahmte Portrait samt Stimmungs-Akzent; Tippen öffnet stets die volle Figuren-Ansicht.
  */
 @Composable
 fun LiveEmotionsKachel(
@@ -69,6 +69,7 @@ fun LiveEmotionsKachel(
     modifier: Modifier = Modifier,
     aufDunkel: Boolean = true,
     kompakt: Boolean = false,
+    nurPortrait: Boolean = false,
     detailsOffen: Boolean = false,
     onTippen: (() -> Unit)? = null,
     portraitGroesse: Dp = ArchivTheme.metrik.portraitGroesse,
@@ -87,18 +88,17 @@ fun LiveEmotionsKachel(
         label = "stimmungsFarbe",
     )
 
-    val hintergrund = if (aufDunkel) farben.dunkelHell else farben.papierHell
+    val hintergrund = if (aufDunkel) farben.dunkelHell.copy(alpha = 0.78f) else farben.papierHell
     val rahmen = when {
         detailsOffen -> stimmungsFarbe
-        aufDunkel -> farben.segmentDunkel
-        else -> farben.linie
+        aufDunkel -> farben.segmentDunkel.copy(alpha = 0.85f)
+        else -> farben.linieFein
     }
     val titelFarbe = if (aufDunkel) farben.textHell else farben.tinte
-    val nebenFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.78f) else farben.tinteMatt
 
     val semantikText = buildString {
         append("${emotion.personName}, ${emotion.stand}, ${emotion.pfadMarke}. ")
-        append("Aktuelle Stimmung: ${emotion.stimmungBezeichnung}")
+        append("Stimmung: ${emotion.stimmungBezeichnung}")
         if (emotion.ausloeserBezeichnung != null) {
             append(" (${emotion.ausloeserBezeichnung})")
         }
@@ -111,7 +111,7 @@ fun LiveEmotionsKachel(
 
     val klickModifier = if (onTippen != null) {
         Modifier
-            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = aufDunkel)
+            .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = aufDunkel)
             .clickable(onClick = onTippen)
             .clearAndSetSemantics {
                 role = Role.Button
@@ -127,16 +127,19 @@ fun LiveEmotionsKachel(
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = ArchivTheme.metrik.minTouchHoehe)
-            .clip(RoundedCornerShape(4.dp))
+            .defaultMinSize(minWidth = ArchivTheme.metrik.minTouchHoehe, minHeight = ArchivTheme.metrik.minTouchHoehe)
+            .clip(RoundedCornerShape(6.dp))
             .then(klickModifier),
         color = hintergrund,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(if (detailsOffen) 1.5.dp else 1.dp, rahmen),
+        shape = RoundedCornerShape(6.dp),
+        border = BorderStroke(if (detailsOffen) 1.25.dp else 0.75.dp, rahmen),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(
+                horizontal = if (nurPortrait) 4.dp else 7.dp,
+                vertical = 4.dp,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ArchivPortraitRahmen(
@@ -147,49 +150,39 @@ fun LiveEmotionsKachel(
                 portraitContent = portraitContent,
             )
 
-            Column(
-                modifier = Modifier.weight(1f, fill = !kompakt),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Text(
-                    text = emotion.personName,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = titelFarbe,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = "${emotion.stand} · ${emotion.pfadMarke}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = nebenFarbe,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            if (!nurPortrait) {
+                Column(
+                    modifier = Modifier.weight(1f, fill = !kompakt),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(stimmungsFarbe),
-                    )
                     Text(
-                        text = buildString {
-                            append(emotion.stimmungBezeichnung)
-                            if (!kompakt && emotion.ausloeserBezeichnung != null) {
-                                append(" · ${emotion.ausloeserBezeichnung}")
-                            }
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = stimmungsFarbe,
+                        text = emotion.personName,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = titelFarbe,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(stimmungsFarbe),
+                        )
+                        Text(
+                            text = emotion.stimmungBezeichnung,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = stimmungsFarbe,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }
@@ -210,20 +203,20 @@ fun ArchivPortraitRahmen(
     portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
-    val innenFlaeche = if (aufDunkel) farben.dunkel else farben.papierDunkel
+    val innenFlaeche = if (aufDunkel) farben.dunkel else farben.papier
     val silhouettenFarbe = if (aufDunkel) {
         farben.textHell.copy(alpha = 0.24f)
     } else {
         farben.tinte.copy(alpha = 0.20f)
     }
-    val rahmenLinie = if (aufDunkel) farben.linie.copy(alpha = 0.55f) else farben.linie
+    val rahmenLinie = if (aufDunkel) farben.linie.copy(alpha = 0.55f) else farben.linieFein
 
     Box(
         modifier = modifier
             .size(groesse)
-            .clip(RoundedCornerShape(3.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(innenFlaeche)
-            .border(1.dp, stimmungsFarbe.copy(alpha = 0.78f), RoundedCornerShape(3.dp)),
+            .border(0.75.dp, stimmungsFarbe.copy(alpha = 0.72f), RoundedCornerShape(4.dp)),
         contentAlignment = Alignment.Center,
     ) {
         if (portraitContent != null) {
@@ -234,13 +227,11 @@ fun ArchivPortraitRahmen(
                 stimmungsFarbe = stimmungsFarbe,
                 beschreibung = "Portrait von ${emotion.personName} (${emotion.stimmungBezeichnung})",
             ) {
-                // Ruhiger, würdiger Archiv-Portrait-Platzhalter als Fallback
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val w = size.width
                     val h = size.height
                     val rand = w * 0.08f
 
-                    // Feiner innerer Passepartout-Rahmen
                     drawRect(
                         color = rahmenLinie,
                         topLeft = Offset(rand, rand),
@@ -248,7 +239,6 @@ fun ArchivPortraitRahmen(
                         style = Stroke(width = 1f),
                     )
 
-                    // Dezente Büsten-Silhouette (Kopf + Schulterbogen, ruhig und zeitlos)
                     val kopfRadius = w * 0.16f
                     drawCircle(
                         color = silhouettenFarbe,
@@ -269,7 +259,6 @@ fun ArchivPortraitRahmen(
                     }
                     drawPath(path = schulterPfad, color = silhouettenFarbe)
 
-                    // Feiner Stimmungs-Akzentbalken am unteren Bildrand
                     drawRect(
                         color = stimmungsFarbe.copy(alpha = 0.85f),
                         topLeft = Offset(0f, h - 3.dp.toPx()),
@@ -277,7 +266,6 @@ fun ArchivPortraitRahmen(
                     )
                 }
 
-                // Ruhiges Monogramm über dem historischen Passepartout
                 Text(
                     text = emotion.initialen,
                     style = MaterialTheme.typography.titleSmall,
@@ -290,150 +278,128 @@ fun ArchivPortraitRahmen(
 }
 
 /**
- * Aufklappbare Detailkarte zur Live-Emotions-Kachel (zeigt vergrößertes Portrait, Herkunft,
- * Zustandssatz und im Analysemodus die exakte Portrait-Asset-Auflösung).
+ * Ruhige Figuren-Detailkarte für die Darstellung im leichten Overlay (ohne Technik-/Asset-IDs).
  */
 @Composable
 fun LiveEmotionDetailKarte(
     emotion: LiveEmotionUiState,
-    sichtbar: Boolean,
-    analyseModus: Boolean,
     onSchliessen: () -> Unit,
     modifier: Modifier = Modifier,
     portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
-    val reduziert = ArchivTheme.reduzierteAnimationen
-    AnimatedVisibility(
-        visible = sichtbar,
-        enter = ArchivUebergaenge.aufklappEnter(reduziert),
-        exit = ArchivUebergaenge.aufklappExit(reduziert),
-        modifier = modifier,
-    ) {
-        val farben = ArchivTheme.farben
-        val metrik = ArchivTheme.metrik
-        val medienRegister = LocalMedienRegister.current
-        val aufgeloest = remember(emotion.portraitId, medienRegister) {
-            BildAufloeser.loesePortrait(emotion.portraitId, medienRegister.verfuegbareIds)
-        }
-        val akzent = stimmungsAkzentFarbe(
-            stimmung = emotion.stimmung,
-            hoechsteStufe = emotion.hoechsteStufe,
-            farben = farben,
-            aufDunkel = false,
-        )
+    val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+    val akzent = stimmungsAkzentFarbe(
+        stimmung = emotion.stimmung,
+        hoechsteStufe = emotion.hoechsteStufe,
+        farben = farben,
+        aufDunkel = false,
+    )
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .archivLiveHinweis(),
-            color = farben.papierHell,
-            shape = RoundedCornerShape(4.dp),
-            border = BorderStroke(1.dp, farben.linie),
-            shadowElevation = 2.dp,
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                        .background(akzent),
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(metrik.kartenInnenAbstand),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .archivLiveHinweis(),
+        color = farben.papierHell,
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(0.75.dp, farben.linieFein),
+        shadowElevation = 8.dp,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .background(akzent),
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    ArchivPortraitRahmen(
+                        emotion = emotion,
+                        stimmungsFarbe = akzent,
+                        groesse = 80.dp,
+                        aufDunkel = false,
+                        portraitContent = portraitContent,
+                    )
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        ArchivPortraitRahmen(
-                            emotion = emotion,
-                            stimmungsFarbe = akzent,
-                            groesse = 64.dp,
-                            aufDunkel = false,
-                            portraitContent = portraitContent,
+                        Text(
+                            text = emotion.personName,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
                         )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = emotion.personName,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = farben.tinte,
-                                modifier = Modifier.archivUeberschrift(),
+                        Text(
+                            text = "${emotion.herkunftTitel} · ${emotion.stand}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = farben.tinteMatt,
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            ArchivStempel(
+                                text = emotion.stimmungBezeichnung,
+                                farbe = akzent,
+                                hintergrund = akzent.copy(alpha = 0.09f),
                             )
                             Text(
-                                text = "${emotion.herkunftTitel} · ${emotion.stand} · ${emotion.pfadMarke}",
+                                text = emotion.stimmungKurzhinweis,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = farben.tinteMatt,
                             )
                         }
-                        Box(
-                            modifier = Modifier
-                                .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
-                                .clip(RoundedCornerShape(3.dp))
-                                .border(1.dp, farben.linie, RoundedCornerShape(3.dp))
-                                .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
-                                .clickable(onClick = onSchliessen)
-                                .semantics {
-                                    role = Role.Button
-                                    contentDescription = "Figuren-Ansicht schließen"
-                                }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = "Schließen ×",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = farben.tinte,
-                            )
-                        }
                     }
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        ArchivStempel(
-                            text = "Stimmung: ${emotion.stimmungBezeichnung}",
-                            farbe = akzent,
-                            hintergrund = farben.papierHell,
-                        )
-                        Text(
-                            text = emotion.stimmungKurzhinweis,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .background(farben.papier, RoundedCornerShape(3.dp))
-                            .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .align(Alignment.Top)
+                            .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
+                            .clip(RoundedCornerShape(6.dp))
+                            .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
+                            .clickable(onClick = onSchliessen)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = "Figuren-Ansicht schließen"
+                            },
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            text = "„${emotion.zustandssatz}“",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = FontStyle.Italic,
-                            color = farben.tinte,
-                        )
+                        SchliessenIcon(farbe = farben.tinteMatt, groesse = 18.dp)
                     }
+                }
 
-                    if (analyseModus) {
-                        val zielHinweis = when {
-                            aufgeloest.aufgeloesteId == null -> "Archiv-Platzhalter"
-                            aufgeloest.aufgeloesteId == emotion.portraitId -> aufgeloest.ebene.kurzLabel
-                            else -> "→ ${aufgeloest.aufgeloesteId} (${aufgeloest.ebene.kurzLabel})"
-                        }
-                        Text(
-                            text = "Portrait-Asset: ${emotion.portraitId} · $zielHinweis",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .background(farben.papier.copy(alpha = 0.72f), RoundedCornerShape(4.dp))
+                        .padding(end = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(2.5.dp)
+                            .fillMaxHeight()
+                            .background(akzent.copy(alpha = 0.8f)),
+                    )
+                    Text(
+                        text = "„${emotion.zustandssatz}“",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Serif,
+                        fontStyle = FontStyle.Italic,
+                        color = farben.tinte,
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
                 }
             }
         }

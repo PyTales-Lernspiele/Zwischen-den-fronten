@@ -8,8 +8,8 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Drei wählbare Schriftgrößen-Stufen für unterschiedliche Endgeräte und den Unterricht:
- * - [KLEIN]: kompakt für kleinere Smartphone-Bildschirme
- * - [MITTEL]: gut lesbarer Standard für Tablet, Desktop und Web
+ * - [KLEIN]: kompakt für kleine Smartphone-Displays
+ * - [MITTEL]: gut lesbarer Standard für Smartphone, Tablet, Desktop und Web
  * - [GROSS]: Beamer- und Klassenzimmertauglichkeit (gut lesbar aus der letzten Reihe)
  */
 enum class Schriftgroesse(
@@ -24,21 +24,21 @@ enum class Schriftgroesse(
         bezeichnung = "Klein",
         kurzZeichen = "A-",
         faktor = 0.88f,
-        beschreibung = "Kompakt für kleine Bildschirme",
+        beschreibung = "Kompakt für kleine Displays",
     ),
     MITTEL(
         code = "mittel",
         bezeichnung = "Mittel",
         kurzZeichen = "A",
         faktor = 1.00f,
-        beschreibung = "Standard für Tablet & Desktop",
+        beschreibung = "Ruhiger Standard",
     ),
     GROSS(
         code = "gross",
         bezeichnung = "Groß",
         kurzZeichen = "A+",
         faktor = 1.24f,
-        beschreibung = "Beamer & Unterricht (hohe Lesbarkeit)",
+        beschreibung = "Groß für Beamer & Unterricht",
     );
 
     fun naechste(): Schriftgroesse = when (this) {
@@ -60,12 +60,12 @@ enum class Schriftgroesse(
 }
 
 /**
- * Erzeugt die Archivpapier-Typografie für die gewählte [Schriftgroesse].
+ * Erzeugt die harmonische Buchdruck- & Archivpapier-Typografie für die gewählte [Schriftgroesse].
  *
  * Gestaltungsgrundsätze für Klasse 8 (13–14 Jahre) und Beamer:
- * - Historische Serifen für Kapitel-, Dokument- und Zeitungstitel
- * - Klare, serifenlose Schrift mit großzügigem Zeilenabstand (~1,45–1,55×) für Fließtext
- * - Monospace für Aktenzeichen, Stempel-Codes, Änderungs-Badges und Medien-IDs
+ * - Warme Buchdruck-Serifen für Titel, Kapitelköpfe, Ausgänge und historische Zitate
+ * - Ruhige, gut lesbare Leseschrift mit großzügigem Zeilenabstand (~1,45–1,52×) für Alltagstexte
+ * - Zurückhaltende, fein gesperrte Auszeichnungen für Zeit- und Ortsangaben (ohne technischen Look)
  */
 fun buildArchivTypography(groesse: Schriftgroesse): Typography {
     val f = groesse.faktor
@@ -80,94 +80,95 @@ fun buildArchivTypography(groesse: Schriftgroesse): Typography {
         displayMedium = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            fontSize = (30f * f).sp,
-            lineHeight = (38f * f).sp,
+            fontSize = (29f * f).sp,
+            lineHeight = (36f * f).sp,
+            letterSpacing = (-0.15f).sp,
         ),
         displaySmall = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            fontSize = (26f * f).sp,
-            lineHeight = (34f * f).sp,
+            fontSize = (25f * f).sp,
+            lineHeight = (32f * f).sp,
         ),
         headlineLarge = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            fontSize = (24f * f).sp,
-            lineHeight = (32f * f).sp,
+            fontSize = (23f * f).sp,
+            lineHeight = (30f * f).sp,
         ),
         headlineMedium = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            fontSize = (21f * f).sp,
-            lineHeight = (29f * f).sp,
+            fontSize = (20.5f * f).sp,
+            lineHeight = (27.5f * f).sp,
         ),
         headlineSmall = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
-            fontSize = (19f * f).sp,
-            lineHeight = (26f * f).sp,
+            fontSize = (18.5f * f).sp,
+            lineHeight = (25f * f).sp,
         ),
         titleLarge = TextStyle(
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
-            fontSize = (18f * f).sp,
-            lineHeight = (25f * f).sp,
+            fontSize = (17.5f * f).sp,
+            lineHeight = (24f * f).sp,
         ),
         titleMedium = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.SemiBold,
-            fontSize = (16f * f).sp,
-            lineHeight = (23f * f).sp,
-            letterSpacing = 0.1.sp,
+            fontSize = (15.5f * f).sp,
+            lineHeight = (22f * f).sp,
+            letterSpacing = 0.05.sp,
         ),
         titleSmall = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.SemiBold,
-            fontSize = (14.5f * f).sp,
-            lineHeight = (20.5f * f).sp,
-            letterSpacing = 0.1.sp,
+            fontSize = (14f * f).sp,
+            lineHeight = (19.5f * f).sp,
+            letterSpacing = 0.05.sp,
         ),
         bodyLarge = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
             fontSize = (16.5f * f).sp,
-            lineHeight = (25f * f).sp,
-            letterSpacing = 0.15.sp,
+            lineHeight = (24.5f * f).sp,
+            letterSpacing = 0.1.sp,
         ),
         bodyMedium = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
             fontSize = (14.5f * f).sp,
-            lineHeight = (21.5f * f).sp,
-            letterSpacing = 0.15.sp,
+            lineHeight = (21f * f).sp,
+            letterSpacing = 0.1.sp,
         ),
         bodySmall = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
             fontSize = (13f * f).sp,
-            lineHeight = (19f * f).sp,
-            letterSpacing = 0.2.sp,
+            lineHeight = (18.5f * f).sp,
+            letterSpacing = 0.15.sp,
         ),
         labelLarge = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.SemiBold,
-            fontSize = (14f * f).sp,
-            lineHeight = (19.5f * f).sp,
-            letterSpacing = 0.2.sp,
+            fontSize = (13.5f * f).sp,
+            lineHeight = (18.5f * f).sp,
+            letterSpacing = 0.15.sp,
         ),
         labelMedium = TextStyle(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Medium,
             fontSize = (12.5f * f).sp,
-            lineHeight = (17.5f * f).sp,
-            letterSpacing = 0.4.sp,
+            lineHeight = (17f * f).sp,
+            letterSpacing = 0.25.sp,
         ),
         labelSmall = TextStyle(
-            fontFamily = FontFamily.Monospace,
+            fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Medium,
             fontSize = (11.5f * f).sp,
-            lineHeight = (16f * f).sp,
-            letterSpacing = 0.4.sp,
+            lineHeight = (15.5f * f).sp,
+            letterSpacing = 0.35.sp,
         ),
     )
 }

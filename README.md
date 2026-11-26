@@ -6,7 +6,7 @@ Das Spiel wird von Grund auf entschlackt und als moderne **Kotlin-Multiplatform-
 
 > **Archiv:** Der ursprüngliche Ren'Py-Arbeitsstand ist vollständig im Branch `archiv/renpy-2026` gesichert.
 
-## Projektstruktur (Stand nach AP 7a)
+## Projektstruktur (Stand `v1.1.0` — Querformat-UI & Bildwelt Batch 1)
 
 ```text
 content/                      Single Source of Truth für alle Spielinhalte & WebP-Medien (per Gradle Sync eingebunden)
@@ -16,21 +16,21 @@ content/                      Single Source of Truth für alle Spielinhalte & We
   merkmale.json               34 erreichbare Merkmale, 4-Fächer-Lebenslauf & Ausgänge
   ereignisse.json             104 geprüfte Zwei-Entscheidungs-Ereignisse mit 104/104 historischen Vollbelegen (Front/Etappe/Heimat)
   sprachregeln.json           Tabu- & Prüfbegriffe sowie Lesbarkeitsgrenzen (Klasse 8)
-  medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen
+  medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen (aktuell 19/63 Stufe 1 vorhanden)
   media/                      Optimierte WebP-Assets (`portraits/`, `kapitel/`, `schauplaetze/`, `szenen/`)
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
-  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController (inkl. Zurück-Leitplanke), Archivpapier-Theme (WCAG-Kontrast & reduzierte Übergänge), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`), UI-Baukasten & vollständige Spiel-Screens (1914–1919)
-  src/commonTest/             55 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Übergänge, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre/Hintergrund-Pause)
+  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController (inkl. Zurück-Leitplanke & einklappbarer Kopfleiste), Archivpapier-Theme (Buchdruck-Optik, WCAG-Kontrast & Landscape-First-Metriken), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`) sowie alle aufgeräumten Spiel-Screens (1914–1919)
+  src/commonTest/             55 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Landscape, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre/Hintergrund-Pause)
   src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard, BackHandler & AudioTrack mit Hintergrund-Pause)
   src/desktopMain/            Windows/Desktop-Einstieg (JVM) inkl. Browser-Druckansicht/Speichern & dezentes Sound-Audio
   src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback)
   src/wasmJsMain/ & jsMain/   Web-Plattformbrücken (Browser-Druck/Download/Clipboard & Web Audio API)
-androidApp/                   Auslieferungsfertiges Android-Modul (`MainActivity` mit Edge-to-Edge/Safe-Area & Audio-Lebenszyklus, Archivpapier-Adaptive-Icon, R8/ProGuard `proguard-rules.pro` & optionale Release-Signierung für `.apk`/`.aab`)
+androidApp/                   Auslieferungsfertiges Android-Modul (`MainActivity` im Querformat `sensorLandscape`, Edge-to-Edge/Safe-Area & Audio-Lebenszyklus, Archivpapier-Adaptive-Icon, R8/ProGuard `proguard-rules.pro` & optionale Release-Signierung für `.apk`/`.aab`)
 tools/
   validate_content.py         Automatische Inhalts-, Quellen-/Vollbeleg-, Referenz-, Balance-, Sprach- und WebP-Medienprüfung
   prepare_media.py            WebP-Aufbereitung (320×320 / 1280×720), Master-Sicherung & Medienplan-Abgleich
 docs/
-  ARBEITSPLAN.md              Übersicht aller 7 Arbeitspakete (AP 1 – AP 7a erledigt; AP 5b & AP 7b offen)
+  ARBEITSPLAN.md              Übersicht aller Arbeitspakete (AP 1–AP 8; AP 5b Batches 2–5 & AP 7b offen)
   ANDROID_AUSLIEFERUNG.md     Praxisanleitung für Android-Installation (Schul-Tablets/APK), Keystore-Signierung & Play-Store-AAB
   bildwelt/                   Stil-A-Leitfaden, Prompt-Bibel (`prompt_bibel.json`) & hochauflösende Master-Referenzen (`masters/`)
 ```
@@ -55,6 +55,7 @@ python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --upd
 ```
 
 ### Android-Auslieferung (Schul-Tablets & Play Store)
+- **Querformat & Bedienung:** Auf Smartphones und Schul-Tablets läuft die App fest im beidseitig drehbaren Querformat (`sensorLandscape`) mit sehr schlanker, ein- und ausklappbarer Kopfleiste, zweispaltiger Spielbühne und ruhigen Overlay-Erklärkarten.
 - **Direktinstallation & Signierung:** Vollständige Anleitung für Lehrkräfte, Schul-Tablets (APK-Sideloading/MDM) und eigene Play-Store-Signierung unter [`docs/ANDROID_AUSLIEFERUNG.md`](docs/ANDROID_AUSLIEFERUNG.md).
 - **Automatisierte Releases:** Der GitHub-Actions-Workflow [`.github/workflows/android-release.yml`](.github/workflows/android-release.yml) erstellt per manuellem Start (`workflow_dispatch`) oder Tag (`v*`) geprüfte `.apk`- und `.aab`-Pakete inkl. `SHA256SUMS.txt` (optional signiert über Repository-Secrets, sonst mit direkt installierbarem Test-Fallback).
 - **CI bei jedem Pull Request:** Alle Prüfungen, Tests sowie Android Debug/Release, Desktop JVM und WebApp laufen automatisch über [`.github/workflows/content-ci.yml`](.github/workflows/content-ci.yml).

@@ -146,26 +146,34 @@ class ArchivThemeTest {
 
         val kompakt = layoutMetrikFuer(LayoutKlasse.KOMPAKT, Schriftgroesse.MITTEL)
         val mittel = layoutMetrikFuer(LayoutKlasse.MITTEL, Schriftgroesse.MITTEL)
+        val mittelSmartphoneQuer = layoutMetrikFuer(LayoutKlasse.MITTEL, Schriftgroesse.MITTEL, hoeheDp = 380f)
         val mittelBeamer = layoutMetrikFuer(LayoutKlasse.MITTEL, Schriftgroesse.GROSS)
         val breit = layoutMetrikFuer(LayoutKlasse.BREIT, Schriftgroesse.GROSS)
 
         assertEquals(2, kompakt.werteSpalten)
         assertFalse(kompakt.kopfNebeneinander)
         assertFalse(kompakt.optionenNebeneinander)
+        assertFalse(kompakt.zweispaltigeBuehne)
 
         assertEquals(4, mittel.werteSpalten)
         assertTrue(mittel.kopfNebeneinander)
         assertTrue(mittel.optionenNebeneinander)
+        assertTrue(mittel.zweispaltigeBuehne)
+        assertFalse(mittel.kompakteHoehe)
+        assertTrue(mittelSmartphoneQuer.kompakteHoehe)
+        assertTrue(mittelSmartphoneQuer.zweispaltigeBuehne)
+        assertTrue(mittelSmartphoneQuer.portraitGroesse <= mittel.portraitGroesse)
         assertFalse(mittelBeamer.optionenNebeneinander, "Bei Tablet + Beamer-Schrift werden Optionen gestapelt")
 
         assertEquals(4, breit.werteSpalten)
         assertTrue(breit.kopfNebeneinander)
         assertTrue(breit.optionenNebeneinander)
+        assertTrue(breit.zweispaltigeBuehne)
         assertTrue(breit.maxInhaltsBreite > mittel.maxInhaltsBreite)
         assertTrue(mittel.maxInhaltsBreite > kompakt.maxInhaltsBreite)
         assertTrue(breit.segmentHoehe > mittel.segmentHoehe)
 
-        listOf(kompakt, mittel, mittelBeamer, breit).forEach { metrik ->
+        listOf(kompakt, mittel, mittelSmartphoneQuer, mittelBeamer, breit).forEach { metrik ->
             assertTrue(metrik.minTouchHoehe >= 48.dp, "Touch-Mindesthöhe verletzt: $metrik")
         }
     }

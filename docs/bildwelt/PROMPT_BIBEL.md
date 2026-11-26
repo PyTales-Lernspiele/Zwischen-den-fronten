@@ -14,28 +14,29 @@
 - **Hochauflösende Master-Referenzen (nicht in App-Builds gepackt):**
   - `docs/bildwelt/masters/<id>.jpg` — dauerhaft auf GitHub gesichert, dient als 1:1-Gesichts- und Stil-Referenz für alle Folge-Batches.
 
-## Stand AP 5a (8 von 63 Stufe-1-Kernbildern vorhanden)
-- **7 Basis-Portraits (`neutral`):**
-  - `portrait_arbeiterschaft_w_neutral`
-  - `portrait_arbeiterschaft_m_neutral`
-  - `portrait_buergertum_m_neutral`
-  - `portrait_buergertum_w_neutral`
-  - `portrait_landbevoelkerung_m_neutral`
-  - `portrait_landbevoelkerung_w_neutral`
-  - `portrait_adel_m_neutral`
+## Stand AP 5b nach Batch 1 (19 von 63 Stufe-1-Kernbildern vorhanden)
+- **Alle 8 Basis-Portraits (`neutral`) — 100 % komplett:**
+  - `portrait_arbeiterschaft_w_neutral`, `portrait_arbeiterschaft_m_neutral`
+  - `portrait_buergertum_w_neutral`, `portrait_buergertum_m_neutral`
+  - `portrait_landbevoelkerung_w_neutral`, `portrait_landbevoelkerung_m_neutral`
+  - `portrait_adel_w_neutral` *(Batch 1)*, `portrait_adel_m_neutral`
+- **10 Live-Emotions-Portraits *(Batch 1)*:**
+  - `portrait_arbeiterschaft_w_{hungrig,erschoepft,angst,einsam}`
+  - `portrait_arbeiterschaft_m_{hungrig,erschoepft,angst,einsam}`
+  - `portrait_buergertum_m_{hungrig,erschoepft}`
 - **1 Schauplatzbild:**
   - `schauplatz_brotschlange`
 
-> Dank des gestuften Portrait-Fallbacks im Bild-Loader (`de.pytales.zdf.ui.media.BildAufloeser`) werden diese 7 Basis-Portraits bereits über alle 5 Stimmungen hinweg im Spiel angezeigt, bis die 32 spezifischen Emotions-Varianten nachgezogen sind.
+> Dank des gestuften Portrait-Fallbacks im Bild-Loader (`de.pytales.zdf.ui.media.BildAufloeser`) werden alle 8 Basis-Portraits bereits über alle Herkünfte und Geschlechter hinweg im Spiel angezeigt; für `arbeiterschaft` (w/m) sowie `buergertum_m` (Teil 1) greifen bereits die spezifischen Emotions-Portraits.
 
-## Nachproduktion der 55 offenen Stufe-1-Bilder (AP 5b)
-Alle 55 offenen Prompts inkl. exaktem Referenzbild-Pfad liegen maschinenlesbar in [`docs/bildwelt/prompt_bibel.json`](prompt_bibel.json), aufgeteilt in **5 Batches à 11 Motive**:
+## Nachproduktion der 44 übrigen Stufe-1-Bilder (AP 5b, Batches 2–5)
+Alle Prompts inkl. exaktem Referenzbild-Pfad liegen maschinenlesbar in [`docs/bildwelt/prompt_bibel.json`](prompt_bibel.json), aufgeteilt in **5 Batches à 11 Motive**:
 
-1. **Batch 1 (11 Motive):** `portrait_adel_w_neutral` + Emotions-Portraits `arbeiterschaft` (w/m) & `buergertum_m` (Teil 1)
-2. **Batch 2 (11 Motive):** Emotions-Portraits `buergertum` (Rest) & `landbevoelkerung` (Teil 1)
-3. **Batch 3 (11 Motive):** Emotions-Portraits `landbevoelkerung_w` (Rest) & `adel` (danach alle 40 Portraits 100 % fertig)
-4. **Batch 4 (11 Motive):** Alle 6 Kapitelbilder (`kapitel_1914`–`kapitel_1919`) + 5 Schauplätze (`amt` bis `fabrik`)
-5. **Batch 5 (11 Motive):** Restliche 11 Schauplätze (`gefangenenlager` bis `wohnviertel` — danach Stufe 1 mit 63/63 komplett)
+1. **Batch 1 (11 Motive) — ✅ erledigt:** `portrait_adel_w_neutral` + Emotions-Portraits `arbeiterschaft` (w/m) & `buergertum_m` (Teil 1) → **19/63**
+2. **Batch 2 (11 Motive) — offen:** Emotions-Portraits `buergertum` (Rest) & `landbevoelkerung` (Teil 1)
+3. **Batch 3 (11 Motive) — offen:** Emotions-Portraits `landbevoelkerung_w` (Rest) & `adel` (danach alle 40 Portraits 100 % fertig)
+4. **Batch 4 (11 Motive) — offen:** Alle 6 Kapitelbilder (`kapitel_1914`–`kapitel_1919`) + 5 Schauplätze (`amt` bis `fabrik`)
+5. **Batch 5 (11 Motive) — offen:** Restliche 11 Schauplätze (`gefangenenlager` bis `wohnviertel` — danach Stufe 1 mit 63/63 komplett)
 
 ### Einbindung neuer Bilder (1 Befehl)
 Sobald Rohbilder (Dateiname `<asset_id>.jpg` / `.png`) aus einem Batch vorliegen:

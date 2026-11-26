@@ -44,11 +44,8 @@ data class HerkunftEntwurf(
  * Es wird niemals zu einer vorherigen Karte oder Entscheidung zurückgesprungen.
  */
 enum class ZurueckErgebnis {
-    /** Offene Verlassen-Sicherheitsabfrage wurde ruhig geschlossen. */
+    /** Ein offener Dialog (Sicherheitsabfrage, Einstellungen oder Grundsätze) wurde ruhig geschlossen. */
     DIALOG_GESCHLOSSEN,
-
-    /** Die AP-3-Komponenten-Vorschau wurde geschlossen (zurück ins Startmenü). */
-    UI_VORSCHAU_GESCHLOSSEN,
 
     /** Eine geöffnete Befindens- oder Figuren-Erklärkarte wurde geschlossen. */
     ERKLAERKARTE_GESCHLOSSEN,
@@ -67,11 +64,12 @@ enum class ZurueckErgebnis {
 data class SpielUiState(
     val gameState: GameState,
     val schriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
-    val analyseModus: Boolean = false,
     val reduzierteAnimationen: Boolean = false,
     val audioAktiv: Boolean = false,
     val audioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
-    val zeigeUiVorschau: Boolean = false,
+    val kopfleisteEingeklappt: Boolean = false,
+    val einstellungenOffen: Boolean = false,
+    val grundsaetzeOffen: Boolean = false,
     val aufgeklappteGrundsaetze: Set<String> = emptySet(),
     val ausgewaehlterWert: WertSchluessel? = null,
     val emotionDetailsOffen: Boolean = false,
@@ -88,7 +86,7 @@ data class SpielUiState(
                 !auffangnetzBestaetigt
         }
 
-    /** `true`, wenn in der Kopfleiste eine Befindens- oder Figuren-Erklärkarte geöffnet ist. */
+    /** `true`, wenn eine Befindens- oder Figuren-Erklärkarte als Overlay geöffnet ist. */
     val hatOffeneErklaerKarte: Boolean
         get() = ausgewaehlterWert != null || emotionDetailsOffen
 
@@ -98,11 +96,12 @@ data class SpielUiState(
 
     /**
      * Gibt an, ob die System-Zurück-Taste abgefangen werden muss.
-     * Im Startmenü ohne offene Vorschau/Dialog bleibt sie frei für normales App-Verlassen.
+     * Im Startmenü ohne offenen Dialog bleibt sie frei für normales App-Verlassen.
      */
     val sollZurueckAbfangen: Boolean
         get() = verlassenDialogOffen ||
-            zeigeUiVorschau ||
+            einstellungenOffen ||
+            grundsaetzeOffen ||
             hatOffeneErklaerKarte ||
             gameState.phase !is GamePhase.Start
 
@@ -130,26 +129,26 @@ data class SpielUiState(
 class SpielController(
     val engine: GameEngine,
     initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
-    initialAnalyseModus: Boolean = false,
     initialReduzierteAnimationen: Boolean = false,
     initialAudioAktiv: Boolean = false,
     initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
+    initialKopfleisteEingeklappt: Boolean = false,
 ) {
     constructor(
         content: GameContent,
         random: RandomSource = KotlinRandomSource(),
         initialSchriftgroesse: Schriftgroesse = Schriftgroesse.MITTEL,
-        initialAnalyseModus: Boolean = false,
         initialReduzierteAnimationen: Boolean = false,
         initialAudioAktiv: Boolean = false,
         initialAudioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
+        initialKopfleisteEingeklappt: Boolean = false,
     ) : this(
         engine = GameEngine(content, random),
         initialSchriftgroesse = initialSchriftgroesse,
-        initialAnalyseModus = initialAnalyseModus,
         initialReduzierteAnimationen = initialReduzierteAnimationen,
         initialAudioAktiv = initialAudioAktiv,
         initialAudioLautstaerke = initialAudioLautstaerke,
+        initialKopfleisteEingeklappt = initialKopfleisteEingeklappt,
     )
 
     val content: GameContent
@@ -159,10 +158,10 @@ class SpielController(
         SpielUiState(
             gameState = engine.neuesSpiel(),
             schriftgroesse = initialSchriftgroesse,
-            analyseModus = initialAnalyseModus,
             reduzierteAnimationen = initialReduzierteAnimationen,
             audioAktiv = initialAudioAktiv,
             audioLautstaerke = AudioRegelwerk.begrenzeLautstaerke(initialAudioLautstaerke),
+            kopfleisteEingeklappt = initialKopfleisteEingeklappt,
         ),
     )
 
@@ -172,19 +171,11 @@ class SpielController(
         get() = _uiState.value
 
     // -------------------------------------------------------------------------
-    // Globale UI-Einstellungen (jederzeit im Unterricht umschaltbar)
+    // Globale UI-Einstellungen & Dialoge (jederzeit ruhig zugänglich)
     // -------------------------------------------------------------------------
 
     fun setzeSchriftgroesse(schriftgroesse: Schriftgroesse) {
         _uiState.update { it.copy(schriftgroesse = schriftgroesse) }
-    }
-
-    fun setzeAnalyseModus(aktiv: Boolean) {
-        _uiState.update { it.copy(analyseModus = aktiv) }
-    }
-
-    fun toggleAnalyseModus() {
-        _uiState.update { it.copy(analyseModus = !it.analyseModus) }
     }
 
     fun setzeReduzierteAnimationen(aktiv: Boolean) {
@@ -208,6 +199,49 @@ class SpielController(
         _uiState.update { it.copy(audioLautstaerke = begrenzt) }
     }
 
+    fun setzeKopfleisteEingeklappt(eingeklappt: Boolean) {
+        _uiState.update { it.copy(kopfleisteEingeklappt = eingeklappt) }
+    }
+
+    fun toggleKopfleisteEingeklappt() {
+        _uiState.update { it.copy(kopfleisteEingeklappt = !it.kopfleisteEingeklappt) }
+    }
+
+    fun einstellungenOeffnen() {
+        _uiState.update {
+            it.copy(
+                einstellungenOffen = true,
+                grundsaetzeOffen = false,
+                ausgewaehlterWert = null,
+                emotionDetailsOffen = false,
+            )
+        }
+    }
+
+    fun einstellungenSchliessen(): Boolean {
+        val aktuell = _uiState.value
+        if (!aktuell.einstellungenOffen) return false
+        _uiState.value = aktuell.copy(einstellungenOffen = false)
+        return true
+    }
+
+    fun grundsaetzeOeffnen(): Boolean {
+        val aktuell = _uiState.value
+        if (aktuell.gameState.phase !is GamePhase.Start) return false
+        _uiState.value = aktuell.copy(
+            grundsaetzeOffen = true,
+            einstellungenOffen = false,
+        )
+        return true
+    }
+
+    fun grundsaetzeSchliessen(): Boolean {
+        val aktuell = _uiState.value
+        if (!aktuell.grundsaetzeOffen) return false
+        _uiState.value = aktuell.copy(grundsaetzeOffen = false)
+        return true
+    }
+
     fun waehleWertErklaerung(schluessel: WertSchluessel?) {
         _uiState.update {
             it.copy(
@@ -227,7 +261,7 @@ class SpielController(
     }
 
     /**
-     * Schließt geöffnete Befindens- oder Figuren-Erklärkarten in der Kopfleiste.
+     * Schließt geöffnete Befindens- oder Figuren-Erklärkarten.
      * Gibt `true` zurück, wenn mindestens eine Karte geöffnet war.
      */
     fun schliesseErklaerKarten(): Boolean {
@@ -243,12 +277,11 @@ class SpielController(
     /**
      * Verarbeitet die System-Zurück-Taste (insbesondere Android `BackHandler`) gemäß der
      * „Kein Zurück“-Leitplanke:
-     * 1. Offene Sicherheitsabfrage schließen (sichere Standardaktion: im Durchgang bleiben).
-     * 2. AP-3-UI-Vorschau schließen.
-     * 3. Geöffnete Befindens- oder Figuren-Erklärkarte schließen.
-     * 4. Während eines laufenden oder abgeschlossenen Durchgangs niemals rückwärts navigieren,
+     * 1. Offene Sicherheitsabfrage, Einstellungen oder Grundsätze ruhig schließen.
+     * 2. Geöffnete Befindens- oder Figuren-Erklärkarte schließen.
+     * 3. Während eines laufenden oder abgeschlossenen Durchgangs niemals rückwärts navigieren,
      *    sondern eine ruhige Sicherheitsabfrage öffnen.
-     * 5. Im Startmenü ohne Überlagerungen greift das normale System-Zurück.
+     * 4. Im Startmenü ohne Überlagerungen greift das normale System-Zurück.
      */
     fun verarbeiteZurueckTaste(): ZurueckErgebnis {
         val aktuell = _uiState.value
@@ -258,9 +291,14 @@ class SpielController(
                 ZurueckErgebnis.DIALOG_GESCHLOSSEN
             }
 
-            aktuell.zeigeUiVorschau -> {
-                _uiState.value = aktuell.copy(zeigeUiVorschau = false)
-                ZurueckErgebnis.UI_VORSCHAU_GESCHLOSSEN
+            aktuell.einstellungenOffen -> {
+                _uiState.value = aktuell.copy(einstellungenOffen = false)
+                ZurueckErgebnis.DIALOG_GESCHLOSSEN
+            }
+
+            aktuell.grundsaetzeOffen -> {
+                _uiState.value = aktuell.copy(grundsaetzeOffen = false)
+                ZurueckErgebnis.DIALOG_GESCHLOSSEN
             }
 
             aktuell.hatOffeneErklaerKarte -> {
@@ -300,7 +338,8 @@ class SpielController(
                 modus = aktuell.gameState.modus,
                 direktwahlAktiv = aktuell.gameState.direktwahlAktiv,
             ),
-            zeigeUiVorschau = false,
+            einstellungenOffen = false,
+            grundsaetzeOffen = false,
             ausgewaehlterWert = null,
             emotionDetailsOffen = false,
             verlassenDialogOffen = false,
@@ -308,24 +347,6 @@ class SpielController(
             ausgewaehlterErwerbId = null,
             auffangnetzBestaetigt = false,
         )
-        return true
-    }
-
-    /**
-     * Öffnet die AP-3-Komponenten-Vorschau ausschließlich aus dem Startmenü
-     * (für Lehrkräfte & Entwicklung), niemals während eines laufenden Durchgangs.
-     */
-    fun uiVorschauOeffnen(): Boolean {
-        val aktuell = _uiState.value
-        if (aktuell.gameState.phase !is GamePhase.Start) return false
-        _uiState.value = aktuell.copy(zeigeUiVorschau = true)
-        return true
-    }
-
-    fun uiVorschauSchliessen(): Boolean {
-        val aktuell = _uiState.value
-        if (!aktuell.zeigeUiVorschau) return false
-        _uiState.value = aktuell.copy(zeigeUiVorschau = false)
         return true
     }
 
@@ -384,7 +405,8 @@ class SpielController(
         )
         _uiState.value = aktuell.copy(
             gameState = naechster,
-            zeigeUiVorschau = false,
+            einstellungenOffen = false,
+            grundsaetzeOffen = false,
             ausgewaehlterWert = null,
             emotionDetailsOffen = false,
             verlassenDialogOffen = false,
@@ -606,8 +628,8 @@ class SpielController(
     /**
      * Startet nach abgeschlossenem Durchgang (regulär 1919 oder nach Auffangnetz) einen
      * frischen Durchgang im Startmenü. Globale Unterrichts- und Zugänglichkeits-Einstellungen
-     * (`schriftgroesse`, `analyseModus`, `reduzierteAnimationen`, `audioAktiv`, `audioLautstaerke`,
-     * gewählter `modus` und `direktwahlAktiv`) bleiben erhalten.
+     * (`schriftgroesse`, `reduzierteAnimationen`, `audioAktiv`, `audioLautstaerke`,
+     * `kopfleisteEingeklappt`, gewählter `modus` und `direktwahlAktiv`) bleiben erhalten.
      */
     fun neuerDurchgang(): Boolean {
         val aktuell = _uiState.value
@@ -617,7 +639,8 @@ class SpielController(
                 modus = aktuell.gameState.modus,
                 direktwahlAktiv = aktuell.gameState.direktwahlAktiv,
             ),
-            zeigeUiVorschau = false,
+            einstellungenOffen = false,
+            grundsaetzeOffen = false,
             ausgewaehlterWert = null,
             emotionDetailsOffen = false,
             verlassenDialogOffen = false,

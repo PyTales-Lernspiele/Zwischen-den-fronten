@@ -2,6 +2,7 @@ package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +24,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -39,6 +44,31 @@ import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
+ * Verleiht dem Archivpapier-Hintergrund eine sehr sanfte, warme Papier-Vignette
+ * (wie ein aufgeschlagenes historisches Skizzenbuch), ohne Unruhe oder Kontrastverlust.
+ */
+@Composable
+fun Modifier.archivPapierHintergrund(): Modifier {
+    val farben = ArchivTheme.farben
+    return this
+        .background(farben.papier)
+        .drawBehind {
+            val radius = (size.maxDimension * 0.78f).coerceAtLeast(1f)
+            drawRect(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        farben.papierHell.copy(alpha = 0.42f),
+                        Color.Transparent,
+                        farben.papierDunkel.copy(alpha = 0.34f),
+                    ),
+                    center = Offset(size.width * 0.5f, size.height * 0.42f),
+                    radius = radius,
+                ),
+            )
+        }
+}
+
+/**
  * Ruhiger 5-Segment-Balken (*voll = gut* gemäß `ValueMetrics`).
  *
  * Gefüllte Segmente links in der Stufenfarbe; leere Segmente rechts im passenden
@@ -52,7 +82,7 @@ fun FuenfSegmentBalken(
     leereFarbe: Color,
     modifier: Modifier = Modifier,
     segmentHoehe: Dp = ArchivTheme.metrik.segmentHoehe,
-    segmentAbstand: Dp = 3.dp,
+    segmentAbstand: Dp = 2.5.dp,
 ) {
     val gesamt = segmenteGesamt.coerceAtLeast(1)
     val gefuellt = gefuellteSegmente.coerceIn(0, gesamt)
@@ -77,7 +107,7 @@ fun FuenfSegmentBalken(
                 modifier = Modifier
                     .weight(1f)
                     .height(segmentHoehe)
-                    .clip(RoundedCornerShape(1.5.dp))
+                    .clip(RoundedCornerShape(2.dp))
                     .background(if (istGefuellt) animierteFarbe else leereFarbe),
             )
         }
@@ -85,8 +115,8 @@ fun FuenfSegmentBalken(
 }
 
 /**
- * Rechteckiger Archiv-Stempel für optionale Risikohinweise (z. B. „gegen die Vorschrift“),
- * Dokumenttypen oder Quellen-Kategorien.
+ * Zurückhaltende Archiv-Marke (z. B. für Risikohinweise wie „gegen die Vorschrift“,
+ * Wirkungs-Deltas oder Datumsangaben). Bewusst leise und ohne grellen Stempel-Look.
  */
 @Composable
 fun ArchivStempel(
@@ -100,11 +130,11 @@ fun ArchivStempel(
     Box(
         modifier = modifier
             .border(
-                border = BorderStroke(1.dp, farbe.copy(alpha = 0.72f)),
-                shape = RoundedCornerShape(2.dp),
+                border = BorderStroke(0.75.dp, farbe.copy(alpha = 0.36f)),
+                shape = RoundedCornerShape(4.dp),
             )
-            .background(color = hintergrund, shape = RoundedCornerShape(2.dp))
-            .padding(horizontal = 7.dp, vertical = 2.dp),
+            .background(color = hintergrund, shape = RoundedCornerShape(4.dp))
+            .padding(horizontal = 8.dp, vertical = 2.5.dp),
     ) {
         Text(
             text = anzeige,
@@ -118,12 +148,12 @@ fun ArchivStempel(
 }
 
 /**
- * Dezente einfache oder doppelte Archiv-Trennlinie (z. B. für Zeitungs- und Behördenköpfe).
+ * Feine Buchdruck-Haarlinie (einfach oder doppelt für Zeitungs- und Behördenköpfe).
  */
 @Composable
 fun ArchivTrennlinie(
     modifier: Modifier = Modifier,
-    farbe: Color = ArchivTheme.farben.linieFein,
+    farbe: Color = ArchivTheme.farben.linieFein.copy(alpha = 0.72f),
     doppelt: Boolean = false,
 ) {
     Column(
@@ -131,21 +161,104 @@ fun ArchivTrennlinie(
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         HorizontalDivider(
-            thickness = if (doppelt) 2.dp else 1.dp,
+            thickness = if (doppelt) 1.5.dp else 0.75.dp,
             color = farbe,
         )
         if (doppelt) {
             HorizontalDivider(
-                thickness = 0.75.dp,
-                color = farbe.copy(alpha = 0.75f),
+                thickness = 0.65.dp,
+                color = farbe.copy(alpha = 0.65f),
             )
         }
     }
 }
 
 /**
- * Dreistufiger Umschalter für die Schriftgröße (`Klein`, `Mittel`, `Groß`/Beamer).
- * Einsetzbar sowohl auf dunkler Kopfleiste als auch auf hellem Archivpapier.
+ * Feine dekorative Buchdruck-Zierlinie mit zarter mittiger Raute für ruhige Abschnittstrenner.
+ */
+@Composable
+fun ArchivZierLinie(
+    modifier: Modifier = Modifier,
+    farbe: Color = ArchivTheme.farben.linieFein,
+    akzentFarbe: Color = ArchivTheme.farben.akzent.copy(alpha = 0.65f),
+) {
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(10.dp),
+    ) {
+        val cy = size.height / 2f
+        val cx = size.width / 2f
+        val raute = 3.dp.toPx()
+        val luecke = 9.dp.toPx()
+        val strich = 0.75.dp.toPx()
+
+        if (cx > luecke) {
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(Color.Transparent, farbe.copy(alpha = 0.75f)),
+                    startX = 0f,
+                    endX = cx - luecke,
+                ),
+                start = Offset(0f, cy),
+                end = Offset(cx - luecke, cy),
+                strokeWidth = strich,
+            )
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(farbe.copy(alpha = 0.75f), Color.Transparent),
+                    startX = cx + luecke,
+                    endX = size.width,
+                ),
+                start = Offset(cx + luecke, cy),
+                end = Offset(size.width, cy),
+                strokeWidth = strich,
+            )
+        }
+
+        val pfad = Path().apply {
+            moveTo(cx, cy - raute)
+            lineTo(cx + raute, cy)
+            lineTo(cx, cy + raute)
+            lineTo(cx - raute, cy)
+            close()
+        }
+        drawPath(path = pfad, color = akzentFarbe)
+    }
+}
+
+/**
+ * Zeichnet feine Tusche-Eckzierden in die vier Ecken eines Bild-Passepartouts
+ * (angelehnt an historische Buch- und Skizzenbuch-Tafeln).
+ */
+fun Modifier.archivEckenDekor(
+    farbe: Color,
+    einrueckung: Dp = 5.dp,
+    schenkelLaenge: Dp = 10.dp,
+): Modifier = this.drawBehind {
+    val inset = einrueckung.toPx()
+    val len = schenkelLaenge.toPx()
+    val stroke = 1.dp.toPx()
+    val w = size.width
+    val h = size.height
+    if (w <= inset * 2 + len || h <= inset * 2 + len) return@drawBehind
+
+    // Oben links
+    drawLine(farbe, Offset(inset, inset), Offset(inset + len, inset), stroke)
+    drawLine(farbe, Offset(inset, inset), Offset(inset, inset + len), stroke)
+    // Oben rechts
+    drawLine(farbe, Offset(w - inset - len, inset), Offset(w - inset, inset), stroke)
+    drawLine(farbe, Offset(w - inset, inset), Offset(w - inset, inset + len), stroke)
+    // Unten links
+    drawLine(farbe, Offset(inset, h - inset), Offset(inset + len, h - inset), stroke)
+    drawLine(farbe, Offset(inset, h - inset - len), Offset(inset, h - inset), stroke)
+    // Unten rechts
+    drawLine(farbe, Offset(w - inset - len, h - inset), Offset(w - inset, h - inset), stroke)
+    drawLine(farbe, Offset(w - inset, h - inset - len), Offset(w - inset, h - inset), stroke)
+}
+
+/**
+ * Dreistufiger Umschalter für die Schriftgröße (`Klein`, `Mittel`, `Groß`).
  */
 @Composable
 fun SchriftgroessenSchalter(
@@ -157,8 +270,8 @@ fun SchriftgroessenSchalter(
 ) {
     val farben = ArchivTheme.farben
     val minTouch = ArchivTheme.metrik.minTouchHoehe
-    val rahmenFarbe = if (aufDunkel) farben.linie.copy(alpha = 0.65f) else farben.linie
-    val hintergrund = if (aufDunkel) farben.dunkelHell else farben.papierHell
+    val rahmenFarbe = if (aufDunkel) farben.linie.copy(alpha = 0.55f) else farben.linieFein
+    val hintergrund = if (aufDunkel) farben.dunkelHell else farben.papier
     val aktivHintergrund = if (aufDunkel) farben.akzent else farben.tinte
     val aktivText = farben.papierHell
     val inaktivText = if (aufDunkel) farben.textHell else farben.tinte
@@ -166,8 +279,8 @@ fun SchriftgroessenSchalter(
     Surface(
         modifier = modifier.archivFokusGruppe(),
         color = hintergrund,
-        shape = RoundedCornerShape(3.dp),
-        border = BorderStroke(1.dp, rahmenFarbe),
+        shape = RoundedCornerShape(6.dp),
+        border = BorderStroke(0.75.dp, rahmenFarbe),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -176,12 +289,14 @@ fun SchriftgroessenSchalter(
                 val istAktiv = stufe == aktuell
                 Box(
                     modifier = Modifier
+                        .weight(1f, fill = !kompakt)
                         .defaultMinSize(
-                            minWidth = if (kompakt) minTouch else 56.dp,
+                            minWidth = if (kompakt) minTouch else 72.dp,
                             minHeight = minTouch,
                         )
+                        .clip(RoundedCornerShape(5.dp))
                         .background(if (istAktiv) aktivHintergrund else Color.Transparent)
-                        .archivFokusRahmen(eckRadius = 2.dp, aufDunkel = aufDunkel)
+                        .archivFokusRahmen(eckRadius = 5.dp, aufDunkel = aufDunkel)
                         .clickable { onAuswahl(stufe) }
                         .semantics {
                             role = Role.RadioButton
@@ -189,11 +304,11 @@ fun SchriftgroessenSchalter(
                             stateDescription = if (istAktiv) "Ausgewählt" else "Nicht ausgewählt"
                             contentDescription = "Schriftgröße ${stufe.bezeichnung}: ${stufe.beschreibung}"
                         }
-                        .padding(horizontal = if (kompakt) 10.dp else 12.dp, vertical = 6.dp),
+                        .padding(horizontal = if (kompakt) 10.dp else 14.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = if (kompakt) stufe.kurzZeichen else "${stufe.kurzZeichen} ${stufe.bezeichnung}",
+                        text = if (kompakt) stufe.kurzZeichen else "${stufe.kurzZeichen}  ${stufe.bezeichnung}",
                         style = MaterialTheme.typography.labelMedium,
                         color = if (istAktiv) aktivText else inaktivText,
                         fontWeight = if (istAktiv) FontWeight.Bold else FontWeight.Medium,

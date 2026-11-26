@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,35 +28,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.model.Geschlecht
 import de.pytales.zdf.model.Herkunft
 import de.pytales.zdf.model.Pfad
-import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.HakenIcon
 import de.pytales.zdf.ui.components.archivFokusGruppe
 import de.pytales.zdf.ui.components.archivFokusRahmen
 import de.pytales.zdf.ui.components.archivLiveHinweis
+import de.pytales.zdf.ui.components.archivPapierHintergrund
 import de.pytales.zdf.ui.components.archivUeberschrift
+import de.pytales.zdf.ui.media.ArchivPortraitBild
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
-import de.pytales.zdf.ui.theme.LayoutKlasse
-import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
- * Gestraffter 2–3-Klick-Einstieg (`GamePhase.HerkunftWahl`):
- * - 1. Soziale Herkunft (4 Milieus mit `zusatz`, `text`, `folge`)
- * - 2. Geschlecht (`m`/`w`) und Jahrgang (`18` / `35`)
- * - 3. Optional bei aktivem Unterrichts-Schalter: direkte Pfadwahl (`front` / `etappe` / `heimat`).
+ * Gestraffter 2–3-Klick-Einstieg (`GamePhase.HerkunftWahl`) im ruhigen Querformat-Layout:
+ * - Links: die 4 sozialen Herkünfte als luftiges 2×2-Raster
+ * - Rechts: Geschlecht, Jahrgang, (optional) Unterrichts-Direktwahl sowie Vorschau-Portrait
+ *   und Bestätigung zum Start in den August 1914.
  */
 @Composable
 fun HerkunftWahlScreen(
@@ -65,9 +70,8 @@ fun HerkunftWahlScreen(
     onAlterWaehlen: (Int) -> Unit,
     onDirektPfadWaehlen: (Pfad) -> Unit,
     onBestaetigen: () -> Unit,
-    onSchriftgroesseChange: (Schriftgroesse) -> Unit,
-    onAnalyseModusToggle: () -> Unit,
-    onAudioToggle: () -> Unit = {},
+    onAudioToggle: () -> Unit,
+    onEinstellungenOeffnen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val content = engine.content
@@ -79,28 +83,235 @@ fun HerkunftWahlScreen(
 
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val layoutKlasse = ArchivTheme.layoutKlasse
-    val zweispaltig = layoutKlasse != LayoutKlasse.KOMPAKT && uiState.schriftgroesse != Schriftgroesse.GROSS
+    val kompakt = metrik.kompakteHoehe
+    val querformat = metrik.zweispaltigeBuehne
+    val startJahr = content.kapitel.kapitel.first().jahr
+
+    val herkunftBlock: @Composable (Modifier) -> Unit = { mod ->
+        Column(
+            modifier = mod,
+            verticalArrangement = Arrangement.spacedBy(if (kompakt) 8.dp else 10.dp),
+        ) {
+            Text(
+                text = "Soziale Herkunft",
+                style = MaterialTheme.typography.titleLarge,
+                color = farben.tinte,
+                modifier = Modifier.archivUeberschrift(),
+            )
+
+            herkuenfte.chunked(2).forEach { paar ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 8.dp else 10.dp),
+                ) {
+                    paar.forEach { herkunft ->
+                        HerkunftKarte(
+                            herkunft = herkunft,
+                            ausgewaehlt = entwurf.herkunftId == herkunft.id,
+                            kompakt = kompakt,
+                            onClick = { onHerkunftWaehlen(herkunft.id) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                        )
+                    }
+                    if (paar.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+
+    val figurUndStartBlock: @Composable (Modifier) -> Unit = { mod ->
+        Column(
+            modifier = mod,
+            verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+        ) {
+            // Geschlecht
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "Geschlecht",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Serif,
+                    color = farben.tinte,
+                    modifier = Modifier.archivUeberschrift(),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AuswahlKachel(
+                        titel = "Männlich",
+                        untertitel = "Wehrpflichtig 1914",
+                        ausgewaehlt = entwurf.geschlecht == Geschlecht.MAENNLICH,
+                        onClick = { onGeschlechtWaehlen(Geschlecht.MAENNLICH) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    )
+                    AuswahlKachel(
+                        titel = "Weiblich",
+                        untertitel = "Heimat oder Lazarett",
+                        ausgewaehlt = entwurf.geschlecht == Geschlecht.WEIBLICH,
+                        onClick = { onGeschlechtWaehlen(Geschlecht.WEIBLICH) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    )
+                }
+            }
+
+            // Jahrgang
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "Alter im August $startJahr",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Serif,
+                    color = farben.tinte,
+                    modifier = Modifier.archivUeberschrift(),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    jahrgaenge.forEach { option ->
+                        val jahrgang = startJahr - option.alter
+                        val klasseHinweis = if (entwurf.geschlecht == Geschlecht.MAENNLICH) {
+                            engine.altersgruppe(option.alter).second
+                        } else {
+                            option.marke
+                        }
+                        AuswahlKachel(
+                            titel = "${option.alter} Jahre (Jg. $jahrgang)",
+                            untertitel = klasseHinweis,
+                            ausgewaehlt = entwurf.alter == option.alter,
+                            onClick = { onAlterWaehlen(option.alter) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                        )
+                    }
+                }
+            }
+
+            // Optional: Unterrichts-Direktwahl
+            if (direktwahlAktiv) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "Lebensbereich (Unterrichts-Direktwahl)",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = FontFamily.Serif,
+                        color = farben.akzent,
+                        modifier = Modifier.archivUeberschrift(),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        content.konfiguration.pfade.reihenfolge.forEach { pfad ->
+                            val pfadDef = content.konfiguration.pfade.definitionen.getValue(pfad)
+                            AuswahlKachel(
+                                titel = pfadDef.marke.removePrefix("An der ").removePrefix("In der "),
+                                untertitel = pfadKurzHinweis(pfad),
+                                ausgewaehlt = entwurf.direktwahlPfad == pfad,
+                                onClick = { onDirektPfadWaehlen(pfad) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Ruhige Zusammenfassung mit Stil-A-Portraitvorschau & Start-Button
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = farben.papierHell,
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(0.75.dp, if (vollstaendig) farben.akzent.copy(alpha = 0.6f) else farben.linieFein),
+                shadowElevation = 1.dp,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(if (kompakt) 12.dp else 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    val zusammenfassung = baueAuswahlZusammenfassung(
+                        content = content,
+                        herkunftId = entwurf.herkunftId,
+                        geschlecht = entwurf.geschlecht,
+                        alter = entwurf.alter,
+                        direktwahlAktiv = direktwahlAktiv,
+                        direktwahlPfad = entwurf.direktwahlPfad,
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (entwurf.herkunftId != null && entwurf.geschlecht != null) {
+                            val vorschauId = "portrait_${entwurf.herkunftId}_${entwurf.geschlecht.code}_neutral"
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(farben.papier),
+                            ) {
+                                ArchivPortraitBild(
+                                    portraitId = vorschauId,
+                                    stimmungsFarbe = farben.stufenFarbe(0),
+                                    beschreibung = "Vorschau-Portrait der gewählten Figur",
+                                ) {}
+                            }
+                        }
+
+                        Text(
+                            text = zusammenfassung,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (vollstaendig) farben.tinte else farben.tinteMatt,
+                            fontWeight = if (vollstaendig) FontWeight.Medium else FontWeight.Normal,
+                            modifier = Modifier
+                                .weight(1f)
+                                .archivLiveHinweis(),
+                        )
+                    }
+
+                    ArchivPrimaerKnopf(
+                        label = "In den August $startJahr starten",
+                        akzentStil = true,
+                        aktiviert = vollstaendig,
+                        onClick = onBestaetigen,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(farben.papier),
+            .archivPapierHintergrund(),
     ) {
         ArchivKopfBand(
-            marke = "AUGUST 1914 · EINSTIEG",
+            marke = "August $startJahr",
             titel = "Wer bist du zu Beginn des Krieges?",
-            untertitel = if (direktwahlAktiv) {
-                "Unterrichts-Direktwahl aktiv: Herkunft, Figur und Pfad festlegen"
-            } else {
-                "Wähle Herkunft, Geschlecht und Jahrgang — danach beginnt der August 1914."
-            },
-            schriftgroesse = uiState.schriftgroesse,
-            onSchriftgroesseChange = onSchriftgroesseChange,
-            analyseModus = uiState.analyseModus,
-            onAnalyseModusToggle = onAnalyseModusToggle,
+            untertitel = if (direktwahlAktiv) "Direktwahl aktiv" else "Ausgangslage wählen",
             audioZustand = uiState.audioZustand,
             onAudioToggle = onAudioToggle,
+            onEinstellungenOeffnen = onEinstellungenOeffnen,
         )
 
         Box(
@@ -110,302 +321,39 @@ fun HerkunftWahlScreen(
                 .verticalScroll(rememberScrollState()),
             contentAlignment = Alignment.TopCenter,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .archivInhaltsSafeArea()
-                    .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
-                    .archivFokusGruppe(),
-                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-            ) {
-                // Schritt 1: Soziale Herkunft (4 Milieus)
-                AbschnittBlatt(
-                    schrittMarke = "SCHRITT 1",
-                    titel = "Soziale Herkunft",
-                    untertitel = "Wo du aufgewachsen bist, prägt Vorräte, Nachbarschaft und den Blick der Behörden.",
-                ) {
-                    if (zweispaltig) {
-                        herkuenfte.chunked(2).forEach { paar ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(IntrinsicSize.Min),
-                                horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-                            ) {
-                                paar.forEach { herkunft ->
-                                    HerkunftKarte(
-                                        herkunft = herkunft,
-                                        ausgewaehlt = entwurf.herkunftId == herkunft.id,
-                                        onClick = { onHerkunftWaehlen(herkunft.id) },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                    )
-                                }
-                                if (paar.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-                        }
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            herkuenfte.forEach { herkunft ->
-                                HerkunftKarte(
-                                    herkunft = herkunft,
-                                    ausgewaehlt = entwurf.herkunftId == herkunft.id,
-                                    onClick = { onHerkunftWaehlen(herkunft.id) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Schritt 2: Geschlecht & Jahrgang
-                AbschnittBlatt(
-                    schrittMarke = "SCHRITT 2",
-                    titel = "Geschlecht & Jahrgang",
-                    untertitel = "Entscheidet über Wehrpflicht, Musterung und deine Rolle in Familie und Beruf.",
-                ) {
-                    val gruppenNebeneinander = layoutKlasse == LayoutKlasse.BREIT
-
-                    val geschlechtBlock: @Composable (Modifier) -> Unit = { mod ->
-                        Column(
-                            modifier = mod,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Text(
-                                text = "Geschlecht",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = farben.tinte,
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(IntrinsicSize.Min),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                AuswahlKachel(
-                                    titel = "Männlich",
-                                    untertitel = "1914 wehrpflichtig (17–45 Jahre)",
-                                    ausgewaehlt = entwurf.geschlecht == Geschlecht.MAENNLICH,
-                                    onClick = { onGeschlechtWaehlen(Geschlecht.MAENNLICH) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight(),
-                                )
-                                AuswahlKachel(
-                                    titel = "Weiblich",
-                                    untertitel = "Alltag in Heimat oder Lazarett",
-                                    ausgewaehlt = entwurf.geschlecht == Geschlecht.WEIBLICH,
-                                    onClick = { onGeschlechtWaehlen(Geschlecht.WEIBLICH) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight(),
-                                )
-                            }
-                        }
-                    }
-
-                    val jahrgangBlock: @Composable (Modifier) -> Unit = { mod ->
-                        val startJahr = content.kapitel.kapitel.first().jahr
-                        Column(
-                            modifier = mod,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Text(
-                                text = "Jahrgang im August $startJahr",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = farben.tinte,
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(IntrinsicSize.Min),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                jahrgaenge.forEach { option ->
-                                    val jahrgang = startJahr - option.alter
-                                    val klasseHinweis = if (entwurf.geschlecht == Geschlecht.MAENNLICH) {
-                                        " · ${engine.altersgruppe(option.alter).second}"
-                                    } else {
-                                        ""
-                                    }
-                                    AuswahlKachel(
-                                        titel = "${option.alter} Jahre (Jg. $jahrgang)",
-                                        untertitel = "${option.marke}$klasseHinweis",
-                                        ausgewaehlt = entwurf.alter == option.alter,
-                                        onClick = { onAlterWaehlen(option.alter) },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    if (gruppenNebeneinander) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
-                            verticalAlignment = Alignment.Top,
-                        ) {
-                            geschlechtBlock(Modifier.weight(1f))
-                            jahrgangBlock(Modifier.weight(1f))
-                        }
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                            geschlechtBlock(Modifier.fillMaxWidth())
-                            jahrgangBlock(Modifier.fillMaxWidth())
-                        }
-                    }
-                }
-
-                // Schritt 3 (optional): Pfad direkt wählen im Unterrichts-Modus
-                if (direktwahlAktiv) {
-                    AbschnittBlatt(
-                        schrittMarke = "SCHRITT 3 · UNTERRICHT",
-                        titel = "Pfad direkt wählen",
-                        untertitel = "Die Musterung wird übersprungen. Alle drei historischen Lebensbereiche sind sofort zugänglich.",
-                    ) {
-                        val pfade = content.konfiguration.pfade.reihenfolge
-                        val pfadNebeneinander = layoutKlasse != LayoutKlasse.KOMPAKT
-
-                        if (pfadNebeneinander) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(IntrinsicSize.Min),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                pfade.forEach { pfad ->
-                                    val pfadDef = content.konfiguration.pfade.definitionen.getValue(pfad)
-                                    AuswahlKachel(
-                                        titel = pfadDef.marke,
-                                        untertitel = "${pfadDef.ort} — ${pfadKurzbeschreibung(pfad)}",
-                                        ausgewaehlt = entwurf.direktwahlPfad == pfad,
-                                        onClick = { onDirektPfadWaehlen(pfad) },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                    )
-                                }
-                            }
-                        } else {
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                pfade.forEach { pfad ->
-                                    val pfadDef = content.konfiguration.pfade.definitionen.getValue(pfad)
-                                    AuswahlKachel(
-                                        titel = pfadDef.marke,
-                                        untertitel = "${pfadDef.ort} — ${pfadKurzbeschreibung(pfad)}",
-                                        ausgewaehlt = entwurf.direktwahlPfad == pfad,
-                                        onClick = { onDirektPfadWaehlen(pfad) },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Abschluss-Bestätigung (kein Zurück!)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = farben.papierHell,
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(1.25.dp, if (vollstaendig) farben.tinte else farben.linie),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(metrik.kartenInnenAbstand),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        val zusammenfassung = baueAuswahlZusammenfassung(
-                            content = content,
-                            herkunftId = entwurf.herkunftId,
-                            geschlecht = entwurf.geschlecht,
-                            alter = entwurf.alter,
-                            direktwahlAktiv = direktwahlAktiv,
-                            direktwahlPfad = entwurf.direktwahlPfad,
+            if (querformat) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .archivInhaltsSafeArea()
+                        .widthIn(max = metrik.maxInhaltsBreite)
+                        .padding(
+                            horizontal = metrik.aussenAbstand,
+                            vertical = if (kompakt) 10.dp else 16.dp,
                         )
-                        Text(
-                            text = if (vollstaendig) {
-                                "Deine Ausgangslage: $zusammenfassung"
-                            } else {
-                                "Noch offen: $zusammenfassung"
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (vollstaendig) farben.tinte else farben.tinteMatt,
-                            fontWeight = if (vollstaendig) FontWeight.SemiBold else FontWeight.Normal,
-                            modifier = Modifier.archivLiveHinweis(),
-                        )
-
-                        ArchivPrimaerKnopf(
-                            label = if (direktwahlAktiv) {
-                                "Mit dieser Ausgangslage in 1914 starten"
-                            } else {
-                                "In den August 1914 starten"
-                            },
-                            aktiviert = vollstaendig,
-                            onClick = onBestaetigen,
-                            modifier = if (layoutKlasse == LayoutKlasse.KOMPAKT) {
-                                Modifier.fillMaxWidth()
-                            } else {
-                                Modifier
-                            },
-                        )
-                    }
+                        .archivFokusGruppe(),
+                    horizontalArrangement = Arrangement.spacedBy(if (kompakt) 14.dp else 22.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    herkunftBlock(Modifier.weight(0.55f))
+                    figurUndStartBlock(Modifier.weight(0.45f))
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .archivInhaltsSafeArea()
+                        .widthIn(max = metrik.maxInhaltsBreite)
+                        .padding(horizontal = metrik.aussenAbstand, vertical = 14.dp)
+                        .archivFokusGruppe(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    herkunftBlock(Modifier.fillMaxWidth())
+                    ArchivTrennlinie()
+                    figurUndStartBlock(Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun AbschnittBlatt(
-    schrittMarke: String,
-    titel: String,
-    untertitel: String,
-    content: @Composable () -> Unit,
-) {
-    val farben = ArchivTheme.farben
-    val metrik = ArchivTheme.metrik
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = farben.papierHell,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(1.dp, farben.linie),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(metrik.kartenInnenAbstand),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                ArchivStempel(
-                    text = schrittMarke,
-                    farbe = farben.akzent,
-                )
-                Text(
-                    text = titel,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = farben.tinte,
-                    modifier = Modifier.archivUeberschrift(),
-                )
-                Text(
-                    text = untertitel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = farben.tinteMatt,
-                )
-            }
-            content()
         }
     }
 }
@@ -414,18 +362,19 @@ private fun AbschnittBlatt(
 private fun HerkunftKarte(
     herkunft: Herkunft,
     ausgewaehlt: Boolean,
+    kompakt: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
-    val flaeche = if (ausgewaehlt) farben.papierDunkel else farben.papier
-    val rahmen = if (ausgewaehlt) farben.akzent else farben.linie
+    val flaeche = if (ausgewaehlt) farben.papierHell else farben.papierHell.copy(alpha = 0.68f)
+    val rahmen = if (ausgewaehlt) farben.akzent else farben.linieFein.copy(alpha = 0.85f)
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = 140.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
+            .defaultMinSize(minHeight = if (kompakt) 104.dp else 128.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.RadioButton
@@ -434,55 +383,69 @@ private fun HerkunftKarte(
                 contentDescription = "${herkunft.titel}: ${herkunft.zusatz}. ${herkunft.folge}"
             },
         color = flaeche,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(if (ausgewaehlt) 2.dp else 1.dp, rahmen),
+        shape = RoundedCornerShape(6.dp),
+        border = BorderStroke(if (ausgewaehlt) 1.4.dp else 0.75.dp, rahmen),
+        shadowElevation = if (ausgewaehlt) 2.dp else 0.dp,
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .height(IntrinsicSize.Min),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+            Box(
+                modifier = Modifier
+                    .width(if (ausgewaehlt) 3.dp else 0.dp)
+                    .fillMaxHeight()
+                    .background(if (ausgewaehlt) farben.akzent else Color.Transparent),
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = if (kompakt) 11.dp else 14.dp, vertical = if (kompakt) 9.dp else 12.dp),
+                verticalArrangement = Arrangement.spacedBy(if (kompakt) 4.dp else 6.dp),
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = herkunft.titel,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
                     )
+                    if (ausgewaehlt) {
+                        HakenIcon(farbe = farben.akzent, groesse = 15.dp)
+                    }
+                }
+
+                Text(
+                    text = herkunft.zusatz,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = farben.akzent,
+                )
+
+                Text(
+                    text = herkunft.text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = farben.tinte,
+                )
+
+                if (!kompakt) {
                     Text(
-                        text = herkunft.zusatz,
+                        text = herkunft.folge,
                         style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Serif,
+                        fontStyle = FontStyle.Italic,
                         color = farben.tinteMatt,
                     )
                 }
-                if (ausgewaehlt) {
-                    ArchivStempel(
-                        text = "GEWÄHLT",
-                        farbe = farben.akzent,
-                        hintergrund = farben.papierHell,
-                    )
-                }
             }
-
-            Text(
-                text = herkunft.text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = farben.tinte,
-            )
-
-            ArchivTrennlinie(farbe = farben.linieFein)
-
-            Text(
-                text = herkunft.folge,
-                style = MaterialTheme.typography.bodySmall,
-                fontStyle = FontStyle.Italic,
-                color = farben.tinteMatt,
-            )
         }
     }
 }
@@ -497,14 +460,14 @@ private fun AuswahlKachel(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
-    val flaeche = if (ausgewaehlt) farben.papierDunkel else farben.papier
-    val rahmen = if (ausgewaehlt) farben.akzent else farben.linie
+    val flaeche = if (ausgewaehlt) farben.papierHell else farben.papierHell.copy(alpha = 0.62f)
+    val rahmen = if (ausgewaehlt) farben.akzent else farben.linieFein.copy(alpha = 0.85f)
 
     Surface(
         modifier = modifier
-            .defaultMinSize(minHeight = metrik.minTouchHoehe + 20.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
+            .defaultMinSize(minHeight = metrik.minTouchHoehe + 8.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
             .clickable(onClick = onClick)
             .clearAndSetSemantics {
                 role = Role.RadioButton
@@ -513,14 +476,15 @@ private fun AuswahlKachel(
                 contentDescription = "$titel: $untertitel"
             },
         color = flaeche,
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(if (ausgewaehlt) 2.dp else 1.dp, rahmen),
+        shape = RoundedCornerShape(6.dp),
+        border = BorderStroke(if (ausgewaehlt) 1.4.dp else 0.75.dp, rahmen),
+        shadowElevation = if (ausgewaehlt) 1.dp else 0.dp,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(horizontal = 11.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -531,29 +495,30 @@ private fun AuswahlKachel(
                     text = titel,
                     style = MaterialTheme.typography.titleSmall,
                     color = farben.tinte,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = if (ausgewaehlt) FontWeight.Bold else FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
                 if (ausgewaehlt) {
-                    ArchivStempel(
-                        text = "✓",
-                        farbe = farben.akzent,
-                    )
+                    HakenIcon(farbe = farben.akzent, groesse = 14.dp)
                 }
             }
             Text(
                 text = untertitel,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = farben.tinteMatt,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
 }
 
-private fun pfadKurzbeschreibung(pfad: Pfad): String = when (pfad) {
-    Pfad.FRONT -> "Stellungskrieg, Marsch und Grabenalltag"
-    Pfad.ETAPPE -> "Lazarett, Schreibstube und Nachschub hinter der Front"
-    Pfad.HEIMAT -> "Erwerb, Versorgung, Familie und Alltag im Reich"
+private fun pfadKurzHinweis(pfad: Pfad): String = when (pfad) {
+    Pfad.FRONT -> "Graben & Marsch"
+    Pfad.ETAPPE -> "Lazarett & Dienst"
+    Pfad.HEIMAT -> "Alltag im Reich"
 }
 
 private fun baueAuswahlZusammenfassung(
@@ -567,18 +532,18 @@ private fun baueAuswahlZusammenfassung(
     val offen = mutableListOf<String>()
     if (herkunftId == null) offen += "Herkunft"
     if (geschlecht == null) offen += "Geschlecht"
-    if (alter == null) offen += "Jahrgang"
-    if (direktwahlAktiv && direktwahlPfad == null) offen += "Pfad"
+    if (alter == null) offen += "Alter"
+    if (direktwahlAktiv && direktwahlPfad == null) offen += "Lebensbereich"
 
     if (offen.isNotEmpty()) {
-        return "Bitte noch ${offen.joinToString(", ")} auswählen."
+        return "Noch wählen: ${offen.joinToString(", ")}."
     }
 
     val herkunftTitel = content.herkunftById[herkunftId]?.titel.orEmpty()
     val geschlechtText = if (geschlecht == Geschlecht.MAENNLICH) "männlich" else "weiblich"
     val startJahr = content.kapitel.kapitel.first().jahr
     val jahrgang = startJahr - requireNotNull(alter)
-    val teile = mutableListOf(herkunftTitel, geschlechtText, "$alter Jahre (Jahrgang $jahrgang)")
+    val teile = mutableListOf(herkunftTitel, geschlechtText, "$alter Jahre (Jg. $jahrgang)")
     if (direktwahlAktiv && direktwahlPfad != null) {
         val pfadMarke = content.konfiguration.pfade.definitionen[direktwahlPfad]?.marke ?: direktwahlPfad.code
         teile += pfadMarke
