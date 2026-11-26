@@ -1,3 +1,4 @@
+import org.gradle.api.file.RelativePath
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -10,19 +11,36 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
-// Single Source of Truth: Synchronisiere content/*.json in generierte Build-Ressourcen (keine Kopien in Git).
+// Single Source of Truth: Synchronisiere content/*.json und content/media/**/*.webp
+// in generierte Build-Ressourcen (keine Kopien in Git).
 val syncContentToComposeResources by tasks.registering(Sync::class) {
     from(rootProject.layout.projectDirectory.dir("content")) {
         include("*.json")
+        into("files/content")
     }
-    into(layout.buildDirectory.dir("generated/contentComposeResources/files/content"))
+    from(rootProject.layout.projectDirectory.dir("content/media")) {
+        include("portraits/*.webp", "kapitel/*.webp", "schauplaetze/*.webp", "szenen/*.webp")
+        eachFile {
+            // Alle 167 Medien-IDs (Portraits, Kapitel, Schauplaetze, Einzelszenen) sind eindeutig
+            // und werden flach als Compose DrawableResource unter drawable/<id>.webp bereitgestellt.
+            relativePath = RelativePath(true, "drawable", name)
+        }
+        includeEmptyDirs = false
+    }
+    into(layout.buildDirectory.dir("generated/contentComposeResources"))
 }
 
 val syncContentToTestResources by tasks.registering(Sync::class) {
     from(rootProject.layout.projectDirectory.dir("content")) {
         include("*.json")
+        into("content")
     }
-    into(layout.buildDirectory.dir("generated/testContentResources/content"))
+    from(rootProject.layout.projectDirectory.dir("content/media")) {
+        include("portraits/*.webp", "kapitel/*.webp", "schauplaetze/*.webp", "szenen/*.webp")
+        into("media")
+        includeEmptyDirs = false
+    }
+    into(layout.buildDirectory.dir("generated/testContentResources"))
 }
 
 kotlin {

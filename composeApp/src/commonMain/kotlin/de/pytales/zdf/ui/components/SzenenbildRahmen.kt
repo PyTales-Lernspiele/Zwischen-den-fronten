@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,14 +32,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.pytales.zdf.ui.media.ArchivSzenenBild
+import de.pytales.zdf.ui.media.BildAufloeser
+import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.SzenenbildUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
 
 /**
  * Ruhiger 16:9-Szenenbild-Rahmen (`1280×720` gemäß `content/medienplan.json`):
- * - Zeigt Ortsangabe, Schauplatz-Tag, Jahr und Bild-ID (`bildId` / `schauplatzBild`).
- * - Bereitet über den optionalen [bildContent]-Slot den nahtlosen Einsatz der
- *   Stufe-1-Schauplatzbilder und Stufe-2-Einzel-Szenenbilder (WebP) in AP 5 vor.
+ * - Zeigt Ortsangabe, Schauplatz-Tag, Jahr und die aufgelöste Illustration.
+ * - Nutzt standardmäßig [ArchivSzenenBild] mit automatischem Fallback
+ *   (`einzelSzenenbild` (Stufe 2) → `schauplatzBild` (Stufe 1) → Archiv-Platzhalter);
+ *   über [bildContent] lässt sich die Bildfläche bei Bedarf gezielt überschreiben.
  */
 @Composable
 fun SzenenbildRahmen(
@@ -48,6 +53,14 @@ fun SzenenbildRahmen(
     bildContent: (@Composable BoxScope.(bildId: String, schauplatzBild: String) -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
+    val medienRegister = LocalMedienRegister.current
+    val aufgeloest = remember(szenenbild.bildId, szenenbild.schauplatzBild, medienRegister) {
+        BildAufloeser.loeseSzene(
+            bildId = szenenbild.bildId,
+            schauplatzBild = szenenbild.schauplatzBild,
+            verfuegbareIds = medienRegister.verfuegbareIds,
+        )
+    }
     val rahmenBeschreibung =
         "Szenenbild: ${szenenbild.ort}, Schauplatz ${szenenbild.schauplatzLabel}, Jahr ${szenenbild.jahr}"
 
@@ -73,90 +86,93 @@ fun SzenenbildRahmen(
                 if (bildContent != null) {
                     bildContent(szenenbild.bildId, szenenbild.schauplatzBild)
                 } else {
-                    // Ruhiger Archiv-Passepartout-Platzhalter bis AP 5 die WebP-Illustrationen liefert
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val w = size.width
-                        val h = size.height
-                        val inset = 10.dp.toPx()
-                        val eckLaenge = 14.dp.toPx()
-
-                        // Zarter innerer Rahmen
-                        drawRect(
-                            color = farben.linieFein.copy(alpha = 0.7f),
-                            topLeft = Offset(inset, inset),
-                            size = Size(w - 2 * inset, h - 2 * inset),
-                            style = Stroke(width = 1f),
-                        )
-
-                        // Dezente Archiv-Passermarken an den vier Ecken
-                        val markenFarbe = farben.linie.copy(alpha = 0.85f)
-                        val strich = 1.5f
-                        // Oben links
-                        drawLine(markenFarbe, Offset(inset, inset), Offset(inset + eckLaenge, inset), strich)
-                        drawLine(markenFarbe, Offset(inset, inset), Offset(inset, inset + eckLaenge), strich)
-                        // Oben rechts
-                        drawLine(markenFarbe, Offset(w - inset - eckLaenge, inset), Offset(w - inset, inset), strich)
-                        drawLine(markenFarbe, Offset(w - inset, inset), Offset(w - inset, inset + eckLaenge), strich)
-                        // Unten links
-                        drawLine(markenFarbe, Offset(inset, h - inset), Offset(inset + eckLaenge, h - inset), strich)
-                        drawLine(markenFarbe, Offset(inset, h - inset - eckLaenge), Offset(inset, h - inset), strich)
-                        // Unten rechts
-                        drawLine(
-                            markenFarbe,
-                            Offset(w - inset - eckLaenge, h - inset),
-                            Offset(w - inset, h - inset),
-                            strich,
-                        )
-                        drawLine(
-                            markenFarbe,
-                            Offset(w - inset, h - inset - eckLaenge),
-                            Offset(w - inset, h - inset),
-                            strich,
-                        )
-
-                        // Sehr ruhige Horizont- und Rahmenlinien als Bildkompositions-Anhaltspunkt
-                        val horizontY = h * 0.68f
-                        drawLine(
-                            color = farben.linieFein.copy(alpha = 0.55f),
-                            start = Offset(inset * 2f, horizontY),
-                            end = Offset(w - inset * 2f, horizontY),
-                            strokeWidth = 1f,
-                        )
-                    }
-
-                    // Mittige ruhige Archiv-Beschriftung
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ArchivSzenenBild(
+                        bildId = szenenbild.bildId,
+                        schauplatzBild = szenenbild.schauplatzBild,
+                        beschreibung = rahmenBeschreibung,
+                        medienRegister = medienRegister,
                     ) {
-                        Text(
-                            text = szenenbild.ort,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = farben.tinte,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "${szenenbild.pfadMarke} · ${szenenbild.jahr}",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontStyle = FontStyle.Italic,
-                            color = farben.tinteMatt,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "Archivtafel 16:9 — Bild folgt in AP 5",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.linie,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        // Ruhiger Archiv-Passepartout-Platzhalter als Fallback, falls weder Stufe 2 noch Stufe 1 vorliegt
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val w = size.width
+                            val h = size.height
+                            val inset = 10.dp.toPx()
+                            val eckLaenge = 14.dp.toPx()
+
+                            // Zarter innerer Rahmen
+                            drawRect(
+                                color = farben.linieFein.copy(alpha = 0.7f),
+                                topLeft = Offset(inset, inset),
+                                size = Size(w - 2 * inset, h - 2 * inset),
+                                style = Stroke(width = 1f),
+                            )
+
+                            // Dezente Archiv-Passermarken an den vier Ecken
+                            val markenFarbe = farben.linie.copy(alpha = 0.85f)
+                            val strich = 1.5f
+                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset + eckLaenge, inset), strich)
+                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset, inset + eckLaenge), strich)
+                            drawLine(markenFarbe, Offset(w - inset - eckLaenge, inset), Offset(w - inset, inset), strich)
+                            drawLine(markenFarbe, Offset(w - inset, inset), Offset(w - inset, inset + eckLaenge), strich)
+                            drawLine(markenFarbe, Offset(inset, h - inset), Offset(inset + eckLaenge, h - inset), strich)
+                            drawLine(markenFarbe, Offset(inset, h - inset - eckLaenge), Offset(inset, h - inset), strich)
+                            drawLine(
+                                markenFarbe,
+                                Offset(w - inset - eckLaenge, h - inset),
+                                Offset(w - inset, h - inset),
+                                strich,
+                            )
+                            drawLine(
+                                markenFarbe,
+                                Offset(w - inset, h - inset - eckLaenge),
+                                Offset(w - inset, h - inset),
+                                strich,
+                            )
+
+                            // Sehr ruhige Horizont- und Rahmenlinien als Bildkompositions-Anhaltspunkt
+                            val horizontY = h * 0.68f
+                            drawLine(
+                                color = farben.linieFein.copy(alpha = 0.55f),
+                                start = Offset(inset * 2f, horizontY),
+                                end = Offset(w - inset * 2f, horizontY),
+                                strokeWidth = 1f,
+                            )
+                        }
+
+                        // Mittige ruhige Archiv-Beschriftung
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(horizontal = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(
+                                text = szenenbild.ort,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = farben.tinte,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = "${szenenbild.pfadMarke} · ${szenenbild.jahr}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = FontStyle.Italic,
+                                color = farben.tinteMatt,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = "Archivtafel · ${szenenbild.schauplatzLabel}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = farben.linie,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
 
@@ -182,7 +198,7 @@ fun SzenenbildRahmen(
                 }
             }
 
-            // Untere Bildregister-Zeile mit Bild-ID & Schauplatz-Fallback-ID
+            // Untere Bildregister-Zeile (im Analysemodus inkl. aufgelöster Stufe & Fallback-Quelle)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +208,12 @@ fun SzenenbildRahmen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Bild: ${szenenbild.bildId}",
+                    text = if (analyseModus) {
+                        val ziel = aufgeloest.aufgeloesteId ?: "Platzhalter"
+                        "Bild: ${szenenbild.bildId} → $ziel (${aufgeloest.ebene.kurzLabel})"
+                    } else {
+                        "${szenenbild.ort} · ${szenenbild.pfadMarke}"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = if (analyseModus) farben.tinte else farben.tinteMatt,
                     fontWeight = if (analyseModus) FontWeight.SemiBold else FontWeight.Normal,
@@ -201,7 +222,11 @@ fun SzenenbildRahmen(
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = "Schauplatz: ${szenenbild.schauplatzBild}",
+                    text = if (analyseModus) {
+                        "Fallback: ${szenenbild.schauplatzBild}"
+                    } else {
+                        "${szenenbild.schauplatzLabel} · ${szenenbild.jahr}"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = farben.tinteMatt,
                     maxLines = 1,

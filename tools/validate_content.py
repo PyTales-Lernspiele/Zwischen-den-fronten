@@ -8,13 +8,23 @@ Bestand, Spielbalance-Regeln, Sprache (Klasse 8) und Live-Emotionen.
 
 from __future__ import annotations
 
+import argparse
 import json
 import pathlib
 import re
+import struct
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
+MEDIA = CONTENT / "media"
+
+MEDIA_CATEGORIES = {
+    "portraits": ("portraits", "portraitMasse", 45),
+    "kapitelbilder": ("kapitel", "szenenMasse", 280),
+    "schauplatzbilder": ("schauplaetze", "szenenMasse", 280),
+    "einzelSzenenbilder": ("szenen", "szenenMasse", 280),
+}
 
 REQUIRED_FILES = [
     "konfiguration.json",
@@ -85,7 +95,50 @@ def word_count(sentence: str) -> int:
     return len(words)
 
 
-def main() -> int:
+def read_webp_dimensions(path: pathlib.Path) -> tuple[int, int]:
+    """
+    Prueft eine WebP-Datei (RIFF/WEBP + VP8/VP8L/VP8X) ausschliesslich mit der
+    Python-Standardbibliothek und liefert (breite, hoehe).
+    """
+    data = path.read_bytes()
+    if len(data) < 30 or data[0:4] != b"RIFF" or data[8:12] != b"WEBP":
+        raise ValueError("Kein gueltiger RIFF/WEBP-Header.")
+
+    chunk = data[12:16]
+    if chunk == b"VP8 ":
+        # Lossy VP8-Keyframe: 3-Byte-Frame-Tag, dann 3-Byte-Startcode 9d 01 2a
+        if data[23:26] != b"\x9d\x01\x2a":
+            raise ValueError("Ungueltiger VP8-Startcode.")
+        raw_w, raw_h = struct.unpack("<HH", data[26:30])
+        return raw_w & 0x3FFF, raw_h & 0x3FFF
+
+    if chunk == b"VP8L":
+        # Lossless VP8L: Signatur-Byte 0x2f, danach 14 Bit Breite-1 und 14 Bit Hoehe-1
+        if data[20] != 0x2F:
+            raise ValueError("Ungueltige VP8L-Signatur.")
+        bits = struct.unpack("<I", data[21:25])[0]
+        return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+
+    if chunk == b"VP8X":
+        # Extended WebP: 24-Bit-Canvas-Breite-1 (24..26) und -Hoehe-1 (27..29)
+        w = int.from_bytes(data[24:27], "little") + 1
+        h = int.from_bytes(data[27:30], "little") + 1
+        return w, h
+
+    raise ValueError(f"Unbekannter WebP-Chunk-Typ: {chunk!r}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Qualitaetspruefung fuer Spielinhalte (content/*.json) und Medien-Assets (content/media/)."
+    )
+    parser.add_argument(
+        "--require-all-stufe1",
+        action="store_true",
+        help="Schlaegt fehl, wenn noch nicht alle 63 Stufe-1-Kernbilder als WebP vorhanden sind.",
+    )
+    args = parser.parse_args(argv)
+
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -385,12 +438,99 @@ def main() -> int:
     for loc, wc, s in over_limit:
         errors.append(f"[Lesbarkeit] {loc} hat {wc} Woerter (>{max_w}): {s[:70]}...")
 
+    # 7. Medien-Assets (AP 5 — eindeutige IDs, WebP-Integritaet, Aufloesung & Medienplan-Abgleich)
+    valid_media_statuses = {"vorhanden", "offen_ap5"}
+    expected_ext = medien["format"]["dateityp"]
+    seen_media_ids: dict[str, str] = {}
+    registered_paths: set[pathlib.Path] = set()
+    stufe1_vorhanden = 0
+    stufe1_gesamt = 0
+    stufe2_vorhanden = 0
+    stufe2_gesamt = 0
+    webp_geprueft = 0
+
+    for plan_key, (folder, size_key, max_warn_kb) in MEDIA_CATEGORIES.items():
+        expected_w, expected_h = medien["format"][size_key]
+        for entry in medien[plan_key]:
+            aid = entry["id"]
+            if aid in seen_media_ids:
+                errors.append(
+                    f"[Medien] Doppelte Asset-ID '{aid}' in {seen_media_ids[aid]} und {plan_key}."
+                )
+            seen_media_ids[aid] = plan_key
+
+            if not re.fullmatch(r"[a-z0-9_]+", aid):
+                errors.append(f"[Medien] Ungueltiger Compose-Ressourcenname fuer Asset-ID '{aid}'.")
+
+            status = entry.get("status", "")
+            if status not in valid_media_statuses:
+                errors.append(f"[Medien] Unbekannter Status '{status}' bei '{aid}'.")
+
+            ist_stufe1 = entry.get("stufe") == 1
+            if ist_stufe1:
+                stufe1_gesamt += 1
+            else:
+                stufe2_gesamt += 1
+
+            asset_path = MEDIA / folder / f"{aid}.{expected_ext}"
+            registered_paths.add(asset_path.resolve())
+            exists = asset_path.exists()
+
+            if status == "vorhanden":
+                if not exists:
+                    errors.append(
+                        f"[Medien] '{aid}' steht auf status='vorhanden', Datei fehlt jedoch: "
+                        f"{asset_path.relative_to(ROOT)}"
+                    )
+                    continue
+                try:
+                    w, h = read_webp_dimensions(asset_path)
+                except Exception as exc:
+                    errors.append(f"[Medien] Ungueltige WebP-Datei '{asset_path.relative_to(ROOT)}': {exc}")
+                    continue
+
+                if (w, h) != (expected_w, expected_h):
+                    errors.append(
+                        f"[Medien] Falsche Aufloesung fuer '{aid}': {w}x{h} statt {expected_w}x{expected_h}."
+                    )
+                size_kb = asset_path.stat().st_size / 1024.0
+                if size_kb > max_warn_kb:
+                    warnings.append(
+                        f"[Medien] '{aid}' ist relativ gross ({size_kb:.1f} KB > {max_warn_kb} KB)."
+                    )
+                webp_geprueft += 1
+                if ist_stufe1:
+                    stufe1_vorhanden += 1
+                else:
+                    stufe2_vorhanden += 1
+            else:
+                if exists:
+                    errors.append(
+                        f"[Medien] Datei '{asset_path.relative_to(ROOT)}' existiert bereits, "
+                        f"aber medienplan.json hat noch status='{status}' (tools/prepare_media.py --sync-plan)."
+                    )
+                elif ist_stufe1 and args.require_all_stufe1:
+                    errors.append(
+                        f"[Medien] Stufe-1-Kernbild fehlt noch (--require-all-stufe1): "
+                        f"{asset_path.relative_to(ROOT)}"
+                    )
+
+    if MEDIA.exists():
+        for file_path in sorted(MEDIA.rglob(f"*.{expected_ext}")):
+            if file_path.resolve() not in registered_paths:
+                errors.append(
+                    f"[Medien] Nicht im Medienplan registrierte Bilddatei: {file_path.relative_to(ROOT)}"
+                )
+
     stats = {
         "ereignisse": len(events),
         "kapitel": len(kap["kapitel"]),
         "merkmale": len(merk["register"]),
         "livePortraits": len(actual_portraits),
         "schauplaetze": len(schauplaetze_plan),
+        "stufe1Vorhanden": f"{stufe1_vorhanden}/{stufe1_gesamt}",
+        "stufe2Vorhanden": f"{stufe2_vorhanden}/{stufe2_gesamt}",
+        "webpGeprueft": webp_geprueft,
         "saetzeGeprueft": total_sentences,
         "schnittWoerter": round(avg_words, 2),
         "saetzeUeberLimit": len(over_limit),
@@ -400,7 +540,7 @@ def main() -> int:
 
 def report(errors: list[str], warnings: list[str], stats: dict) -> int:
     print("=" * 68)
-    print("ZWISCHEN DEN FRONTEN — INHALTSPRUEFUNG (AP 1)")
+    print("ZWISCHEN DEN FRONTEN — INHALTS- & MEDIENPRUEFUNG (AP 1 / AP 5)")
     print("=" * 68)
     for k, v in stats.items():
         print(f"  {k:22s}: {v}")

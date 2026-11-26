@@ -208,6 +208,7 @@ fun KopfLeiste(
                         sichtbar = emotionDetailsOffen && ausgewaehlterStatus == null,
                         analyseModus = analyseModus,
                         onSchliessen = { emotionDetailsOffen = false },
+                        portraitContent = portraitContent,
                     )
                 }
             }

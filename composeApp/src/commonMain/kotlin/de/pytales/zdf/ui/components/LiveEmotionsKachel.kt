@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.model.Stimmung
+import de.pytales.zdf.ui.media.ArchivPortraitBild
+import de.pytales.zdf.ui.media.BildAufloeser
+import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.LiveEmotionUiState
 import de.pytales.zdf.ui.theme.ArchivFarben
 import de.pytales.zdf.ui.theme.ArchivTheme
@@ -57,9 +61,9 @@ import de.pytales.zdf.ui.theme.ArchivTheme
  * Live-Emotions-Kachel rechts oben:
  * - Reagiert live auf `GameEngine.liveEmotion(state)` (`neutral`, `hungrig`, `erschoepft`, `angst`, `einsam`).
  * - Zeigt Name, Stand, Pfad und aktuelle Stimmung der Figur.
- * - Bereitet die saubere Einbindung der 40 Rollen-Portraits (`portrait_<herkunft>_<geschlecht>_<stimmung>`)
- *   über den optionalen [portraitContent]-Slot vor; bis AP 5 die WebP-Bilder liefert, wird ein
- *   würdiger, ruhiger Archiv-Platzhalter gerendert.
+ * - Lädt standardmäßig die Rollen-Portraits (`portrait_<herkunft>_<geschlecht>_<stimmung>`, WebP)
+ *   über [ArchivPortraitBild] mit automatischem Basis-Portrait- und Archiv-Platzhalter-Fallback;
+ *   über den optionalen [portraitContent]-Slot lässt sich die Darstellung gezielt überschreiben.
  */
 @Composable
 fun LiveEmotionsKachel(
@@ -188,7 +192,8 @@ fun LiveEmotionsKachel(
 }
 
 /**
- * Quadratischer 1:1-Portraitrahmen (`320×320` WebP-Slot für AP 5) mit ruhigem Archiv-Platzhalter.
+ * Quadratischer 1:1-Portraitrahmen (`320×320` WebP) mit automatischem Multiplatform-Loader
+ * ([ArchivPortraitBild]) und ruhigem Archiv-Platzhalter als Fallback.
  */
 @Composable
 fun ArchivPortraitRahmen(
@@ -219,63 +224,69 @@ fun ArchivPortraitRahmen(
         if (portraitContent != null) {
             portraitContent(emotion.portraitId)
         } else {
-            // Ruhiger, würdiger Archiv-Portrait-Platzhalter bis AP 5 die 40 WebP-Portraits liefert
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val w = size.width
-                val h = size.height
-                val rand = w * 0.08f
+            ArchivPortraitBild(
+                portraitId = emotion.portraitId,
+                stimmungsFarbe = stimmungsFarbe,
+                beschreibung = "Portrait von ${emotion.personName} (${emotion.stimmungBezeichnung})",
+            ) {
+                // Ruhiger, würdiger Archiv-Portrait-Platzhalter als Fallback
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val w = size.width
+                    val h = size.height
+                    val rand = w * 0.08f
 
-                // Feiner innerer Passepartout-Rahmen
-                drawRect(
-                    color = rahmenLinie,
-                    topLeft = Offset(rand, rand),
-                    size = Size(w - 2 * rand, h - 2 * rand),
-                    style = Stroke(width = 1f),
-                )
-
-                // Dezente Büsten-Silhouette (Kopf + Schulterbogen, ruhig und zeitlos)
-                val kopfRadius = w * 0.16f
-                drawCircle(
-                    color = silhouettenFarbe,
-                    radius = kopfRadius,
-                    center = Offset(w * 0.5f, h * 0.38f),
-                )
-                val schulterPfad = Path().apply {
-                    moveTo(w * 0.20f, h * 0.88f)
-                    cubicTo(
-                        w * 0.24f,
-                        h * 0.60f,
-                        w * 0.76f,
-                        h * 0.60f,
-                        w * 0.80f,
-                        h * 0.88f,
+                    // Feiner innerer Passepartout-Rahmen
+                    drawRect(
+                        color = rahmenLinie,
+                        topLeft = Offset(rand, rand),
+                        size = Size(w - 2 * rand, h - 2 * rand),
+                        style = Stroke(width = 1f),
                     )
-                    close()
-                }
-                drawPath(path = schulterPfad, color = silhouettenFarbe)
 
-                // Feiner Stimmungs-Akzentbalken am unteren Bildrand
-                drawRect(
-                    color = stimmungsFarbe.copy(alpha = 0.85f),
-                    topLeft = Offset(0f, h - 3.dp.toPx()),
-                    size = Size(w, 3.dp.toPx()),
+                    // Dezente Büsten-Silhouette (Kopf + Schulterbogen, ruhig und zeitlos)
+                    val kopfRadius = w * 0.16f
+                    drawCircle(
+                        color = silhouettenFarbe,
+                        radius = kopfRadius,
+                        center = Offset(w * 0.5f, h * 0.38f),
+                    )
+                    val schulterPfad = Path().apply {
+                        moveTo(w * 0.20f, h * 0.88f)
+                        cubicTo(
+                            w * 0.24f,
+                            h * 0.60f,
+                            w * 0.76f,
+                            h * 0.60f,
+                            w * 0.80f,
+                            h * 0.88f,
+                        )
+                        close()
+                    }
+                    drawPath(path = schulterPfad, color = silhouettenFarbe)
+
+                    // Feiner Stimmungs-Akzentbalken am unteren Bildrand
+                    drawRect(
+                        color = stimmungsFarbe.copy(alpha = 0.85f),
+                        topLeft = Offset(0f, h - 3.dp.toPx()),
+                        size = Size(w, 3.dp.toPx()),
+                    )
+                }
+
+                // Ruhiges Monogramm über dem historischen Passepartout
+                Text(
+                    text = emotion.initialen,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (aufDunkel) farben.textHell.copy(alpha = 0.88f) else farben.tinte.copy(alpha = 0.84f),
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
-
-            // Ruhiges Monogramm über dem historischen Passepartout
-            Text(
-                text = emotion.initialen,
-                style = MaterialTheme.typography.titleSmall,
-                color = if (aufDunkel) farben.textHell.copy(alpha = 0.88f) else farben.tinte.copy(alpha = 0.84f),
-                fontWeight = FontWeight.SemiBold,
-            )
         }
     }
 }
 
 /**
- * Aufklappbare Detailkarte zur Live-Emotions-Kachel (zeigt Herkunft, Zustandssatz
- * und im Analysemodus / für AP 5 die exakte Portrait-Asset-ID).
+ * Aufklappbare Detailkarte zur Live-Emotions-Kachel (zeigt vergrößertes Portrait, Herkunft,
+ * Zustandssatz und im Analysemodus die exakte Portrait-Asset-Auflösung).
  */
 @Composable
 fun LiveEmotionDetailKarte(
@@ -284,6 +295,7 @@ fun LiveEmotionDetailKarte(
     analyseModus: Boolean,
     onSchliessen: () -> Unit,
     modifier: Modifier = Modifier,
+    portraitContent: (@Composable BoxScope.(portraitId: String) -> Unit)? = null,
 ) {
     AnimatedVisibility(
         visible = sichtbar,
@@ -292,6 +304,10 @@ fun LiveEmotionDetailKarte(
         modifier = modifier,
     ) {
         val farben = ArchivTheme.farben
+        val medienRegister = LocalMedienRegister.current
+        val aufgeloest = remember(emotion.portraitId, medienRegister) {
+            BildAufloeser.loesePortrait(emotion.portraitId, medienRegister.verfuegbareIds)
+        }
         val akzent = stimmungsAkzentFarbe(
             stimmung = emotion.stimmung,
             hoechsteStufe = emotion.hoechsteStufe,
@@ -321,9 +337,16 @@ fun LiveEmotionDetailKarte(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        ArchivPortraitRahmen(
+                            emotion = emotion,
+                            stimmungsFarbe = akzent,
+                            groesse = 64.dp,
+                            aufDunkel = false,
+                            portraitContent = portraitContent,
+                        )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = emotion.personName,
@@ -388,8 +411,13 @@ fun LiveEmotionDetailKarte(
                     }
 
                     if (analyseModus) {
+                        val zielHinweis = when {
+                            aufgeloest.aufgeloesteId == null -> "Archiv-Platzhalter"
+                            aufgeloest.aufgeloesteId == emotion.portraitId -> aufgeloest.ebene.kurzLabel
+                            else -> "→ ${aufgeloest.aufgeloesteId} (${aufgeloest.ebene.kurzLabel})"
+                        }
                         Text(
-                            text = "AP-5-Portrait-Slot: ${emotion.portraitId} (${emotion.portraitRessourcenPfad})",
+                            text = "Portrait-Asset: ${emotion.portraitId} · $zielHinweis",
                             style = MaterialTheme.typography.labelSmall,
                             color = farben.tinteMatt,
                         )

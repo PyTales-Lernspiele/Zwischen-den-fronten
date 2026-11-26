@@ -45,6 +45,9 @@ import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.KopfLeiste
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
+import de.pytales.zdf.ui.media.ArchivKapitelBild
+import de.pytales.zdf.ui.media.BildAufloeser
+import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.KapitelbildUiState
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
@@ -409,8 +412,9 @@ internal fun ArchivSchalterZeile(
 }
 
 /**
- * Ruhiger 16:9-Kapitelbild-Rahmen (`1280×720` gemäß `content/medienplan.json`),
- * vorbereitet für die 6 einheitlichen Kapitel-Illustrationen aus AP 5 (`kapitel_1914`..`kapitel_1919`).
+ * Ruhiger 16:9-Kapitelbild-Rahmen (`1280×720` gemäß `content/medienplan.json`):
+ * nutzt standardmäßig [ArchivKapitelBild] (`kapitel_1914`..`kapitel_1919`, WebP) mit
+ * automatischem Fallback auf die bisherige Archiv-Kapiteltafel.
  */
 @Composable
 internal fun KapitelbildRahmen(
@@ -420,6 +424,10 @@ internal fun KapitelbildRahmen(
     bildContent: (@Composable BoxScope.(bildId: String) -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
+    val medienRegister = LocalMedienRegister.current
+    val aufgeloest = remember(kapitelbild.bildId, medienRegister) {
+        BildAufloeser.loeseKapitel(kapitelbild.bildId, medienRegister.verfuegbareIds)
+    }
     val rahmenBeschreibung =
         "Kapitelbild ${kapitelbild.jahr}: ${kapitelbild.ueberschrift} (${kapitelbild.zeitraum})"
 
@@ -444,73 +452,79 @@ internal fun KapitelbildRahmen(
                 if (bildContent != null) {
                     bildContent(kapitelbild.bildId)
                 } else {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val w = size.width
-                        val h = size.height
-                        val inset = 12.dp.toPx()
-                        val eckLaenge = 16.dp.toPx()
-
-                        drawRect(
-                            color = farben.linieFein.copy(alpha = 0.72f),
-                            topLeft = Offset(inset, inset),
-                            size = Size(w - 2 * inset, h - 2 * inset),
-                            style = Stroke(width = 1f),
-                        )
-
-                        val markenFarbe = farben.linie.copy(alpha = 0.9f)
-                        val strich = 1.5f
-                        drawLine(markenFarbe, Offset(inset, inset), Offset(inset + eckLaenge, inset), strich)
-                        drawLine(markenFarbe, Offset(inset, inset), Offset(inset, inset + eckLaenge), strich)
-                        drawLine(markenFarbe, Offset(w - inset - eckLaenge, inset), Offset(w - inset, inset), strich)
-                        drawLine(markenFarbe, Offset(w - inset, inset), Offset(w - inset, inset + eckLaenge), strich)
-                        drawLine(markenFarbe, Offset(inset, h - inset), Offset(inset + eckLaenge, h - inset), strich)
-                        drawLine(markenFarbe, Offset(inset, h - inset - eckLaenge), Offset(inset, h - inset), strich)
-                        drawLine(markenFarbe, Offset(w - inset - eckLaenge, h - inset), Offset(w - inset, h - inset), strich)
-                        drawLine(markenFarbe, Offset(w - inset, h - inset - eckLaenge), Offset(w - inset, h - inset), strich)
-
-                        val horizontY = h * 0.72f
-                        drawLine(
-                            color = farben.linieFein.copy(alpha = 0.5f),
-                            start = Offset(inset * 2f, horizontY),
-                            end = Offset(w - inset * 2f, horizontY),
-                            strokeWidth = 1f,
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ArchivKapitelBild(
+                        kapitelBildId = kapitelbild.bildId,
+                        beschreibung = rahmenBeschreibung,
+                        medienRegister = medienRegister,
                     ) {
-                        Text(
-                            text = kapitelbild.jahr.toString(),
-                            style = MaterialTheme.typography.displaySmall,
-                            color = farben.akzent,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = kapitelbild.ueberschrift,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = farben.tinte,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = kapitelbild.zeitraum,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontStyle = FontStyle.Italic,
-                            color = farben.tinteMatt,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = "Kapiteltafel 16:9 — Bild folgt in AP 5",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = farben.linie,
-                            textAlign = TextAlign.Center,
-                        )
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val w = size.width
+                            val h = size.height
+                            val inset = 12.dp.toPx()
+                            val eckLaenge = 16.dp.toPx()
+
+                            drawRect(
+                                color = farben.linieFein.copy(alpha = 0.72f),
+                                topLeft = Offset(inset, inset),
+                                size = Size(w - 2 * inset, h - 2 * inset),
+                                style = Stroke(width = 1f),
+                            )
+
+                            val markenFarbe = farben.linie.copy(alpha = 0.9f)
+                            val strich = 1.5f
+                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset + eckLaenge, inset), strich)
+                            drawLine(markenFarbe, Offset(inset, inset), Offset(inset, inset + eckLaenge), strich)
+                            drawLine(markenFarbe, Offset(w - inset - eckLaenge, inset), Offset(w - inset, inset), strich)
+                            drawLine(markenFarbe, Offset(w - inset, inset), Offset(w - inset, inset + eckLaenge), strich)
+                            drawLine(markenFarbe, Offset(inset, h - inset), Offset(inset + eckLaenge, h - inset), strich)
+                            drawLine(markenFarbe, Offset(inset, h - inset - eckLaenge), Offset(inset, h - inset), strich)
+                            drawLine(markenFarbe, Offset(w - inset - eckLaenge, h - inset), Offset(w - inset, h - inset), strich)
+                            drawLine(markenFarbe, Offset(w - inset, h - inset - eckLaenge), Offset(w - inset, h - inset), strich)
+
+                            val horizontY = h * 0.72f
+                            drawLine(
+                                color = farben.linieFein.copy(alpha = 0.5f),
+                                start = Offset(inset * 2f, horizontY),
+                                end = Offset(w - inset * 2f, horizontY),
+                                strokeWidth = 1f,
+                            )
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(horizontal = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                text = kapitelbild.jahr.toString(),
+                                style = MaterialTheme.typography.displaySmall,
+                                color = farben.akzent,
+                                textAlign = TextAlign.Center,
+                            )
+                            Text(
+                                text = kapitelbild.ueberschrift,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = farben.tinte,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = kapitelbild.zeitraum,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = FontStyle.Italic,
+                                color = farben.tinteMatt,
+                                textAlign = TextAlign.Center,
+                            )
+                            Text(
+                                text = "Kapiteltafel 16:9",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = farben.linie,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
                 }
 
@@ -544,7 +558,11 @@ internal fun KapitelbildRahmen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Kapitelbild: ${kapitelbild.bildId}",
+                    text = if (analyseModus) {
+                        "Kapitelbild: ${kapitelbild.bildId} (${aufgeloest.ebene.kurzLabel})"
+                    } else {
+                        "${kapitelbild.ueberschrift} · ${kapitelbild.zeitraum}"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = if (analyseModus) farben.tinte else farben.tinteMatt,
                     fontWeight = if (analyseModus) FontWeight.SemiBold else FontWeight.Normal,

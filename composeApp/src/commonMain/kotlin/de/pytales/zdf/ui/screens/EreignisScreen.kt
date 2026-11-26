@@ -40,7 +40,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
  * Durchgängiger Ereignis-Bildschirm für `GamePhase.EreignisAnzeige` und `GamePhase.EreignisAusgang`:
- * verbindet [SpielKopfLeiste] (`BefindensLeiste` + `LiveEmotionsKachel`), [SzenenbildRahmen],
+ * verbindet [SpielKopfLeiste] (`BefindensLeiste` + `LiveEmotionsKachel` mit AP-5-Portrait-Loader),
+ * [SzenenbildRahmen] (mit automatischem Stufe-2→Stufe-1→Platzhalter-Loader),
  * [EntscheidungsKarte] (alle 5 Kartentypen, genau 2 Entscheidungen) und [EreignisAusgangKarte].
  */
 @Composable
