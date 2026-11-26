@@ -1,4 +1,4 @@
-name: Inhaltsprüfung (Content CI)
+name: CI — Inhalte, Engine-Tests & Multiplatform-Builds
 
 on:
   push:
@@ -21,3 +21,47 @@ jobs:
 
       - name: Spielinhalte prüfen
         run: python3 tools/validate_content.py
+
+  kotlin-tests:
+    name: Kotlin-Tests & Balance-Simulation (JVM + Android Unit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: JUnit-Testsuite & Monte-Carlo-Balance ausführen
+        run: ./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest --no-daemon
+
+  multiplatform-builds:
+    name: Multiplatform-Builds (Android, Desktop JVM, Web Wasm/JS)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Android Debug APK bauen
+        run: ./gradlew :androidApp:assembleDebug --no-daemon
+
+      - name: Desktop JVM JAR bauen
+        run: ./gradlew :composeApp:desktopJar --no-daemon
+
+      - name: WebApp (WasmJS + JS-Fallback) bauen
+        run: ./gradlew :composeApp:composeCompatibilityBrowserDistribution --no-daemon
