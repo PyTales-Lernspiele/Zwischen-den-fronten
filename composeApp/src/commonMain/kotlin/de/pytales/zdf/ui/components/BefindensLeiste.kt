@@ -1,10 +1,6 @@
 package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,12 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.state.WertKachelUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 
 /**
  * Obere Befindensleiste mit allen 4 Befindenswerten (*Hunger, Erschöpfung, Verdacht, Einsamkeit*):
@@ -61,7 +59,9 @@ fun BefindensLeiste(
     val zeilen = werte.chunked(effektiveSpalten)
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .archivFokusGruppe(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         zeilen.forEach { zeile ->
@@ -113,7 +113,7 @@ fun WertKachel(
         else -> farben.linieFein
     }
     val titelFarbe = if (aufDunkel) farben.textHell else farben.tinte
-    val hinweisFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.72f) else farben.tinteMatt
+    val hinweisFarbe = if (aufDunkel) farben.textHell.copy(alpha = 0.76f) else farben.tinteMatt
 
     val beschreibung = buildString {
         append("${wert.bezeichnung}: ${wert.stufenName}, ")
@@ -121,17 +121,20 @@ fun WertKachel(
         if (wert.aenderungsText != null) {
             append(", letzte Änderung ${wert.aenderungsText}")
         }
-        append(". Tippen für Erklärung.")
+        append(". ")
+        append(if (istAusgewaehlt) "Erklärkarte schließen." else "Tippen für Erklärung.")
     }
 
     Surface(
         modifier = modifier
             .defaultMinSize(minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = aufDunkel)
             .clickable(onClick = onClick)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.Button
                 selected = istAusgewaehlt
+                stateDescription = if (istAusgewaehlt) "Erklärung geöffnet" else "Erklärung geschlossen"
                 contentDescription = beschreibung
             },
         color = flaeche,
@@ -239,18 +242,22 @@ fun WertErklaerKarte(
     onSchliessen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val reduziert = ArchivTheme.reduzierteAnimationen
     AnimatedVisibility(
         visible = wert != null,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = ArchivUebergaenge.aufklappEnter(reduziert),
+        exit = ArchivUebergaenge.aufklappExit(reduziert),
         modifier = modifier,
     ) {
         if (wert != null) {
             val farben = ArchivTheme.farben
+            val metrik = ArchivTheme.metrik
             val stufenFarbe = farben.stufenFarbe(wert.stufe)
 
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .archivLiveHinweis(),
                 color = farben.papierHell,
                 shape = RoundedCornerShape(4.dp),
                 border = BorderStroke(1.dp, farben.linie),
@@ -268,7 +275,7 @@ fun WertErklaerKarte(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(ArchivTheme.metrik.kartenInnenAbstand),
+                            .padding(metrik.kartenInnenAbstand),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         // Kopfzeile mit Name, Stufe und Schließen-Schaltfläche
@@ -286,10 +293,12 @@ fun WertErklaerKarte(
                                     text = wert.bezeichnung,
                                     style = MaterialTheme.typography.titleLarge,
                                     color = farben.tinte,
+                                    modifier = Modifier.archivUeberschrift(),
                                 )
                                 ArchivStempel(
                                     text = wert.stufenName,
                                     farbe = stufenFarbe,
+                                    hintergrund = farben.papierHell,
                                 )
                                 if (wert.aenderungsText != null) {
                                     WertDeltaBadge(
@@ -302,21 +311,22 @@ fun WertErklaerKarte(
 
                             Box(
                                 modifier = Modifier
-                                    .defaultMinSize(minHeight = 40.dp)
+                                    .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                                     .clip(RoundedCornerShape(3.dp))
-                                    .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
+                                    .border(1.dp, farben.linie, RoundedCornerShape(3.dp))
+                                    .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
                                     .clickable(onClick = onSchliessen)
                                     .semantics {
                                         role = Role.Button
                                         contentDescription = "Erklärkarte für ${wert.bezeichnung} schließen"
                                     }
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     text = "Schließen ×",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = farben.tinteMatt,
+                                    color = farben.tinte,
                                 )
                             }
                         }

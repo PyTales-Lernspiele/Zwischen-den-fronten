@@ -1,10 +1,6 @@
 package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -46,10 +42,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +60,7 @@ import de.pytales.zdf.ui.state.EntscheidungsOptionUiState
 import de.pytales.zdf.ui.state.EreignisAusgangUiState
 import de.pytales.zdf.ui.state.QuelleUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 
 /**
  * Entscheidungskarten-Baukasten für alle 5 historischen Kartentypen:
@@ -281,8 +280,11 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                             color = farben.tinteMatt,
                         )
                     }
-                    // Stilisierte Marken-Abschnitte einer historischen Lebensmittelkarte
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // Stilisierte Marken-Abschnitte einer historischen Lebensmittelkarte (rein dekorativ)
+                    Row(
+                        modifier = Modifier.clearAndSetSemantics {},
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
                         listOf("I", "II", "III").forEach { abschnitt ->
                             Box(
                                 modifier = Modifier
@@ -319,6 +321,7 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                     color = farben.tinte,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.archivUeberschrift(),
                 )
                 Text(
                     text = "${karte.aktenzeichen} · ${karte.pfadMarke}",
@@ -353,6 +356,7 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                             fontFamily = FontFamily.Serif,
                             color = farben.tinte,
                             fontWeight = FontWeight.Bold,
+                            modifier = Modifier.archivUeberschrift(),
                         )
                         Text(
                             text = karte.aktenzeichen,
@@ -376,7 +380,9 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
 private fun FeldpostStempel(jahr: Int) {
     val farben = ArchivTheme.farben
     Box(
-        modifier = Modifier.size(46.dp),
+        modifier = Modifier
+            .size(46.dp)
+            .clearAndSetSemantics {},
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -550,10 +556,16 @@ fun EntscheidungsOptionButton(
         modifier = modifier
             .defaultMinSize(minHeight = 76.dp)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
             .clickable(enabled = aktiv, onClick = onClick)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.Button
                 selected = istAusgewaehlt
+                stateDescription = when {
+                    istAusgewaehlt -> "Gewählt"
+                    !aktiv -> "Nicht gewählt"
+                    else -> "Auswählbar"
+                }
                 contentDescription = semantik
             },
         color = flaeche,
@@ -603,6 +615,8 @@ fun QuellenEinordnungBox(
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+    val reduziert = ArchivTheme.reduzierteAnimationen
     var aufgeklappt by remember(ereignisId) { mutableStateOf(analyseModus) }
 
     LaunchedEffect(analyseModus) {
@@ -618,17 +632,20 @@ fun QuellenEinordnungBox(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 44.dp)
+                .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
                 .clickable { aufgeklappt = !aufgeklappt }
-                .semantics {
+                .clearAndSetSemantics {
                     role = Role.Button
+                    selected = aufgeklappt
+                    stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
                     contentDescription = if (aufgeklappt) {
                         "Historische Einordnung und Quelle zuklappen"
                     } else {
                         "Historische Einordnung und Quelle aufklappen"
                     }
                 }
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -658,8 +675,8 @@ fun QuellenEinordnungBox(
 
         AnimatedVisibility(
             visible = aufgeklappt,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
+            enter = ArchivUebergaenge.aufklappEnter(reduziert),
+            exit = ArchivUebergaenge.aufklappExit(reduziert),
         ) {
             Column(
                 modifier = Modifier
@@ -754,7 +771,9 @@ fun EreignisAusgangKarte(
     val metrik = ArchivTheme.metrik
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .archivLiveHinweis(),
         color = farben.papierHell,
         shape = RoundedCornerShape(4.dp),
         border = BorderStroke(1.25.dp, farben.linie),
@@ -777,6 +796,7 @@ fun EreignisAusgangKarte(
                     style = MaterialTheme.typography.labelMedium,
                     color = farben.tinteMatt,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.archivUeberschrift(),
                 )
 
                 Text(
@@ -798,6 +818,7 @@ fun EreignisAusgangKarte(
                             ArchivStempel(
                                 text = "${wirkung.name} ${wirkung.zeichen} (${wirkung.richtung})",
                                 farbe = farbe,
+                                hintergrund = farben.papierHell,
                             )
                         }
                     }
@@ -816,8 +837,9 @@ fun EreignisAusgangKarte(
 
                 Surface(
                     modifier = Modifier
-                        .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                        .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                         .clip(RoundedCornerShape(4.dp))
+                        .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
                         .clickable(onClick = onWeiter)
                         .semantics {
                             role = Role.Button

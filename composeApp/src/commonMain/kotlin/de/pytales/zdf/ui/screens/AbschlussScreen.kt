@@ -1,10 +1,6 @@
 package de.pytales.zdf.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,9 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,10 +56,20 @@ import de.pytales.zdf.engine.WertStatus
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
 import de.pytales.zdf.ui.components.FuenfSegmentBalken
+import de.pytales.zdf.ui.components.archivFokusGruppe
+import de.pytales.zdf.ui.components.archivFokusRahmen
+import de.pytales.zdf.ui.components.archivLiveHinweis
+import de.pytales.zdf.ui.components.archivUeberschrift
+import de.pytales.zdf.ui.export.ExportErgebnis
+import de.pytales.zdf.ui.export.LebenslaufExportDokument
+import de.pytales.zdf.ui.export.LebenslaufExporter
+import de.pytales.zdf.ui.export.PlattformExportBruecke
+import de.pytales.zdf.ui.export.rememberPlattformExportBruecke
 import de.pytales.zdf.ui.state.ProtokollUiEintrag
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.LayoutKlasse
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
@@ -70,7 +80,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
  *   und Übergang in den erreichten 4-Fächer-Lebenslauf.
  * - Danach bzw. bei regulärem Erreichen von 1919: vollständiger **4-Fächer-Lebenslauf**
  *   mit Personendaten, historischem Ausgang, allen 4 Fächern, chronologischer Zeitleiste,
- *   aufklappbarem Entscheidungsweg, Wertebilanz und sauberem „Neuer Durchgang“-Button.
+ *   aufklappbarem Entscheidungsweg, Wertebilanz, **Export-/Druckansicht für das Klassenzimmer**
+ *   (Desktop JVM, WebApp, Android) und sauberem „Neuer Durchgang“-Button.
  */
 @Composable
 fun AbschlussScreen(
@@ -81,6 +92,7 @@ fun AbschlussScreen(
     onNeuerDurchgang: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val hartesEnde = phase.hartesEnde
@@ -94,6 +106,7 @@ fun AbschlussScreen(
             onNeuerDurchgang = onNeuerDurchgang,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             modifier = modifier,
         )
     } else {
@@ -104,6 +117,7 @@ fun AbschlussScreen(
             onNeuerDurchgang = onNeuerDurchgang,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             modifier = modifier,
         )
     }
@@ -123,6 +137,7 @@ private fun AuffangnetzAnsicht(
     onNeuerDurchgang: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
@@ -145,6 +160,8 @@ private fun AuffangnetzAnsicht(
             onSchriftgroesseChange = onSchriftgroesseChange,
             analyseModus = uiState.analyseModus,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            audioZustand = uiState.audioZustand,
+            onAudioToggle = onAudioToggle,
         )
 
         Box(
@@ -158,7 +175,8 @@ private fun AuffangnetzAnsicht(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 760.dp)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
+                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                    .archivFokusGruppe(),
                 verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
             ) {
                 Surface(
@@ -203,6 +221,7 @@ private fun AuffangnetzAnsicht(
                                 text = hartesEnde.titel,
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
                             )
 
                             Text(
@@ -234,7 +253,7 @@ private fun AuffangnetzAnsicht(
                                         color = farben.tinte,
                                     )
                                     Text(
-                                        text = "Dein bisheriger Weg bleibt vollständig erhalten und lässt sich im Lebenslauf nachvollziehen.",
+                                        text = "Dein bisheriger Weg bleibt vollständig erhalten und lässt sich im Lebenslauf nachvollziehen, drucken oder sichern.",
                                         style = MaterialTheme.typography.bodySmall,
                                         fontStyle = FontStyle.Italic,
                                         color = farben.tinteMatt,
@@ -283,7 +302,8 @@ private fun AuffangnetzAnsicht(
 /**
  * Vollständige Darstellung des 4-Fächer-Lebenslaufs aus [LebenslaufCalculator]:
  * Personendaten, historischer Ausgang (bzw. vorzeitiger Einschnitt), alle 4 Fächer,
- * chronologische Zeitleiste, aufklappbarer Entscheidungsweg, Wertebilanz & „Neuer Durchgang“.
+ * chronologische Zeitleiste, aufklappbarer Entscheidungsweg, Wertebilanz,
+ * Klassenzimmer-Export/Druckansicht & „Neuer Durchgang“.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -294,6 +314,7 @@ private fun LebenslaufAnsicht(
     onNeuerDurchgang: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
@@ -328,6 +349,25 @@ private fun LebenslaufAnsicht(
         }
     }
 
+    // Export-/Druckaufbereitung für das Klassenzimmer
+    var exportMitProtokoll by remember { mutableStateOf(true) }
+    val exportDokument = remember(
+        engine.content,
+        gameState,
+        phase,
+        exportMitProtokoll,
+        uiState.analyseModus,
+    ) {
+        LebenslaufExporter.erstelleDokument(
+            content = engine.content,
+            gameState = gameState,
+            phase = phase,
+            mitProtokoll = exportMitProtokoll,
+            analyseModus = uiState.analyseModus,
+        )
+    }
+    val exportBruecke = rememberPlattformExportBruecke()
+
     val scrollState = rememberScrollState()
     LaunchedEffect(uiState.auffangnetzBestaetigt) {
         scrollState.scrollTo(0)
@@ -350,6 +390,8 @@ private fun LebenslaufAnsicht(
             onSchriftgroesseChange = onSchriftgroesseChange,
             analyseModus = uiState.analyseModus,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            audioZustand = uiState.audioZustand,
+            onAudioToggle = onAudioToggle,
         )
 
         Box(
@@ -363,7 +405,8 @@ private fun LebenslaufAnsicht(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
+                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                    .archivFokusGruppe(),
                 verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
             ) {
                 // 1. Personenblatt & Historischer Ausgang (oder vorzeitiger Einschnitt)
@@ -422,6 +465,7 @@ private fun LebenslaufAnsicht(
                                         text = ausgang.titel,
                                         style = MaterialTheme.typography.headlineLarge,
                                         color = farben.tinte,
+                                        modifier = Modifier.archivUeberschrift(),
                                     )
                                     Text(
                                         text = "„${ausgang.deutung}“",
@@ -465,6 +509,7 @@ private fun LebenslaufAnsicht(
                                         text = "${hartesEnde.titel} (${hartesEnde.jahr})",
                                         style = MaterialTheme.typography.headlineLarge,
                                         color = farben.tinte,
+                                        modifier = Modifier.archivUeberschrift(),
                                     )
                                     Text(
                                         text = hartesEnde.text,
@@ -523,6 +568,7 @@ private fun LebenslaufAnsicht(
                                 text = "Was diesen Weg geprägt hat",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
                             )
                         }
 
@@ -585,6 +631,7 @@ private fun LebenslaufAnsicht(
                                 text = "Zeitleiste deines Weges",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
                             )
                         }
 
@@ -612,7 +659,16 @@ private fun LebenslaufAnsicht(
                     )
                 }
 
-                // 6. Neuer Durchgang
+                // 6. Export- & Druckansicht für das Klassenzimmer (AP 6)
+                LebenslaufExportKarte(
+                    dokument = exportDokument,
+                    bruecke = exportBruecke,
+                    hatProtokoll = protokollUi.isNotEmpty(),
+                    mitProtokoll = exportMitProtokoll,
+                    onMitProtokollToggle = { exportMitProtokoll = !exportMitProtokoll },
+                )
+
+                // 7. Neuer Durchgang
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = farben.papierHell,
@@ -672,6 +728,170 @@ private fun LebenslaufAnsicht(
     }
 }
 
+/**
+ * Klassenzimmer-Exportkarte (AP 6):
+ * Druckansicht (A4-Archivblatt), Datei-Download / Teilen, Kopieren in die Zwischenablage
+ * sowie eine aufklappbare, markierbare Textvorschau direkt im Bildschirm.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LebenslaufExportKarte(
+    dokument: LebenslaufExportDokument,
+    bruecke: PlattformExportBruecke,
+    hatProtokoll: Boolean,
+    mitProtokoll: Boolean,
+    onMitProtokollToggle: () -> Unit,
+) {
+    val farben = ArchivTheme.farben
+    val metrik = ArchivTheme.metrik
+    val layoutKlasse = ArchivTheme.layoutKlasse
+    val reduziert = ArchivTheme.reduzierteAnimationen
+
+    var letztesErgebnis by remember { mutableStateOf<ExportErgebnis?>(null) }
+    var textVorschauOffen by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = farben.papierHell,
+        shape = RoundedCornerShape(4.dp),
+        border = BorderStroke(1.dp, farben.linie),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(metrik.kartenInnenAbstand),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                ArchivStempel(
+                    text = "KLASSENZIMMER · AUSWERTUNG & DRUCK",
+                    farbe = farben.akzent,
+                    hintergrund = farben.papier,
+                )
+                Text(
+                    text = "Lebenslauf sichern oder drucken",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = farben.tinte,
+                    modifier = Modifier.archivUeberschrift(),
+                )
+                Text(
+                    text = "Bereitet deinen 4-Fächer-Lebenslauf als ruhiges A4-Druckblatt (PDF/Drucker) oder strukturierten Text für Mappe und Unterrichtsgespräch auf.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = farben.tinteMatt,
+                )
+            }
+
+            if (hatProtokoll) {
+                ArchivSchalterZeile(
+                    titel = "Entscheidungsprotokoll in Export & Druck einschließen",
+                    beschreibung = "Listet alle getroffenen Stationen chronologisch mit auf, um Wege in der Klasse zu vergleichen.",
+                    aktiv = mitProtokoll,
+                    onToggle = onMitProtokollToggle,
+                )
+            }
+
+            if (layoutKlasse == LayoutKlasse.KOMPAKT) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ArchivPrimaerKnopf(
+                        label = bruecke.druckenLabel,
+                        onClick = { letztesErgebnis = bruecke.drucken(dokument) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    ArchivSekundaerKnopf(
+                        label = bruecke.speichernLabel,
+                        onClick = { letztesErgebnis = bruecke.speichernOderTeilen(dokument) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    ArchivSekundaerKnopf(
+                        label = "Als Text kopieren",
+                        onClick = { letztesErgebnis = bruecke.kopieren(dokument) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    ArchivSekundaerKnopf(
+                        label = if (textVorschauOffen) "Textvorschau ausblenden" else "Textvorschau anzeigen",
+                        onClick = { textVorschauOffen = !textVorschauOffen },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    ArchivPrimaerKnopf(
+                        label = bruecke.druckenLabel,
+                        onClick = { letztesErgebnis = bruecke.drucken(dokument) },
+                    )
+                    ArchivSekundaerKnopf(
+                        label = bruecke.speichernLabel,
+                        onClick = { letztesErgebnis = bruecke.speichernOderTeilen(dokument) },
+                    )
+                    ArchivSekundaerKnopf(
+                        label = "Als Text kopieren",
+                        onClick = { letztesErgebnis = bruecke.kopieren(dokument) },
+                    )
+                    ArchivSekundaerKnopf(
+                        label = if (textVorschauOffen) "Textvorschau ausblenden" else "Textvorschau anzeigen",
+                        onClick = { textVorschauOffen = !textVorschauOffen },
+                    )
+                }
+            }
+
+            // Höfliche Live-Rückmeldung nach Export-, Druck- oder Kopieraktion
+            val ergebnis = letztesErgebnis
+            if (ergebnis != null) {
+                val hinweisFarbe = if (ergebnis.erfolgreich) farben.stufenFarbe(0) else farben.akzent
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .archivLiveHinweis()
+                        .background(farben.papier, RoundedCornerShape(3.dp))
+                        .border(1.dp, hinweisFarbe.copy(alpha = 0.7f), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                ) {
+                    Text(
+                        text = ergebnis.meldung,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = farben.tinte,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+            }
+
+            // Aufklappbare, markierbare Klartext-Vorschau (funktioniert auf jedem Schulgerät auch offline)
+            AnimatedVisibility(
+                visible = textVorschauOffen,
+                enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                exit = ArchivUebergaenge.aufklappExit(reduziert),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
+                        .background(farben.papier, RoundedCornerShape(3.dp))
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "EXPORT-TEXTVORSCHAU (MARKIERBAR · ${dokument.dateinameBasis}.html)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = farben.tinteMatt,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    SelectionContainer {
+                        Text(
+                            text = dokument.klartext,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = farben.tinte,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun PersonMerkmalStempel(
     feld: String,
@@ -680,6 +900,7 @@ private fun PersonMerkmalStempel(
     val farben = ArchivTheme.farben
     Column(
         modifier = Modifier
+            .semantics(mergeDescendants = true) {}
             .border(0.75.dp, farben.linieFein, RoundedCornerShape(3.dp))
             .background(farben.papier, RoundedCornerShape(3.dp))
             .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -708,7 +929,7 @@ private fun LebenslaufFachKarte(
     val istGefuellt = fach.merkmalName != null
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         color = if (istGefuellt) farben.papier else farben.papier.copy(alpha = 0.5f),
         shape = RoundedCornerShape(4.dp),
         border = BorderStroke(1.dp, if (istGefuellt) farben.linie else farben.linieFein),
@@ -776,6 +997,7 @@ private fun ZeitleistenEintragKarte(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
             .background(farben.papier, RoundedCornerShape(3.dp))
             .height(IntrinsicSize.Min),
@@ -824,6 +1046,7 @@ private fun EntscheidungsProtokollBox(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val reduziert = ArchivTheme.reduzierteAnimationen
     var aufgeklappt by remember { mutableStateOf(analyseModus) }
 
     LaunchedEffect(analyseModus) {
@@ -841,13 +1064,16 @@ private fun EntscheidungsProtokollBox(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                    .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
                     .clickable { aufgeklappt = !aufgeklappt }
-                    .semantics {
+                    .clearAndSetSemantics {
                         role = Role.Button
+                        selected = aufgeklappt
+                        stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
                         contentDescription = if (aufgeklappt) {
-                            "Chronologische Entscheidungsliste zuklappen"
+                            "Chronologische Entscheidungsliste (${eintraege.size} Stationen) zuklappen"
                         } else {
-                            "Chronologische Entscheidungsliste aufklappen"
+                            "Chronologische Entscheidungsliste (${eintraege.size} Stationen) aufklappen"
                         }
                     }
                     .padding(horizontal = metrik.kartenInnenAbstand, vertical = 12.dp),
@@ -875,8 +1101,8 @@ private fun EntscheidungsProtokollBox(
 
             AnimatedVisibility(
                 visible = aufgeklappt,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
+                enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                exit = ArchivUebergaenge.aufklappExit(reduziert),
             ) {
                 Column(
                     modifier = Modifier
@@ -889,6 +1115,7 @@ private fun EntscheidungsProtokollBox(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .semantics(mergeDescendants = true) {}
                                 .border(0.75.dp, farben.linieFein, RoundedCornerShape(3.dp))
                                 .background(farben.papierHell, RoundedCornerShape(3.dp))
                                 .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -949,6 +1176,7 @@ private fun WerteBilanzKarte(
                 text = "Befindensstand am Ende ($endJahr)",
                 style = MaterialTheme.typography.titleLarge,
                 color = farben.tinte,
+                modifier = Modifier.archivUeberschrift(),
             )
 
             werte.chunked(spalten).forEach { zeile ->
@@ -961,6 +1189,7 @@ private fun WerteBilanzKarte(
                         Column(
                             modifier = Modifier
                                 .weight(1f)
+                                .semantics(mergeDescendants = true) {}
                                 .border(0.75.dp, farben.linieFein, RoundedCornerShape(3.dp))
                                 .background(farben.papier, RoundedCornerShape(3.dp))
                                 .padding(10.dp),
@@ -979,6 +1208,7 @@ private fun WerteBilanzKarte(
                                 ArchivStempel(
                                     text = status.stufenName,
                                     farbe = stufenFarbe,
+                                    hintergrund = farben.papierHell,
                                 )
                             }
                             FuenfSegmentBalken(

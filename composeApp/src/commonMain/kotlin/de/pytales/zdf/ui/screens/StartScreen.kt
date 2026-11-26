@@ -1,10 +1,6 @@
 package de.pytales.zdf.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,10 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.content.GameContent
@@ -46,8 +44,12 @@ import de.pytales.zdf.model.SpielModus
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
+import de.pytales.zdf.ui.components.archivFokusGruppe
+import de.pytales.zdf.ui.components.archivFokusRahmen
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.LayoutKlasse
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
@@ -56,7 +58,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
  * - Titel, Untertitel und Zielgruppe aus `content/konfiguration.json`
  * - Auswahl *Kurzer Verlauf* vs. *Langer Verlauf* (mit Umfang & Dauer)
  * - 3 per Tipp/Klick aufklappbare Onboarding-Grundsätze (`onboarding.grundsaetze`)
- * - Schriftgrößen-Schalter (`klein`/`mittel`/`gross`), Analysemodus & Unterrichts-Direktwahl
+ * - Schriftgrößen-Schalter (`klein`/`mittel`/`gross`), ruhige Übergänge / Animationen reduzieren,
+ *   optionaler dezenter Ton (mit harter Musiksperre an Front & Etappe), Analysemodus & Unterrichts-Direktwahl
  * - Dezenter Zugang zur AP-3-Komponenten-Vorschau für Lehrkräfte & Entwicklung.
  */
 @Composable
@@ -67,6 +70,8 @@ fun StartScreen(
     onGrundsatzToggle: (String) -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onReduzierteAnimationenToggle: () -> Unit,
+    onAudioToggle: () -> Unit,
     onDirektwahlChange: (Boolean) -> Unit,
     onDurchgangBeginnen: () -> Unit,
     onUiVorschauOeffnen: () -> Unit,
@@ -93,6 +98,8 @@ fun StartScreen(
             onSchriftgroesseChange = onSchriftgroesseChange,
             analyseModus = uiState.analyseModus,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            audioZustand = uiState.audioZustand,
+            onAudioToggle = onAudioToggle,
         )
 
         Box(
@@ -106,7 +113,8 @@ fun StartScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
+                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                    .archivFokusGruppe(),
                 verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
             ) {
                 // 1. Verlaufsauswahl (Kurzer Verlauf vs. Langer Verlauf)
@@ -131,6 +139,9 @@ fun StartScreen(
                                 text = "Umfang des Durchgangs wählen",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = farben.tinte,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .archivUeberschrift(),
                             )
                             ArchivStempel(
                                 text = "OHNE PUNKTE",
@@ -147,7 +158,8 @@ fun StartScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(IntrinsicSize.Min),
+                                    .height(IntrinsicSize.Min)
+                                    .archivFokusGruppe(),
                                 horizontalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
                             ) {
                                 modi.forEach { modus ->
@@ -165,7 +177,9 @@ fun StartScreen(
                             }
                         } else {
                             Column(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .archivFokusGruppe(),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
                                 modi.forEach { modus ->
@@ -244,6 +258,7 @@ fun StartScreen(
                             text = "Drei Grundsätze vor Beginn",
                             style = MaterialTheme.typography.titleLarge,
                             color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
                         )
                         Text(
                             text = konf.onboarding.aufforderung,
@@ -264,7 +279,7 @@ fun StartScreen(
                     }
                 }
 
-                // 3. Einstellungen für Unterricht, Beamer & Direktwahl
+                // 3. Einstellungen für Lesbarkeit, Zugänglichkeit, Audio & Unterricht
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = farben.papierHell,
@@ -278,9 +293,10 @@ fun StartScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
-                            text = "Lesbarkeit & Unterrichts-Optionen",
+                            text = "Lesbarkeit, Zugänglichkeit & Unterrichts-Optionen",
                             style = MaterialTheme.typography.titleLarge,
                             color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
                         )
 
                         // Schriftgröße
@@ -300,10 +316,30 @@ fun StartScreen(
 
                         ArchivTrennlinie(farbe = farben.linieFein)
 
+                        // Ruhige Übergänge / Animationen reduzieren (AP 6)
+                        ArchivSchalterZeile(
+                            titel = "Ruhige Übergänge: Animationen reduzieren",
+                            beschreibung = "Schaltet sanfte Phasen- und Kartenübergänge sowie Aufklapp-Animationen ab — für sofortige, vollkommen ruhige Wechsel auf Beamer, bei Bewegungsempfindlichkeit oder mit Bildschirmleser.",
+                            aktiv = uiState.reduzierteAnimationen,
+                            onToggle = onReduzierteAnimationenToggle,
+                            statusLabelAktiv = "REDUZIERT",
+                            statusLabelInaktiv = "SANFT",
+                        )
+
+                        // Optionaler dezenter Ton mit harter Musiksperre an Front & Etappe (AP 6)
+                        ArchivSchalterZeile(
+                            titel = "Dezenter Ton (Musiksperre an Front & Etappe)",
+                            beschreibung = "Sehr leise, ruhige Begleitung im Startmenü und in der Heimat. Auf den Pfaden Front und Etappe sowie bei vorzeitigem Einschnitt herrscht strikt respektvolle Stille.",
+                            aktiv = uiState.audioAktiv,
+                            onToggle = onAudioToggle,
+                            statusLabelAktiv = "LEISE",
+                            statusLabelInaktiv = "STUMM",
+                        )
+
                         // Analysemodus
                         ArchivSchalterZeile(
                             titel = "Analysemodus (Quellen & Archiv-Hinweise)",
-                            beschreibung = "Öffnet historische Quellen, Vertiefungshinweise und Archiv-IDs auf jeder Karte automatisch für das Unterrichtsgespräch.",
+                            beschreibung = "Öffnet historische Quellen, Vollbelege, Vertiefungshinweise und Archiv-IDs auf jeder Karte automatisch für das Unterrichtsgespräch.",
                             aktiv = uiState.analyseModus,
                             onToggle = onAnalyseModusToggle,
                         )
@@ -320,7 +356,7 @@ fun StartScreen(
                     }
                 }
 
-                // 4. Dezenter Fußbereich mit Link zur AP-3-Komponenten-Vorschau
+                // 4. Dezenter Fußbereich mit Link zur AP-3-Komponenten-Vorschau (mind. 48 dp Touch-Ziel)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -336,21 +372,22 @@ fun StartScreen(
                     )
                     Box(
                         modifier = Modifier
-                            .defaultMinSize(minHeight = 40.dp)
+                            .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                             .clip(RoundedCornerShape(3.dp))
-                            .border(1.dp, farben.linieFein, RoundedCornerShape(3.dp))
+                            .border(1.dp, farben.linie, RoundedCornerShape(3.dp))
+                            .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
                             .clickable(onClick = onUiVorschauOeffnen)
                             .semantics {
                                 role = Role.Button
-                                contentDescription = "AP-3-Komponenten-Vorschau für Lehrkräfte und Entwicklung öffnen"
+                                contentDescription = "UI- und Bildwelt-Vorschau für Lehrkräfte und Entwicklung öffnen"
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = "UI-Vorschau (AP 3)",
                             style = MaterialTheme.typography.labelSmall,
-                            color = farben.tinteMatt,
+                            color = farben.tinte,
                         )
                     }
                 }
@@ -377,10 +414,12 @@ private fun ModusAuswahlKarte(
         modifier = modifier
             .defaultMinSize(minHeight = 120.dp)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
             .clickable(onClick = onClick)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.RadioButton
                 selected = ausgewaehlt
+                stateDescription = if (ausgewaehlt) "Ausgewählt" else "Nicht ausgewählt"
                 contentDescription = "${konf.bezeichnung}: ${konf.umfang} ${konf.dauer}"
             },
         color = flaeche,
@@ -407,7 +446,7 @@ private fun ModusAuswahlKarte(
                 ArchivStempel(
                     text = if (ausgewaehlt) "GEWÄHLT" else "${konf.zielzahl} KARTEN",
                     farbe = if (ausgewaehlt) farben.akzent else farben.tinteMatt,
-                    hintergrund = if (ausgewaehlt) farben.akzent.copy(alpha = 0.12f) else farben.papierHell,
+                    hintergrund = farben.papierHell,
                 )
             }
 
@@ -443,6 +482,7 @@ private fun OnboardingGrundsatzKarte(
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
+    val reduziert = ArchivTheme.reduzierteAnimationen
 
     Column(
         modifier = Modifier
@@ -454,10 +494,12 @@ private fun OnboardingGrundsatzKarte(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = metrik.minTouchHoehe)
+                .archivFokusRahmen(eckRadius = 3.dp, aufDunkel = false)
                 .clickable(onClick = onToggle)
-                .semantics {
+                .clearAndSetSemantics {
                     role = Role.Button
                     selected = aufgeklappt
+                    stateDescription = if (aufgeklappt) "Aufgeklappt" else "Zugeklappt"
                     contentDescription = if (aufgeklappt) {
                         "Grundsatz $nummer: ${grundsatz.satz} zuklappen"
                     } else {
@@ -494,8 +536,8 @@ private fun OnboardingGrundsatzKarte(
 
         AnimatedVisibility(
             visible = aufgeklappt,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically(),
+            enter = ArchivUebergaenge.aufklappEnter(reduziert),
+            exit = ArchivUebergaenge.aufklappExit(reduziert),
         ) {
             Column(
                 modifier = Modifier

@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.pytales.zdf.ui.theme.ArchivFarben
+import de.pytales.zdf.ui.theme.ArchivKontrast
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.HexColorParser
 import de.pytales.zdf.ui.theme.LayoutKlasse
 import de.pytales.zdf.ui.theme.Schriftgroesse
@@ -165,6 +167,83 @@ class ArchivThemeTest {
 
         listOf(kompakt, mittel, mittelBeamer, breit).forEach { metrik ->
             assertTrue(metrik.minTouchHoehe >= 48.dp, "Touch-Mindesthöhe verletzt: $metrik")
+        }
+    }
+
+    @Test
+    fun ruhigeUebergaengeUndReduzierteAnimationenSindSauberKonfiguriert() {
+        val ruhig = ArchivUebergaenge.profilFuer(reduzierteAnimationen = false)
+        assertFalse(ruhig.reduzierteAnimationen)
+        assertTrue(ruhig.phasenDauerMs in 120..300)
+        assertTrue(ruhig.aufklappDauerMs in 100..250)
+        assertTrue(ruhig.farbDauerMs in 100..260)
+        assertTrue(ruhig.sanftScrollen)
+        assertTrue(ruhig.vertikalAufklappen)
+
+        val reduziert = ArchivUebergaenge.profilFuer(reduzierteAnimationen = true)
+        assertTrue(reduziert.reduzierteAnimationen)
+        assertEquals(0, reduziert.phasenDauerMs)
+        assertEquals(0, reduziert.aufklappDauerMs)
+        assertEquals(0, reduziert.farbDauerMs)
+        assertFalse(reduziert.sanftScrollen)
+        assertFalse(reduziert.vertikalAufklappen)
+
+        // Auch die Compose-Übergangs-Fabriken laufen ohne Fehler
+        ArchivUebergaenge.phasenTransitionSpec(false)
+        ArchivUebergaenge.phasenTransitionSpec(true)
+        ArchivUebergaenge.aufklappEnter(false)
+        ArchivUebergaenge.aufklappEnter(true)
+        ArchivUebergaenge.aufklappExit(false)
+        ArchivUebergaenge.aufklappExit(true)
+        ArchivUebergaenge.farbSpec(false)
+        ArchivUebergaenge.farbSpec(true)
+    }
+
+    @Test
+    fun archivFarbweltErfuelltWcagAAKontrasteFuerBeamerUndUnterricht() {
+        val farben = ArchivFarben.fromFarbwelt(content.konfiguration.farbwelt)
+
+        val pflichtPaare = listOf(
+            "tinte auf papier" to (farben.tinte to farben.papier),
+            "tinte auf papierHell" to (farben.tinte to farben.papierHell),
+            "tinte auf papierDunkel" to (farben.tinte to farben.papierDunkel),
+            "tinteMatt auf papier" to (farben.tinteMatt to farben.papier),
+            "tinteMatt auf papierHell" to (farben.tinteMatt to farben.papierHell),
+            "tinteMatt auf papierDunkel" to (farben.tinteMatt to farben.papierDunkel),
+            "akzent auf papier" to (farben.akzent to farben.papier),
+            "akzent auf papierHell" to (farben.akzent to farben.papierHell),
+            "akzent auf papierDunkel" to (farben.akzent to farben.papierDunkel),
+            "papierHell auf tinte" to (farben.papierHell to farben.tinte),
+            "papierHell auf akzent" to (farben.papierHell to farben.akzent),
+            "textHell auf dunkel" to (farben.textHell to farben.dunkel),
+            "textHell auf dunkelHell" to (farben.textHell to farben.dunkelHell),
+            "textHell@0.76 auf dunkelHell" to (farben.textHell.copy(alpha = 0.76f) to farben.dunkelHell),
+        )
+
+        pflichtPaare.forEach { (name, paar) ->
+            val ratio = ArchivKontrast.kontrastVerhaeltnis(paar.first, paar.second)
+            assertTrue(
+                ArchivKontrast.erfuelltWcagAA(paar.first, paar.second),
+                "WCAG AA (>= 4.5:1) verletzt für $name: $ratio",
+            )
+        }
+
+        // Alle 5 Stufenfarben erfüllen WCAG AA auf hellem Papier (stufen) bzw. dunkler Kopfleiste (stufenHell)
+        farben.stufen.forEachIndexed { stufe, farbe ->
+            assertTrue(
+                ArchivKontrast.erfuelltWcagAA(farbe, farben.papierHell),
+                "Stufe $stufe verletzt WCAG AA auf papierHell",
+            )
+        }
+        farben.stufenHell.forEachIndexed { stufe, farbe ->
+            assertTrue(
+                ArchivKontrast.erfuelltWcagAA(farbe, farben.dunkel),
+                "Helle Stufe $stufe verletzt WCAG AA auf dunkel",
+            )
+            assertTrue(
+                ArchivKontrast.erfuelltWcagAA(farbe, farben.dunkelHell),
+                "Helle Stufe $stufe verletzt WCAG AA auf dunkelHell",
+            )
         }
     }
 }

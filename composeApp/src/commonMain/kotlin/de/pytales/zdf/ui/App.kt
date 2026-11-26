@@ -56,15 +56,14 @@ fun App() {
     val controller = remember(geladen) {
         geladen?.let { SpielController(content = it) }
     }
-    val schriftgroesse = if (controller != null) {
-        controller.uiState.collectAsState().value.schriftgroesse
-    } else {
-        Schriftgroesse.MITTEL
-    }
+    val uiState = controller?.uiState?.collectAsState()?.value
+    val schriftgroesse = uiState?.schriftgroesse ?: Schriftgroesse.MITTEL
+    val reduzierteAnimationen = uiState?.reduzierteAnimationen ?: false
 
     ArchivPapierTheme(
         farbwelt = geladen?.konfiguration?.farbwelt,
         schriftgroesse = schriftgroesse,
+        reduzierteAnimationen = reduzierteAnimationen,
     ) {
         val farben = ArchivTheme.farben
         Surface(

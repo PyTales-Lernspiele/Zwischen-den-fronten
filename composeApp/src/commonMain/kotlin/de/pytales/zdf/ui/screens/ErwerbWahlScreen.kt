@@ -31,10 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,10 @@ import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.archivFokusGruppe
+import de.pytales.zdf.ui.components.archivFokusRahmen
+import de.pytales.zdf.ui.components.archivLiveHinweis
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.ErwerbOptionUiState
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
@@ -64,6 +69,7 @@ fun ErwerbWahlScreen(
     onBestaetigen: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -88,6 +94,7 @@ fun ErwerbWahlScreen(
             uiState = uiState,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
         )
 
@@ -102,7 +109,8 @@ fun ErwerbWahlScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = metrik.maxInhaltsBreite)
-                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand),
+                    .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                    .archivFokusGruppe(),
                 verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
             ) {
                 // Einordnungskopf
@@ -126,6 +134,7 @@ fun ErwerbWahlScreen(
                             text = "Wovon lebst du, während der Krieg beginnt?",
                             style = MaterialTheme.typography.headlineSmall,
                             color = farben.tinte,
+                            modifier = Modifier.archivUeberschrift(),
                         )
                         Text(
                             text = buildString {
@@ -201,6 +210,7 @@ fun ErwerbWahlScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (ausgewaehlt != null) farben.tinte else farben.tinteMatt,
                             fontWeight = if (ausgewaehlt != null) FontWeight.SemiBold else FontWeight.Normal,
+                            modifier = Modifier.archivLiveHinweis(),
                         )
                         ArchivPrimaerKnopf(
                             label = if (ausgewaehlt != null) {
@@ -242,10 +252,12 @@ private fun ErwerbKarte(
         modifier = modifier
             .defaultMinSize(minHeight = 148.dp)
             .clip(RoundedCornerShape(4.dp))
+            .archivFokusRahmen(eckRadius = 4.dp, aufDunkel = false)
             .clickable(onClick = onClick)
-            .semantics {
+            .clearAndSetSemantics {
                 role = Role.RadioButton
                 selected = ausgewaehlt
+                stateDescription = if (ausgewaehlt) "Ausgewählt" else "Nicht ausgewählt"
                 contentDescription = buildString {
                     append("${option.titel}: ${option.zusatz}. ")
                     if (option.hinweisStempel != null) {

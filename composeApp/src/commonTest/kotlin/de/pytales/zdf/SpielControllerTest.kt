@@ -36,10 +36,13 @@ class SpielControllerTest {
         assertFalse(start.gameState.direktwahlAktiv)
         assertEquals(Schriftgroesse.MITTEL, start.schriftgroesse)
         assertFalse(start.analyseModus)
+        assertFalse(start.reduzierteAnimationen)
+        assertFalse(start.audioAktiv)
+        assertFalse(start.audioZustand.spieltGerade)
         assertFalse(start.zeigeUiVorschau)
         assertTrue(start.aufgeklappteGrundsaetze.isEmpty())
 
-        // Modus, Schriftgröße, Analysemodus & Direktwahl umschalten
+        // Modus, Schriftgröße, Analysemodus, reduzierte Animationen, Audio & Direktwahl umschalten
         assertTrue(controller.waehleModus(SpielModus.LANG))
         assertEquals(SpielModus.LANG, controller.aktuellerZustand.gameState.modus)
 
@@ -48,6 +51,19 @@ class SpielControllerTest {
 
         controller.toggleAnalyseModus()
         assertTrue(controller.aktuellerZustand.analyseModus)
+
+        controller.toggleReduzierteAnimationen()
+        assertTrue(controller.aktuellerZustand.reduzierteAnimationen)
+        controller.setzeReduzierteAnimationen(false)
+        assertFalse(controller.aktuellerZustand.reduzierteAnimationen)
+        controller.setzeReduzierteAnimationen(true)
+        assertTrue(controller.aktuellerZustand.reduzierteAnimationen)
+
+        controller.toggleAudioAktiv()
+        assertTrue(controller.aktuellerZustand.audioAktiv)
+        assertTrue(controller.aktuellerZustand.audioZustand.spieltGerade)
+        controller.setzeAudioLautstaerke(0.9f)
+        assertEquals(0.35f, controller.aktuellerZustand.audioLautstaerke)
 
         assertTrue(controller.setzeDirektwahlAktiv(true))
         assertTrue(controller.aktuellerZustand.gameState.direktwahlAktiv)
@@ -148,6 +164,8 @@ class SpielControllerTest {
                     random = KotlinRandomSource(Random(2000 + index * 100 + seedOffset)),
                     initialSchriftgroesse = Schriftgroesse.GROSS,
                     initialAnalyseModus = true,
+                    initialReduzierteAnimationen = true,
+                    initialAudioAktiv = true,
                 )
                 assertTrue(controller.waehleModus(modus))
                 assertTrue(controller.setzeDirektwahlAktiv(true))
@@ -187,15 +205,26 @@ class SpielControllerTest {
                 "Epilog-Finale wirtshaus_wahl muss vor Abschluss 1919 gespielt worden sein.",
             )
 
+            // Auf Front & Etappe greift auch am Ende die harte Musiksperre
+            if (pfad == Pfad.FRONT || pfad == Pfad.ETAPPE) {
+                assertTrue(fertig.aktuellerZustand.audioZustand.musikGesperrt)
+                assertFalse(fertig.aktuellerZustand.audioZustand.spieltGerade)
+            } else {
+                assertFalse(fertig.aktuellerZustand.audioZustand.musikGesperrt)
+                assertTrue(fertig.aktuellerZustand.audioZustand.spieltGerade)
+            }
+
             val protokollUi = UiStateMapper.mapProtokollEintraege(content, fertig.aktuellerZustand.gameState.protokoll)
             assertTrue(protokollUi.size >= 8, "Protokoll muss alle getroffenen Stationen enthalten.")
             assertTrue(protokollUi.all { it.station.isNotBlank() && it.wahl.isNotBlank() })
 
-            // Neuer Durchgang nach Abschluss bewahrt globale Unterrichts-Einstellungen
+            // Neuer Durchgang nach Abschluss bewahrt globale Unterrichts- & Zugänglichkeits-Einstellungen
             assertTrue(fertig.neuerDurchgang())
             assertIs<GamePhase.Start>(fertig.aktuellerZustand.gameState.phase)
             assertEquals(Schriftgroesse.GROSS, fertig.aktuellerZustand.schriftgroesse)
             assertTrue(fertig.aktuellerZustand.analyseModus)
+            assertTrue(fertig.aktuellerZustand.reduzierteAnimationen)
+            assertTrue(fertig.aktuellerZustand.audioAktiv)
             assertEquals(modus, fertig.aktuellerZustand.gameState.modus)
             assertTrue(fertig.aktuellerZustand.gameState.direktwahlAktiv)
         }

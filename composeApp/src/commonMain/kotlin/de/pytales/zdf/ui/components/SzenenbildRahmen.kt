@@ -167,7 +167,7 @@ fun SzenenbildRahmen(
                             Text(
                                 text = "Archivtafel · ${szenenbild.schauplatzLabel}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = farben.linie,
+                                color = farben.tinteMatt,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,

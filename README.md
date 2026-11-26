@@ -6,7 +6,7 @@ Das Spiel wird von Grund auf entschlackt und als moderne **Kotlin-Multiplatform-
 
 > **Archiv:** Der ursprüngliche Ren'Py-Arbeitsstand ist vollständig im Branch `archiv/renpy-2026` gesichert.
 
-## Projektstruktur (Stand nach AP 5a)
+## Projektstruktur (Stand nach AP 6)
 
 ```text
 content/                      Single Source of Truth für alle Spielinhalte & WebP-Medien (per Gradle Sync eingebunden)
@@ -14,18 +14,20 @@ content/                      Single Source of Truth für alle Spielinhalte & We
   herkunft.json               4 Herkünfte, 6 Erwerbslagen, Musterung, Jahrgänge, Namen
   kapitel.json                6 Kapitel (1914–1919) mit Leitfragen, Rückblick & Wirkungen
   merkmale.json               34 erreichbare Merkmale, 4-Fächer-Lebenslauf & Ausgänge
-  ereignisse.json             104 geprüfte Zwei-Entscheidungs-Ereignisse (Front/Etappe/Heimat)
+  ereignisse.json             104 geprüfte Zwei-Entscheidungs-Ereignisse mit 104/104 historischen Vollbelegen (Front/Etappe/Heimat)
   sprachregeln.json           Tabu- & Prüfbegriffe sowie Lesbarkeitsgrenzen (Klasse 8)
   medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen
   media/                      Optimierte WebP-Assets (`portraits/`, `kapitel/`, `schauplaetze/`, `szenen/`)
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
-  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController, Archivpapier-Theme, Multiplatform-Bild-Loader (`de.pytales.zdf.ui.media`), UI-Baukasten & vollständige Spiel-Screens (1914–1919)
-  src/commonTest/             JUnit-Testsuite (Deserialisierung, Engine, Balance, Theme, UI-Mapping, Spieldurchläufe & WebP-Bild-Loader)
-  src/desktopMain/            Windows/Desktop-Einstieg (JVM)
+  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController, Archivpapier-Theme (inkl. WCAG-Kontrast & reduzierte Übergänge), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`), UI-Baukasten & vollständige Spiel-Screens (1914–1919)
+  src/commonTest/             52 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Übergänge, UI-Mapping, Spieldurchläufe, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre)
+  src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard & dezentes AudioTrack)
+  src/desktopMain/            Windows/Desktop-Einstieg (JVM) inkl. Browser-Druckansicht/Speichern & dezentes Sound-Audio
   src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback)
+  src/wasmJsMain/ & jsMain/   Web-Plattformbrücken (Browser-Druck/Download/Clipboard & Web Audio API)
 androidApp/                   Android-App-Modul (`MainActivity` + Manifest)
 tools/
-  validate_content.py         Automatische Inhalts-, Referenz-, Balance-, Sprach- und WebP-Medienprüfung
+  validate_content.py         Automatische Inhalts-, Quellen-/Vollbeleg-, Referenz-, Balance-, Sprach- und WebP-Medienprüfung
   prepare_media.py            WebP-Aufbereitung (320×320 / 1280×720), Master-Sicherung & Medienplan-Abgleich
 docs/
   ARBEITSPLAN.md              Übersicht aller 7 Arbeitspakete (AP 1 – AP 7)
@@ -35,14 +37,14 @@ docs/
 ## Prüfen & Bauen
 
 ```bash
-# 1. JSON-Inhalte, 2-Wahl-Regel, Sprachmaß (Klasse 8) & WebP-Assets prüfen
+# 1. JSON-Inhalte, 2-Wahl-Regel, 104/104 Vollbelege, Sprachmaß (Klasse 8) & WebP-Assets prüfen
 python3 tools/validate_content.py
 # (Für Vollabnahme aller 63 Stufe-1-Bilder nach AP 5b: python3 tools/validate_content.py --require-all-stufe1)
 
 # 2. Neue Stil-A-Rohbilder als optimierte WebP-Assets aufbereiten & Medienplan abgleichen
 python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --update-plan
 
-# 3. Kotlin-Tests, Medien-Loader-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
+# 3. Alle 52 Kotlin-Tests, Export-/Audio-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
 ./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest
 
 # 4. Alle drei Zielplattformen bauen

@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,7 @@ import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
@@ -56,6 +58,7 @@ fun KapitelAbschlussScreen(
     onNaechstesKapitel: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -83,6 +86,7 @@ fun KapitelAbschlussScreen(
             uiState = uiState,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
         )
 
@@ -143,6 +147,7 @@ fun KapitelAbschlussScreen(
                                 text = abschlussUi.ueberschrift,
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
                             )
 
                             if (abschlussUi.stichworte.isNotEmpty()) {
@@ -272,6 +277,7 @@ private fun BogenHinweisKarte(
 
     Row(
         modifier = modifier
+            .semantics(mergeDescendants = true) {}
             .border(1.dp, if (hervorgehoben) farben.akzent.copy(alpha = 0.55f) else farben.linieFein, RoundedCornerShape(3.dp))
             .background(if (hervorgehoben) farben.papierDunkel.copy(alpha = 0.52f) else farben.papier, RoundedCornerShape(3.dp))
             .height(IntrinsicSize.Min),

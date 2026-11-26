@@ -1,7 +1,6 @@
 package de.pytales.zdf.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,11 +29,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.ui.theme.ArchivTheme
+import de.pytales.zdf.ui.theme.ArchivUebergaenge
 import de.pytales.zdf.ui.theme.Schriftgroesse
 
 /**
@@ -57,7 +58,7 @@ fun FuenfSegmentBalken(
     val gefuellt = gefuellteSegmente.coerceIn(0, gesamt)
     val animierteFarbe by animateColorAsState(
         targetValue = aktiveFarbe,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = ArchivUebergaenge.farbSpec(ArchivTheme.reduzierteAnimationen),
         label = "segmentFarbe",
     )
 
@@ -155,6 +156,7 @@ fun SchriftgroessenSchalter(
     kompakt: Boolean = false,
 ) {
     val farben = ArchivTheme.farben
+    val minTouch = ArchivTheme.metrik.minTouchHoehe
     val rahmenFarbe = if (aufDunkel) farben.linie.copy(alpha = 0.65f) else farben.linie
     val hintergrund = if (aufDunkel) farben.dunkelHell else farben.papierHell
     val aktivHintergrund = if (aufDunkel) farben.akzent else farben.tinte
@@ -162,7 +164,7 @@ fun SchriftgroessenSchalter(
     val inaktivText = if (aufDunkel) farben.textHell else farben.tinte
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.archivFokusGruppe(),
         color = hintergrund,
         shape = RoundedCornerShape(3.dp),
         border = BorderStroke(1.dp, rahmenFarbe),
@@ -174,12 +176,17 @@ fun SchriftgroessenSchalter(
                 val istAktiv = stufe == aktuell
                 Box(
                     modifier = Modifier
-                        .defaultMinSize(minWidth = if (kompakt) 40.dp else 52.dp, minHeight = 40.dp)
+                        .defaultMinSize(
+                            minWidth = if (kompakt) minTouch else 56.dp,
+                            minHeight = minTouch,
+                        )
                         .background(if (istAktiv) aktivHintergrund else Color.Transparent)
+                        .archivFokusRahmen(eckRadius = 2.dp, aufDunkel = aufDunkel)
                         .clickable { onAuswahl(stufe) }
                         .semantics {
                             role = Role.RadioButton
                             selected = istAktiv
+                            stateDescription = if (istAktiv) "Ausgewählt" else "Nicht ausgewählt"
                             contentDescription = "Schriftgröße ${stufe.bezeichnung}: ${stufe.beschreibung}"
                         }
                         .padding(horizontal = if (kompakt) 10.dp else 12.dp, vertical = 6.dp),

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.model.WertSchluessel
 import de.pytales.zdf.ui.components.ArchivStempel
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.components.archivUeberschrift
 import de.pytales.zdf.ui.state.SpielUiState
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
@@ -53,6 +55,7 @@ fun MusterungErgebnisScreen(
     onBestaetigen: () -> Unit,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onAnalyseModusToggle: () -> Unit,
+    onAudioToggle: () -> Unit = {},
     onWertErklaerungChange: (WertSchluessel?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -73,6 +76,7 @@ fun MusterungErgebnisScreen(
             uiState = uiState,
             onSchriftgroesseChange = onSchriftgroesseChange,
             onAnalyseModusToggle = onAnalyseModusToggle,
+            onAudioToggle = onAudioToggle,
             onWertErklaerungChange = onWertErklaerungChange,
         )
 
@@ -126,6 +130,7 @@ fun MusterungErgebnisScreen(
                                         fontFamily = FontFamily.Serif,
                                         color = farben.tinte,
                                         fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.archivUeberschrift(),
                                     )
                                     Text(
                                         text = "Ersatzkommission · ${musterungUi.anlassBezeichnung}",
@@ -277,6 +282,7 @@ private fun AktenZeile(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {}
                 .border(0.75.dp, farben.linieFein, RoundedCornerShape(2.dp))
                 .background(farben.papier.copy(alpha = 0.45f), RoundedCornerShape(2.dp))
                 .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -297,6 +303,7 @@ private fun AktenZeile(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {}
                 .border(0.75.dp, farben.linieFein, RoundedCornerShape(2.dp))
                 .background(farben.papier.copy(alpha = 0.45f), RoundedCornerShape(2.dp))
                 .padding(horizontal = 12.dp, vertical = 8.dp),
