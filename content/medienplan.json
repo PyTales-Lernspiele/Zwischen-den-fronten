@@ -1,5 +1,5 @@
 {
-  "hinweis": "Frischer, einheitlicher Illustrationsstil wird in AP 5 gemeinsam mit Dominik festgelegt. Alte Ren'Py-Bilder liegen im Branch archiv/renpy-2026.",
+  "hinweis": "Freigegebener Illustrationsstil (AP 5): Stil A — Tusche & Aquarell-Lavierung auf warmem Archivpapier (#efe9dc / #1f1c18 / #8a3324). Erste 8 Stil-A-Kernbilder liegen als WebP unter content/media/ (Master-Referenzen unter docs/bildwelt/masters/); uebrige 55 Stufe-1-Motive folgen in Etappen gemaess docs/bildwelt/prompt_bibel.json. Alte Ren'Py-Bilder liegen im Branch archiv/renpy-2026.",
   "format": {
     "dateityp": "webp",
     "szenenMasse": [
@@ -25,7 +25,7 @@
       "geschlecht": "m",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_arbeiterschaft_m_hungrig",
@@ -65,7 +65,7 @@
       "geschlecht": "w",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_arbeiterschaft_w_hungrig",
@@ -105,7 +105,7 @@
       "geschlecht": "m",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_m_hungrig",
@@ -145,7 +145,7 @@
       "geschlecht": "w",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_hungrig",
@@ -185,7 +185,7 @@
       "geschlecht": "m",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_hungrig",
@@ -225,7 +225,7 @@
       "geschlecht": "w",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_hungrig",
@@ -265,7 +265,7 @@
       "geschlecht": "m",
       "stimmung": "neutral",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_m_hungrig",
@@ -403,7 +403,7 @@
     {
       "id": "schauplatz_brotschlange",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_etappe",

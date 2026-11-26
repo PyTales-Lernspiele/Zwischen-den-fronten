@@ -42,8 +42,8 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
 /**
  * Ruhige Jahres-Auftaktkarte (`GamePhase.KapitelStart`):
  * zeigt Zeitraum, Überschrift, Einführungstext, historische Stichworte,
- * den vorbereiteten 16:9-Kapitelbild-Platzhalter (`kapitel.bildId` für AP 5)
- * sowie die spürbare Kapitelwirkung (falls vorhanden).
+ * den 16:9-[KapitelbildRahmen] (`kapitel.bildId` über den Multiplatform-Bild-Loader mit
+ * Archivtafel-Fallback) sowie die spürbare Kapitelwirkung (falls vorhanden).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

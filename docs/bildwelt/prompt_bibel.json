@@ -1,0 +1,432 @@
+{
+  "stilName": "Stil A — Tusche & Aquarell-Lavierung (Archiv-Skizzenbuch)",
+  "stilBasisPromptPortrait": "In the EXACT same editorial sepia pen-and-ink (#1f1c18) and translucent watercolor wash style, fine line weight, warm textured archival cream paper background (#efe9dc), muted brick-red (#8a3324) and slate-gray (#57514a) palette, soft watercolor wash behind shoulders, and centered head-and-shoulders framing as the reference image. Respectful historical realism for a German 8th-grade history educational game, no violence, no caricature, no text, no borders, no frames.",
+  "stilBasisPromptSzene": "In the EXACT same editorial sepia pen-and-ink (#1f1c18) and loose translucent watercolor wash style as the reference image, full-bleed to all edges on warm archival cream paper (#efe9dc), using warm slate gray (#57514a), muted ochre, soft earth tones, and subtle muted brick-red (#8a3324) accents. Natural atmospheric 16:9 historical perspective, calm, dignified, documentary tone suitable for 13-14 year old students, strictly no violence, no blood, no corpses, no melodrama, no text, no letters, no white border, no frame.",
+  "referenzBilder": {
+    "stilPortrait": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+    "stilSzene": "docs/bildwelt/masters/schauplatz_brotschlange.jpg"
+  },
+  "stimmungenPromptZusatz": {
+    "hungrig": "Keep the EXACT same person, face structure, age, hair, clothing, collar, framing, ink linework, and warm archival cream paper background (#efe9dc) as the reference portrait. Change ONLY the expression and subtle shading to convey HUNGER (hungrig): slightly hollower cheeks, paler tired complexion, worried longing eyes, dry tightly closed lips, slightly subdued muted cool-ochre wash behind shoulders. Dignified and age-appropriate, not exaggerated.",
+    "erschoepft": "Keep the EXACT same person, face structure, age, hair, clothing, collar, framing, ink linework, and warm archival cream paper background (#efe9dc) as the reference portrait. Change ONLY the expression and subtle posture to convey EXHAUSTION (erschoepft): heavy drooping eyelids, soft dark shadows under the eyes, slightly lowered chin and slumped shoulders, weary drained expression as after a 14-hour shift. Dignified and empathetic.",
+    "angst": "Keep the EXACT same person, face structure, age, hair, clothing, collar, framing, ink linework, and warm archival cream paper background (#efe9dc) as the reference portrait. Change ONLY the expression and gaze to convey ANXIETY / BEING WATCHED (angst): tense watchful side-glance, slightly raised knitted eyebrows, tight jaw, alert uneasy posture, subtle muted slate-shadow wash behind shoulders. Calm historical realism, not cartoonish terror.",
+    "einsam": "Keep the EXACT same person, face structure, age, hair, clothing, collar, framing, ink linework, and warm archival cream paper background (#efe9dc) as the reference portrait. Change ONLY the expression and gaze to convey LONELINESS (einsam): quiet inward sadness, eyes softly averted downward and away into the distance, gentle solemn mouth, slightly cooler muted gray-blue watercolor wash behind shoulders. Quiet, dignified, empathetic."
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "titel": "Basis-Portrait Adel (w) + Emotions-Portraits Arbeiterschaft & Buergertum (m) Teil 1",
+      "motive": [
+        {
+          "id": "portrait_adel_w_neutral",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+          "prompt": "Using ONLY the ink-and-watercolor artistic technique, warm archival cream paper (#efe9dc), line weight, and framing of the reference image — but with a COMPLETELY DIFFERENT, distinct individual face (slender aristocratic oval face, slightly higher cheekbones, darker eyebrows): portrait of a dignified young German noble woman (Adel) around 1914 (age 25), dark auburn-brown hair in a graceful neat 1914 updo, wearing a fine dark charcoal-burgundy silk dress with a delicate cream lace standing collar, a tiny pearl brooch at the throat, and a muted deep rust-red (#8a3324) wool shawl. Poised, calm, reserved neutral expression looking slightly off-center. Softly fading shoulders into warm archival paper (#efe9dc). No text, no borders, no frames."
+        },
+        {
+          "id": "portrait_arbeiterschaft_w_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_arbeiterschaft_w_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_arbeiterschaft_w_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_arbeiterschaft_w_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_w_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_arbeiterschaft_m_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_m_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_arbeiterschaft_m_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_m_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_arbeiterschaft_m_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_m_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_arbeiterschaft_m_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_arbeiterschaft_m_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_buergertum_m_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_m_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_buergertum_m_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_m_neutral.jpg",
+          "stimmung": "erschoepft"
+        }
+      ]
+    },
+    {
+      "batch": 2,
+      "titel": "Emotions-Portraits Buergertum & Landbevoelkerung Teil 2",
+      "motive": [
+        {
+          "id": "portrait_buergertum_m_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_m_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_buergertum_m_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_m_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_buergertum_w_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_w_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_buergertum_w_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_w_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_buergertum_w_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_w_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_buergertum_w_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_buergertum_w_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_landbevoelkerung_m_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_m_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_landbevoelkerung_m_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_m_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_landbevoelkerung_m_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_m_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_landbevoelkerung_m_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_m_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_landbevoelkerung_w_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_w_neutral.jpg",
+          "stimmung": "hungrig"
+        }
+      ]
+    },
+    {
+      "batch": 3,
+      "titel": "Emotions-Portraits Landbevoelkerung (w) & Adel (alle 40 Portraits danach komplett)",
+      "motive": [
+        {
+          "id": "portrait_landbevoelkerung_w_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_w_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_landbevoelkerung_w_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_w_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_landbevoelkerung_w_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_landbevoelkerung_w_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_adel_m_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_m_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_adel_m_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_m_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_adel_m_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_m_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_adel_m_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_m_neutral.jpg",
+          "stimmung": "einsam"
+        },
+        {
+          "id": "portrait_adel_w_hungrig",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_w_neutral.jpg",
+          "stimmung": "hungrig"
+        },
+        {
+          "id": "portrait_adel_w_erschoepft",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_w_neutral.jpg",
+          "stimmung": "erschoepft"
+        },
+        {
+          "id": "portrait_adel_w_angst",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_w_neutral.jpg",
+          "stimmung": "angst"
+        },
+        {
+          "id": "portrait_adel_w_einsam",
+          "kategorie": "portraits",
+          "aspectRatio": "1:1",
+          "referenz": "docs/bildwelt/masters/portrait_adel_w_neutral.jpg",
+          "stimmung": "einsam"
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "titel": "Alle 6 Kapitelbilder (1914-1919) + erste 5 Schauplaetze",
+      "motive": [
+        {
+          "id": "kapitel_1914",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "August 1914 farewell at a German railway station platform in warm late-summer light. Steam locomotive and wooden passenger carriages along the platform; quiet, thoughtful families — women in 1914 hats and headscarves, an older father, children — saying goodbye to young men in plain field-gray wool overcoats carrying simple leather suitcases. Sober, human, unhurried mood without propaganda or cheering crowds."
+        },
+        {
+          "id": "kapitel_1915",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Autumn 1915 in a rain-damp German provincial town square. People in muted wool coats pausing silently around a round advertising pillar (Litfasssaeule) covered with blank/unreadable pasted notices; wet cobblestones reflecting overcast skies, a distant railway bridge in soft mist. Quiet mood of a war settling into long routine."
+        },
+        {
+          "id": "kapitel_1916",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "1916 landscape of exhaustion and material warfare without combat or violence: a quiet wooden timbered trench parapet in the foreground with a simple closed field-post envelope and canvas knapsack resting on a wooden crate; beyond the sandbags stretches a wide gray-brown rain-soaked plain with bare splintered trees under low heavy clouds. No soldiers fighting, no blood, no bodies — only quiet gravity."
+        },
+        {
+          "id": "kapitel_1917",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Winter 1917 (Turnip Winter / Steckruebenwinter) on a snow-dusted German industrial street outside a closed iron factory gate with smokeless brick chimneys against a pale cold sky. Small groups of workers and women in worn winter coats standing together in quiet solidarity; one woman carries a wicker basket holding a few pale turnips. Calm, dignified cold-weather atmosphere."
+        },
+        {
+          "id": "kapitel_1918",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "November 1918 late-autumn country road lined with bare poplar trees under breaking pale clouds. Small, tired, unorganized groups of returning unarmed soldiers in worn greatcoats and civilians with handcarts walking slowly homeward along muddy tracks toward the distant silhouette of town church spires. Exhaustion, relief, and quiet transition without triumphalism."
+        },
+        {
+          "id": "kapitel_1919",
+          "kategorie": "kapitel",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Early 1919 clear crisp morning light over a calm German town street outside a modest civic hall polling entrance. Women and men in simple everyday coats walking peacefully up the stone steps together to vote for the first time; bare winter trees, warm sunlit plaster and brick walls showing small weathered patches. Quiet openness and cautious new beginning."
+        },
+        {
+          "id": "schauplatz_amt",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Interior of a sober German municipal office / rationing bureau (Bezirksamt) around 1916. High tall windows letting in cool daylight, long dark wooden counter with simple rail, neat stacks of paper folders, inkwell and rubber stamps on a clerk's desk, two ordinary citizens waiting patiently on a wooden bench along the wall."
+        },
+        {
+          "id": "schauplatz_bahnhof",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Wide interior view of a historic German arched iron-and-glass railway station hall around 1915. Gentle shafts of daylight through tall glass roofs, a dark steam train resting at the platform with soft drifting steam, travelers with suitcases, bundles, and coats waiting quietly along the stone platform."
+        },
+        {
+          "id": "schauplatz_bauernhof",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Small German family farmstead at the edge of a village around 1915 in early morning light. Timber-framed farmhouse with muted brick roof, wooden barn with open doors, simple wooden farm wagon on a dirt yard, a few chickens, and wide open plowed fields stretching toward low hills in the background."
+        },
+        {
+          "id": "schauplatz_etappe",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Quiet rear-area staging village (Etappenort) in northern France or Belgium around 1916. Intact historic stone village houses around a cobblestone square, horse-drawn wooden supply wagons parked by a stone archway, a few unarmed soldiers in greatcoats and local townspeople calmly unloading wooden crates in overcast daylight."
+        },
+        {
+          "id": "schauplatz_fabrik",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "High brick industrial machine workshop / factory hall in Germany around 1916. Tall arched factory windows casting soft pale daylight across rows of belt-driven metal lathes and wooden workbenches; female and male workers in dark aprons and headscarves working intently and steadily on their shift. Dignified industrial realism."
+        }
+      ]
+    },
+    {
+      "batch": 5,
+      "titel": "Restliche 11 Schauplaetze (Stufe 1 63/63 komplett)",
+      "motive": [
+        {
+          "id": "schauplatz_gefangenenlager",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Sober, calm historical view of a World War I prisoner-of-war camp yard around 1916 without harshness or violence. Neat rows of simple weathered wooden barracks along a gravel yard, a plain timber fence in the background, several men in mismatched worn overcoats standing in quiet conversation under an overcast sky."
+        },
+        {
+          "id": "schauplatz_graben",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Quiet defensive trench sector on the Western Front around 1916 during a lull in overcast daylight — strictly no combat, no weapons firing, no violence. Wooden duckboards on the floor, timber-revetted earthen walls topped with sandbags, a low timber dugout doorway; one tired soldier in a greatcoat sits calmly on a wooden box reading a letter."
+        },
+        {
+          "id": "schauplatz_landstrasse",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Long European country road lined with tall slender poplar trees stretching into gentle morning mist around 1916. Rutted dirt and gravel road with puddles, stone milestone by the verge, a single horse-drawn wooden cart and two distant pedestrians walking quietly along the edge."
+        },
+        {
+          "id": "schauplatz_lazarett",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Bright, calm, dignified military reserve hospital ward (Reservelazarett) inside a repurposed German school hall around 1916. Tall sunlit windows, neat rows of simple white-linened iron beds, a nurse in a clean white cap and apron gently handing a warm cup of tea to a seated resting patient. Strictly no blood, no graphic injuries."
+        },
+        {
+          "id": "schauplatz_nachschub",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Rear-area supply depot and field bakery courtyard around 1916. Large timber storage shed with open double doors, neatly stacked burlap flour sacks and wooden provision crates, a calm pair of draft horses harnessed to a supply wagon, two supply clerks checking a clipboard list."
+        },
+        {
+          "id": "schauplatz_niemandsland",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Wide silent expanse of Northern French / Flemish countryside in pale morning fog around 1916. Uneven muddy gray-brown earth, low weathered wooden stakes, a few solitary bare broken trees, and the distant silhouette of a damaged stone farmhouse on the misty horizon. Quiet, solemn landscape strictly without bodies, soldiers, or violence."
+        },
+        {
+          "id": "schauplatz_quartier",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Simple rural rest billet inside a quiet timber barn loft around 1916. Warm afternoon sunlight through a small wooden window illuminating straw mattresses along the wall, wool coats hanging on pegs, a sturdy wooden table with tin mugs, a loaf of bread, and an unlit candle lantern. Peaceful moment of respite."
+        },
+        {
+          "id": "schauplatz_schreibstube",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Compact orderly clerical office / mail censorship room (Schreibstube) around 1916. Sturdy wooden writing desk beside a tall paned window, warm shaded desk lamp, neatly tied bundles of envelopes, ink bottle, fountain pen, red pencil, and wooden shelves filled with archival ledgers and folders."
+        },
+        {
+          "id": "schauplatz_versammlung",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Modest German community hall (Gemeindesaal) around 1914-1919. High wooden-paneled walls and tall windows, rows of simple bentwood chairs and long wooden tables, a small group of ordinary townswomen and men in everyday wool coats talking calmly together around a table with folded parcels and papers."
+        },
+        {
+          "id": "schauplatz_wirtshaus",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Quiet traditional German neighborhood tavern (Wirtshaus) interior in 1919. Warm timber wall paneling, simple dark wooden tables and chairs, soft warm hanging lamps, frosted street window; a few ordinary guests in coats sitting quietly in small groups conversing over simple mugs and cups in a reflective, restrained atmosphere."
+        },
+        {
+          "id": "schauplatz_wohnviertel",
+          "kategorie": "schauplaetze",
+          "aspectRatio": "16:9",
+          "referenz": "docs/bildwelt/masters/schauplatz_brotschlange.jpg",
+          "prompt": "Everyday German urban residential street and tenement courtyard entrance around 1915. Four-story brick and ochre-plaster apartment buildings with mullioned windows and a cast-iron street lamp, cobblestone pavement, a few residents — a mother with a cloth bag, an elderly neighbor, children — walking calmly past in soft overcast light."
+        }
+      ]
+    }
+  ]
+}

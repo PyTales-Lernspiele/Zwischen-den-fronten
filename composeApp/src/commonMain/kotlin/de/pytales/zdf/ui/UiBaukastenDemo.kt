@@ -64,6 +64,8 @@ import de.pytales.zdf.ui.components.EreignisAusgangKarte
 import de.pytales.zdf.ui.components.KopfLeiste
 import de.pytales.zdf.ui.components.SchriftgroessenSchalter
 import de.pytales.zdf.ui.components.SzenenbildRahmen
+import de.pytales.zdf.ui.media.BildAufloeser
+import de.pytales.zdf.ui.media.LocalMedienRegister
 import de.pytales.zdf.ui.state.UiStateMapper
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.LayoutKlasse
@@ -72,11 +74,11 @@ import kotlin.random.Random
 
 /**
  * Kuratierte Beispiel-Ereignisse aus `content/ereignisse.json` für die 5 Kartentypen
- * in der AP-3-Vorschau (fällt automatisch auf das erste passende Ereignis zurück).
+ * in der UI- & Bildwelt-Vorschau (inkl. direkter Vorschau auf verfügbare Stil-A-Motive).
  */
 internal object DemoBeispiele {
     private val BEVORZUGTE_IDS: Map<Kartentyp, String> = mapOf(
-        Kartentyp.KARTE to "front_1914_marsch",
+        Kartentyp.KARTE to "einstieg_meldung",
         Kartentyp.FELDPOST to "alltag_rotstift",
         Kartentyp.LEBENSMITTEL to "heimat_1915_brotkarte",
         Kartentyp.ZEITUNG to "heimat_1917_unterseeboot",
@@ -541,12 +543,13 @@ private fun DemoWerkzeugLeiste(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f),
                 ) {
+                    val geladeneBilder = LocalMedienRegister.current.verfuegbareIds.size
                     ArchivStempel(
-                        text = "AP 3 · UI-VORSCHAU",
+                        text = "UI- & BILD-VORSCHAU",
                         farbe = farben.akzent,
                     )
                     Text(
-                        text = "Layout: ${layoutKlasse.bezeichnung} · Schrift: ${schriftgroesse.bezeichnung}",
+                        text = "Layout: ${layoutKlasse.bezeichnung} · Schrift: ${schriftgroesse.bezeichnung} · Bilder: $geladeneBilder WebP",
                         style = MaterialTheme.typography.labelMedium,
                         color = farben.tinteMatt,
                     )
@@ -708,6 +711,10 @@ private fun ZustandsNotiz(
     analyseModus: Boolean,
 ) {
     val farben = ArchivTheme.farben
+    val medienRegister = LocalMedienRegister.current
+    val aufgeloest = remember(portraitId, medienRegister) {
+        BildAufloeser.loesePortrait(portraitId, medienRegister.verfuegbareIds)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -729,8 +736,9 @@ private fun ZustandsNotiz(
             color = farben.tinte,
         )
         if (analyseModus) {
+            val ziel = aufgeloest.aufgeloesteId ?: "Platzhalter"
             Text(
-                text = "Aktives Portrait-Asset: $portraitId",
+                text = "Portrait: $portraitId → $ziel (${aufgeloest.ebene.kurzLabel})",
                 style = MaterialTheme.typography.labelSmall,
                 color = farben.akzent,
             )
