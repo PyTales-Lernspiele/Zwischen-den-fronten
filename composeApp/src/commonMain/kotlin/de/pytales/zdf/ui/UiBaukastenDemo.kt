@@ -215,6 +215,7 @@ fun UiBaukastenDemo(
     schriftgroesse: Schriftgroesse,
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     modifier: Modifier = Modifier,
+    onZurueckZumSpiel: (() -> Unit)? = null,
 ) {
     val engine = remember(content) { GameEngine(content, KotlinRandomSource(Random(1914))) }
 
@@ -379,6 +380,7 @@ fun UiBaukastenDemo(
                     },
                     analyseModus = analyseModus,
                     onAnalyseModusToggle = { analyseModus = !analyseModus },
+                    onZurueckZumSpiel = onZurueckZumSpiel,
                 )
 
                 // Eigentliche Spielbühne: 16:9 Szenenbild-Rahmen + Entscheidungskarte (bzw. Ausgang)
@@ -506,6 +508,7 @@ private fun DemoWerkzeugLeiste(
     onGeschlechtWechseln: () -> Unit,
     analyseModus: Boolean,
     onAnalyseModusToggle: () -> Unit,
+    onZurueckZumSpiel: (() -> Unit)? = null,
 ) {
     val farben = ArchivTheme.farben
 
@@ -548,11 +551,23 @@ private fun DemoWerkzeugLeiste(
                         color = farben.tinteMatt,
                     )
                 }
-                Text(
-                    text = if (offen) "Ausblenden ▴" else "Steuerung ▾",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = farben.tinte,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (onZurueckZumSpiel != null) {
+                        DemoAuswahlKnopf(
+                            label = "Zum Startmenü",
+                            aktiv = true,
+                            onClick = onZurueckZumSpiel,
+                        )
+                    }
+                    Text(
+                        text = if (offen) "Ausblenden ▴" else "Steuerung ▾",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = farben.tinte,
+                    )
+                }
             }
 
             AnimatedVisibility(
