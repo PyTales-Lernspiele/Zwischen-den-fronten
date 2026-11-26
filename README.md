@@ -6,7 +6,7 @@ Das Spiel wird von Grund auf entschlackt und als moderne **Kotlin-Multiplatform-
 
 > **Archiv:** Der ursprüngliche Ren'Py-Arbeitsstand ist vollständig im Branch `archiv/renpy-2026` gesichert.
 
-## Projektstruktur (Stand nach AP 2)
+## Projektstruktur (Stand nach AP 3)
 
 ```text
 content/                      Single Source of Truth für alle Spielinhalte (per Gradle Sync eingebunden)
@@ -18,8 +18,8 @@ content/                      Single Source of Truth für alle Spielinhalte (per
   sprachregeln.json           Tabu- & Prüfbegriffe sowie Lesbarkeitsgrenzen (Klasse 8)
   medienplan.json             Bildplan: 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
-  src/commonMain/             Typsichere Datenmodelle, ContentLoader, GameEngine, Platzhalter-UI
-  src/commonTest/             JUnit-Testsuite (Deserialisierung, Texte, Emotionen, Ketten, Lebenslauf, Monte-Carlo-Balance)
+  src/commonMain/             Datenmodelle, ContentLoader, GameEngine, Archivpapier-Theme & UI-Baukasten (AP 3)
+  src/commonTest/             JUnit-Testsuite (Deserialisierung, Engine, Balance, Theme, Breakpoints & UI-Mapping)
   src/desktopMain/            Windows/Desktop-Einstieg (JVM)
   src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback)
 androidApp/                   Android-App-Modul (`MainActivity` + Manifest)
