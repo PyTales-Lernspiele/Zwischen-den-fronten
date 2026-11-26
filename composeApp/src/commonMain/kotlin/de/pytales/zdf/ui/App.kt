@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import de.pytales.zdf.content.ContentLoader
 import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.ui.components.ArchivTrennlinie
+import de.pytales.zdf.ui.screens.SpielScreen
+import de.pytales.zdf.ui.state.SpielController
 import de.pytales.zdf.ui.theme.ArchivPapierTheme
 import de.pytales.zdf.ui.theme.ArchivTheme
 import de.pytales.zdf.ui.theme.Schriftgroesse
@@ -33,14 +36,13 @@ import de.pytales.zdf.ui.theme.Schriftgroesse
  * Gemeinsamer Einstiegspunkt für Android, Windows Desktop (JVM) und WebApp (`wasmJs` + JS).
  *
  * Lädt die geprüften JSON-Inhalte aus `content/`, initialisiert das [ArchivPapierTheme]
- * direkt aus `konfiguration.json` und startet die interaktive AP-3-Komponenten-Vorschau
- * als direkte Grundlage für den vollständigen Spieldurchgang in AP 4.
+ * direkt aus `konfiguration.json` und startet über [SpielController] und [SpielScreen]
+ * direkt in das echte Spiel (`GamePhase.Start` bis 1919 bzw. Auffangnetz).
  */
 @Composable
 fun App() {
     var content by remember { mutableStateOf<GameContent?>(null) }
     var fehler by remember { mutableStateOf<String?>(null) }
-    var schriftgroesse by remember { mutableStateOf(Schriftgroesse.MITTEL) }
 
     LaunchedEffect(Unit) {
         try {
@@ -50,8 +52,18 @@ fun App() {
         }
     }
 
+    val geladen = content
+    val controller = remember(geladen) {
+        geladen?.let { SpielController(content = it) }
+    }
+    val schriftgroesse = if (controller != null) {
+        controller.uiState.collectAsState().value.schriftgroesse
+    } else {
+        Schriftgroesse.MITTEL
+    }
+
     ArchivPapierTheme(
-        farbwelt = content?.konfiguration?.farbwelt,
+        farbwelt = geladen?.konfiguration?.farbwelt,
         schriftgroesse = schriftgroesse,
     ) {
         val farben = ArchivTheme.farben
@@ -59,7 +71,6 @@ fun App() {
             modifier = Modifier.fillMaxSize(),
             color = farben.papier,
         ) {
-            val geladen = content
             when {
                 fehler != null -> LadeStatusKarte(
                     titel = "Fehler beim Laden der Spielinhalte",
@@ -67,17 +78,13 @@ fun App() {
                     istFehler = true,
                 )
 
-                geladen == null -> LadeStatusKarte(
+                controller == null -> LadeStatusKarte(
                     titel = "Zwischen den Fronten",
                     untertitel = "Archivdaten (1914–1919) werden geladen …",
                     istFehler = false,
                 )
 
-                else -> UiBaukastenDemo(
-                    content = geladen,
-                    schriftgroesse = schriftgroesse,
-                    onSchriftgroesseChange = { schriftgroesse = it },
-                )
+                else -> SpielScreen(controller = controller)
             }
         }
     }

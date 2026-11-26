@@ -2,12 +2,19 @@ package de.pytales.zdf.ui.state
 
 import androidx.compose.runtime.Immutable
 import de.pytales.zdf.content.GameContent
+import de.pytales.zdf.engine.EinstiegKontext
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.engine.GameState
+import de.pytales.zdf.engine.Lebenslage
+import de.pytales.zdf.engine.ProtokollEintrag
 import de.pytales.zdf.engine.WirkungZeile
 import de.pytales.zdf.model.Ereignis
+import de.pytales.zdf.model.Erwerbslage
+import de.pytales.zdf.model.Kapitel
 import de.pytales.zdf.model.Kartentyp
+import de.pytales.zdf.model.MusterungsGrad
+import de.pytales.zdf.model.MusterungsVermerk
 import de.pytales.zdf.model.Pfad
 import de.pytales.zdf.model.Quelle
 import de.pytales.zdf.model.Stimmung
@@ -118,6 +125,115 @@ data class EreignisAusgangUiState(
     val ausgangsText: String,
     val wirkungen: List<WirkungZeile>,
     val neueMerkmaleNamen: List<String>,
+)
+
+/**
+ * Aufbereiteter UI-Zustand für das 16:9-Kapitelbild (vorbereitet für die 6 WebP-Kapitelbilder in AP 5).
+ */
+@Immutable
+data class KapitelbildUiState(
+    val bildId: String,
+    val jahr: Int,
+    val zeitraum: String,
+    val ueberschrift: String,
+    val pfadMarke: String,
+    val istEpilog: Boolean,
+    val ressourcenPfad: String,
+    val istImMedienplan: Boolean,
+)
+
+/**
+ * Aufbereiteter UI-Zustand für das Musterungsergebnis-Blatt (`GamePhase.MusterungErgebnis`).
+ */
+@Immutable
+data class MusterungUiState(
+    val grad: MusterungsGrad,
+    val gradKurz: String,
+    val gradLang: String,
+    val gradErklaerung: String,
+    val vermerk: MusterungsVermerk?,
+    val vermerkKurz: String?,
+    val vermerkLang: String?,
+    val vermerkErklaerung: String?,
+    val befund: String,
+    val heeresklasse: String,
+    val anlassBezeichnung: String,
+    val zielPfad: Pfad,
+    val zielPfadMarke: String,
+    val zielPfadOrt: String,
+    val zielPfadFolge: String,
+    val personName: String,
+    val jahrgang: Int?,
+    val herkunftTitel: String,
+    val friedensberuf: String,
+    val groesseCm: Int?,
+    val brustumfangCm: Int?,
+)
+
+/**
+ * Aufbereiteter UI-Zustand für eine wählbare Erwerbslage (`GamePhase.ErwerbWahl`)
+ * inklusive historischer Einordnung aus `GameEngine.erwerbHinweis(...)`.
+ */
+@Immutable
+data class ErwerbOptionUiState(
+    val id: String,
+    val titel: String,
+    val zusatz: String,
+    val text: String,
+    val folge: String,
+    val berufsBezeichnung: String,
+    val hinweisStempel: String?,
+    val hinweisText: String?,
+    val wirkungen: List<WirkungZeile>,
+    val etappeMoeglich: Boolean,
+)
+
+/**
+ * Aufbereiteter UI-Zustand für die ruhige Jahres-Auftaktkarte (`GamePhase.KapitelStart`).
+ */
+@Immutable
+data class KapitelStartUiState(
+    val jahr: Int,
+    val istEpilog: Boolean,
+    val zeitraum: String,
+    val ueberschrift: String,
+    val text: String,
+    val stichworte: List<String>,
+    val leitfrage: String?,
+    val wirkungText: String?,
+    val wirkungen: List<WirkungZeile>,
+    val kapitelbild: KapitelbildUiState,
+    val aktionLabel: String,
+)
+
+/**
+ * Aufbereiteter UI-Zustand für den Jahresrückblick (`GamePhase.KapitelAbschluss`).
+ */
+@Immutable
+data class KapitelAbschlussUiState(
+    val jahr: Int,
+    val zeitraum: String,
+    val ueberschrift: String,
+    val rueckblick: String?,
+    val stichworte: List<String>,
+    val leitfrage: String,
+    val kipppunkt: String,
+    val pfadMarke: String,
+    val zustandssatz: String,
+    val naechstesKapitelJahr: Int?,
+    val naechstesKapitelTitel: String?,
+    val weiterLabel: String,
+)
+
+/**
+ * Lesbarer Eintrag aus dem Spielprotokoll für den Entscheidungsrückblick im Lebenslauf.
+ */
+@Immutable
+data class ProtokollUiEintrag(
+    val jahr: Int,
+    val ereignisId: String,
+    val station: String,
+    val wahl: String,
 )
 
 /**
@@ -376,6 +492,275 @@ object UiStateMapper {
         QUELLEN_ART_LABELS[norm]?.let { return it }
         if (norm.isEmpty()) return "Quelle"
         return norm.replaceFirstChar { it.uppercaseChar() }
+    }
+
+    fun mapKapitelbild(
+        content: GameContent,
+        kapitel: Kapitel,
+        pfad: Pfad,
+    ): KapitelbildUiState {
+        val pfadMarke = content.konfiguration.pfade.definitionen[pfad]?.marke ?: pfad.code
+        val dateityp = content.medienplan.format.dateityp
+        val imPlan = content.medienplan.kapitelbilder.any { it.id == kapitel.bildId }
+        return KapitelbildUiState(
+            bildId = kapitel.bildId,
+            jahr = kapitel.jahr,
+            zeitraum = kapitel.zeitraum,
+            ueberschrift = kapitel.ueberschrift,
+            pfadMarke = pfadMarke,
+            istEpilog = kapitel.istEpilog,
+            ressourcenPfad = "kapitel/${kapitel.bildId}.$dateityp",
+            istImMedienplan = imPlan,
+        )
+    }
+
+    fun mapMusterungErgebnis(
+        content: GameContent,
+        phase: GamePhase.MusterungErgebnis,
+        person: Lebenslage?,
+    ): MusterungUiState {
+        val musterungDaten = content.herkunft.musterung
+        val daten = phase.daten
+        val gradInfo = musterungDaten.grade[daten.grad]
+        val vermerkInfo = daten.vermerk?.let { musterungDaten.vermerke[it] }
+        val pfadDef = content.konfiguration.pfade.definitionen[phase.zielPfad]
+
+        val anlass = when (daten.strenge) {
+            "august_1914" -> "Kriegsfreiwillige Meldung (August 1914)"
+            "einberufung" -> "Reguläre Einberufung"
+            else -> daten.strenge
+        }
+
+        val zielFolge = when (phase.zielPfad) {
+            Pfad.FRONT -> "Überweisung an einen Feldtruppenteil — dein Weg führt an die Front."
+            Pfad.ETAPPE -> "Einsatz im rückwärtigen Dienst — dein Weg führt in die Etappe."
+            Pfad.HEIMAT -> "Kein Front- oder Etappendienst — du bleibst im Reich und wählst deinen Platz in der Heimat."
+        }
+
+        return MusterungUiState(
+            grad = daten.grad,
+            gradKurz = gradInfo?.kurz ?: daten.grad.code,
+            gradLang = gradInfo?.lang ?: daten.grad.code,
+            gradErklaerung = gradInfo?.erklaerung.orEmpty(),
+            vermerk = daten.vermerk,
+            vermerkKurz = vermerkInfo?.kurz,
+            vermerkLang = vermerkInfo?.lang,
+            vermerkErklaerung = vermerkInfo?.erklaerung,
+            befund = daten.befund,
+            heeresklasse = daten.heeresklasse,
+            anlassBezeichnung = anlass,
+            zielPfad = phase.zielPfad,
+            zielPfadMarke = pfadDef?.marke ?: phase.zielPfad.code,
+            zielPfadOrt = pfadDef?.ort.orEmpty(),
+            zielPfadFolge = zielFolge,
+            personName = person?.vollerName?.ifBlank { null } ?: "Gemusterte Person",
+            jahrgang = person?.jahrgang,
+            herkunftTitel = person?.herkunftTitel.orEmpty(),
+            friedensberuf = person?.friedensberuf.orEmpty(),
+            groesseCm = person?.groesseCm,
+            brustumfangCm = person?.brustumfangCm,
+        )
+    }
+
+    fun mapErwerbOptionen(
+        engine: GameEngine,
+        state: GameState,
+        optionen: List<Erwerbslage>,
+    ): List<ErwerbOptionUiState> {
+        val geschlecht = state.person?.geschlecht
+        return optionen.map { erwerb ->
+            val hinweis = engine.erwerbHinweis(state, erwerb)
+            val berufsBezeichnung = geschlecht?.let { erwerb.bezeichnung[it] } ?: erwerb.titel
+            ErwerbOptionUiState(
+                id = erwerb.id,
+                titel = erwerb.titel,
+                zusatz = erwerb.zusatz,
+                text = erwerb.text,
+                folge = erwerb.folge,
+                berufsBezeichnung = berufsBezeichnung,
+                hinweisStempel = hinweis?.first,
+                hinweisText = hinweis?.second,
+                wirkungen = engine.metrics.wirkungZeilen(erwerb.werte),
+                etappeMoeglich = erwerb.etappeMoeglich,
+            )
+        }
+    }
+
+    fun mapKapitelStart(
+        engine: GameEngine,
+        phase: GamePhase.KapitelStart,
+        pfad: Pfad,
+    ): KapitelStartUiState {
+        val kapitel = phase.kapitel
+        val leitfrage = kapitel.bogen[pfad]?.frage
+        val aktionLabel = if (kapitel.istEpilog) {
+            "Epilog ${kapitel.jahr} beginnen"
+        } else {
+            "In das Jahr ${kapitel.jahr} eintreten"
+        }
+        return KapitelStartUiState(
+            jahr = kapitel.jahr,
+            istEpilog = kapitel.istEpilog,
+            zeitraum = kapitel.zeitraum,
+            ueberschrift = kapitel.ueberschrift,
+            text = kapitel.text,
+            stichworte = kapitel.stichworte,
+            leitfrage = leitfrage,
+            wirkungText = kapitel.wirkungText?.trim()?.ifBlank { null },
+            wirkungen = engine.metrics.wirkungZeilen(phase.kapitelWirkung),
+            kapitelbild = mapKapitelbild(engine.content, kapitel, pfad),
+            aktionLabel = aktionLabel,
+        )
+    }
+
+    fun mapKapitelAbschluss(
+        content: GameContent,
+        phase: GamePhase.KapitelAbschluss,
+        pfad: Pfad,
+        zustandssatz: String,
+    ): KapitelAbschlussUiState {
+        val kapitel = phase.kapitel
+        val kapitelListe = content.kapitel.kapitel
+        val aktuellerIndex = kapitelListe.indexOfFirst { it.jahr == kapitel.jahr }
+        val naechstes = kapitelListe.getOrNull(aktuellerIndex + 1)
+        val pfadMarke = content.konfiguration.pfade.definitionen[pfad]?.marke ?: pfad.code
+
+        val weiterLabel = when {
+            naechstes == null -> "Zum Abschluss 1919"
+            naechstes.istEpilog -> "Weiter zum Epilog ${naechstes.jahr}: ${naechstes.ueberschrift}"
+            else -> "Weiter in das Jahr ${naechstes.jahr}: ${naechstes.ueberschrift}"
+        }
+
+        return KapitelAbschlussUiState(
+            jahr = kapitel.jahr,
+            zeitraum = kapitel.zeitraum,
+            ueberschrift = kapitel.ueberschrift,
+            rueckblick = kapitel.rueckblick?.trim()?.ifBlank { null },
+            stichworte = kapitel.stichworte,
+            leitfrage = phase.bogen.frage,
+            kipppunkt = phase.bogen.kippt,
+            pfadMarke = pfadMarke,
+            zustandssatz = zustandssatz,
+            naechstesKapitelJahr = naechstes?.jahr,
+            naechstesKapitelTitel = naechstes?.ueberschrift,
+            weiterLabel = weiterLabel,
+        )
+    }
+
+    /**
+     * Liefert die passende Beschriftung für den Fortfahren-Knopf nach einem Entscheidungs-Ausgang.
+     */
+    fun mapWeiterLabel(
+        engine: GameEngine,
+        state: GameState,
+        phase: GamePhase.EreignisAusgang,
+    ): String {
+        if (phase.istFinale) {
+            return "Zum Lebenslauf 1919"
+        }
+        if (phase.istEinstieg) {
+            return when (state.einstiegKontext) {
+                EinstiegKontext.MELDUNG -> "Zum Musterungsbescheid"
+                EinstiegKontext.ETAPPE -> if (phase.gewaehlteOptionIndex == 0) {
+                    "In das Jahr 1914"
+                } else {
+                    "Weiter"
+                }
+
+                EinstiegKontext.OFFIZIER,
+                EinstiegKontext.ABSCHIED,
+                EinstiegKontext.KEINER,
+                -> "In das Jahr 1914"
+            }
+        }
+        if (engine.metrics.pruefeHartesEnde(state.werte, state.jahr, engine.content.kapitel.epilogJahr) != null) {
+            return "Weiter"
+        }
+
+        val kapitel = engine.content.kapitelByJahr[state.jahr]
+        val sollZiehungen = kapitel?.ziehungen?.get(state.modus) ?: 1
+        val kapitelFertig = state.ziehungenImKapitel >= sollZiehungen ||
+            (engine.verfuegbareEreignisse(state).isEmpty() && state.vorgemerkteKetten.none { it.abJahr <= state.jahr })
+        if (kapitelFertig) {
+            return if (kapitel?.istEpilog == true || state.jahr >= engine.content.kapitel.epilogJahr) {
+                "Zur Abschluss-Szene 1919"
+            } else {
+                "Zum Jahresrückblick ${state.jahr}"
+            }
+        }
+        return "Nächstes Ereignis"
+    }
+
+    /**
+     * Erzeugt die ruhige Kontextzeile für `KopfLeiste` (Kapitel + Fortschritt oder Einstieg/Epilog).
+     */
+    fun mapKopfKapitelTitel(
+        content: GameContent,
+        state: GameState,
+    ): String? {
+        val kapitel = content.kapitelByJahr[state.jahr]
+        val sollZiehungen = kapitel?.ziehungen?.get(state.modus) ?: 1
+        return when (val phase = state.phase) {
+            is GamePhase.MusterungErgebnis -> "Einstieg · Musterungsbescheid"
+            is GamePhase.ErwerbWahl -> "Einstieg · Erwerbslage 1914"
+            is GamePhase.KapitelStart -> if (phase.kapitel.istEpilog) {
+                "Epilog · ${phase.kapitel.ueberschrift}"
+            } else {
+                phase.kapitel.ueberschrift
+            }
+
+            is GamePhase.KapitelAbschluss -> "Jahresrückblick · ${phase.kapitel.ueberschrift}"
+            is GamePhase.EreignisAnzeige -> when {
+                phase.istEinstieg -> "Einstieg · August 1914"
+                phase.istFinale -> "Epilog · Abschluss 1919"
+                else -> {
+                    val nummer = (state.ziehungenImKapitel + 1).coerceAtMost(sollZiehungen)
+                    val titel = kapitel?.ueberschrift.orEmpty()
+                    if (titel.isNotBlank()) "$titel · Station $nummer/$sollZiehungen" else "Station $nummer/$sollZiehungen"
+                }
+            }
+
+            is GamePhase.EreignisAusgang -> when {
+                phase.istEinstieg -> "Einstieg · August 1914"
+                phase.istFinale -> "Epilog · Abschluss 1919"
+                else -> {
+                    val nummer = state.ziehungenImKapitel.coerceIn(1, sollZiehungen)
+                    val titel = kapitel?.ueberschrift.orEmpty()
+                    if (titel.isNotBlank()) "$titel · Station $nummer/$sollZiehungen" else "Station $nummer/$sollZiehungen"
+                }
+            }
+
+            else -> kapitel?.ueberschrift
+        }
+    }
+
+    /**
+     * Bereitet die protokollierten Entscheidungen eines Durchgangs lesbar für den Lebenslauf auf.
+     */
+    fun mapProtokollEintraege(
+        content: GameContent,
+        protokoll: List<ProtokollEintrag>,
+    ): List<ProtokollUiEintrag> = protokoll.map { eintrag ->
+        val station = when (eintrag.ereignisId) {
+            "herkunft" -> "Herkunft & Figur"
+            "musterung" -> "Musterung"
+            "erwerb" -> "Erwerbslage 1914"
+            else -> {
+                val ev = content.ereignisById[eintrag.ereignisId]
+                if (ev != null) {
+                    val typ = kartentypBezeichnung(ev.kartentyp)
+                    "${ev.ort} ($typ)"
+                } else {
+                    eintrag.ereignisId
+                }
+            }
+        }
+        ProtokollUiEintrag(
+            jahr = eintrag.jahr,
+            ereignisId = eintrag.ereignisId,
+            station = station,
+            wahl = eintrag.wahl,
+        )
     }
 
     fun berechneInitialen(vorname: String, familienname: String): String {
