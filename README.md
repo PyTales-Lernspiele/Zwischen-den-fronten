@@ -23,7 +23,7 @@ composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kern
   src/commonTest/             55 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Landscape, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre/Hintergrund-Pause)
   src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard, BackHandler & AudioTrack mit Hintergrund-Pause)
   src/desktopMain/            Windows/Desktop-Einstieg (JVM) inkl. Browser-Druckansicht/Speichern & dezentes Sound-Audio
-  src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback)
+  src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback) inkl. Startseite mit Ladeanzeige, Favicon & Web-Manifest
   src/wasmJsMain/ & jsMain/   Web-Plattformbrücken (Browser-Druck/Download/Clipboard & Web Audio API)
 androidApp/                   Auslieferungsfertiges Android-Modul (`MainActivity` im Querformat `sensorLandscape`, Edge-to-Edge/Safe-Area & Audio-Lebenszyklus, Archivpapier-Adaptive-Icon, R8/ProGuard `proguard-rules.pro` & optionale Release-Signierung für `.apk`/`.aab`)
 tools/
@@ -58,3 +58,9 @@ python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --upd
 - **Direktinstallation & Signierung:** Vollständige Anleitung für Lehrkräfte, Schul-Tablets (APK-Sideloading/MDM) und eigene Play-Store-Signierung unter [`docs/ANDROID_AUSLIEFERUNG.md`](docs/ANDROID_AUSLIEFERUNG.md).
 - **Automatisierte Releases:** Der GitHub-Actions-Workflow [`.github/workflows/android-release.yml`](.github/workflows/android-release.yml) erstellt per manuellem Start (`workflow_dispatch`) oder Tag (`v*`) geprüfte `.apk`- und `.aab`-Pakete inkl. `SHA256SUMS.txt` (optional signiert über Repository-Secrets, sonst mit direkt installierbarem Test-Fallback).
 - **CI bei jedem Pull Request:** Alle Prüfungen, Tests sowie Android Debug/Release, Desktop JVM und WebApp laufen automatisch über [`.github/workflows/content-ci.yml`](.github/workflows/content-ci.yml).
+
+### Webfassung (GitHub Pages)
+- **Direkt im Browser spielen:** <https://pytales-lernspiele.github.io/Zwischen-den-fronten/> — ohne Installation, ohne Anmeldung und ohne Tracking. Moderne Browser laden die WebAssembly-Fassung, ältere automatisch den JavaScript-Fallback.
+- **Automatische Veröffentlichung:** Jeder Push auf `main` baut die Webfassung neu und veröffentlicht sie über [`.github/workflows/web-pages.yml`](.github/workflows/web-pages.yml) (vorher Inhalts- und Medienprüfung). Ein manueller Start ist unter *Actions → „Web — GitHub Pages“ → Run workflow* möglich.
+- **Einmalige Einrichtung:** Unter *Settings → Pages → Build and deployment → Source* muss **„GitHub Actions“** ausgewählt sein.
+- **Lokal testen:** Nach `./gradlew :composeApp:composeCompatibilityBrowserDistribution` liegt die fertige statische Website unter `composeApp/build/dist/composeWebCompatibility/productionExecutable/` und lässt sich mit jedem Webserver ausliefern, z. B. `python3 -m http.server -d composeApp/build/dist/composeWebCompatibility/productionExecutable 8080`.
