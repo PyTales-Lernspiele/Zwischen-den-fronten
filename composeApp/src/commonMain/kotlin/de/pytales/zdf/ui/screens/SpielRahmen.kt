@@ -452,8 +452,8 @@ internal fun EinstellungenDialog(
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .widthIn(max = 540.dp)
+                    .fillMaxWidth()
                     .archivFokusGruppe(),
                 color = farben.papierHell,
                 shape = RoundedCornerShape(8.dp),
@@ -600,8 +600,8 @@ internal fun GrundsaetzeDialog(
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .widthIn(max = 560.dp)
+                    .fillMaxWidth()
                     .archivFokusGruppe(),
                 color = farben.papierHell,
                 shape = RoundedCornerShape(8.dp),
@@ -713,7 +713,6 @@ private fun GrundsatzZeile(
             Text(
                 text = "$numeral.",
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = FontFamily.Serif,
                 color = farben.akzent,
                 fontWeight = FontWeight.Bold,
             )
@@ -1128,8 +1127,8 @@ internal fun VerlassenSicherheitsDialog(
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .widthIn(max = 460.dp)
+                    .fillMaxWidth()
                     .archivFokusGruppe()
                     .archivLiveHinweis(),
                 color = farben.papierHell,

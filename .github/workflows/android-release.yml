@@ -195,7 +195,7 @@ jobs:
           ### Highlights
           - **Querformat-Erlebnis (\`sensorLandscape\`):** Zweispaltige Buch-Bühne (links gerahmte 16:9-Illustration, rechts Erzählkarte & Entscheidungen), sehr schlanke einzeilige Kopfleiste (ein- und ausklappbar) sowie ruhige Erklär-Overlays ohne Seitenverschiebung.
           - **Aufgeräumte Archivpapier-Ästhetik:** Harmonische Buchdruck-Typografie passend zu den Stil-A-Illustrationen, ruhiges Einstellungs-Fenster (Schriftgröße, Ton, Animationen, Unterrichts-Direktwahl), ohne Analysemodus und Entwickler-Vorschau.
-          - **Bildwelt (AP 5b):** Enthält **${WEBP_COUNT} von 63** Stil-A-Kernbildern (alle 8 Basis-Portraits komplett + erste Live-Emotions-Serien + \`schauplatz_brotschlange\`).
+          - **Bildwelt:** ${WEBP_COUNT} Illustrationen für Figuren, Kapitel, Schauplätze und Ereignisse.
 
           ### Enthaltene Dateien
           - **\`.apk\`**: Direkte Installation / Sideloading auf Android-Tablets und -Smartphones (Android 7.0+ / API 24+).

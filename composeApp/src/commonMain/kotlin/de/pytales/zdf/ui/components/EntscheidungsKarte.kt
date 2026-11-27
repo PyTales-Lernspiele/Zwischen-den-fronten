@@ -225,7 +225,6 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                         Text(
                             text = "Feldpostbrief",
                             style = MaterialTheme.typography.titleMedium,
-                            fontFamily = FontFamily.Serif,
                             color = farben.tinte,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -258,7 +257,6 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                         Text(
                             text = "Reichs-Lebensmittelkarte",
                             style = MaterialTheme.typography.titleSmall,
-                            fontFamily = FontFamily.Serif,
                             color = farben.tinte,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -301,7 +299,6 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                 Text(
                     text = "Tagesblatt · Meldung",
                     style = MaterialTheme.typography.titleLarge,
-                    fontFamily = FontFamily.Serif,
                     color = farben.tinte,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -333,7 +330,6 @@ private fun KartenKopfNachTyp(karte: EntscheidungsKarteUiState) {
                     Text(
                         text = "Amtliche Verfügung",
                         style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier
@@ -709,7 +705,6 @@ fun QuellenEinordnungBox(
                     Text(
                         text = "${quelle.artLabel} · ${quelle.kurz}",
                         style = MaterialTheme.typography.titleSmall,
-                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
                     )
 
@@ -789,7 +784,6 @@ fun EreignisAusgangKarte(
                 Text(
                     text = ausgang.gewaehlterTitel,
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif,
                     color = farben.akzent,
                     modifier = Modifier.archivUeberschrift(),
                 )

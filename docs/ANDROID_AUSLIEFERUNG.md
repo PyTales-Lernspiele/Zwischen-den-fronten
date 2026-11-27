@@ -128,11 +128,6 @@ Der Workflow [`.github/workflows/android-release.yml`](../.github/workflows/andr
 
 ---
 
-## 5. Hinweis zum Nachziehen der Bildwelt (AP 5b)
+## 5. Bilder im Android-Build
 
-Im aktuellen Stand (`v1.1.0`, `versionCode = 10100`, festes Querformat `sensorLandscape`) sind bereits **19 von 63 Stil-A-Kernbildern** fest als WebP-Assets in der App gebündelt (alle 8 Basis-Portraits komplett, 10 Live-Emotions-Portraits aus Batch 1 sowie `schauplatz_brotschlange`); fehlende Motive zeigen sauber den Basis-Portrait- bzw. Archivtafel-Fallback (`de.pytales.zdf.ui.media.BildAufloeser`).
-
-Sobald die übrigen **44 Stufe-1-Bilder** (Batches 2–5) aus AP 5b ergänzt werden:
-1. Bilder wie in [`docs/bildwelt/PROMPT_BIBEL.md`](bildwelt/PROMPT_BIBEL.md) beschrieben über `python3 tools/prepare_media.py --input <ordner> --save-master --update-plan` einpflegen.
-2. Mit `python3 tools/validate_content.py --require-all-stufe1` prüfen.
-3. Einen neuen Android-Release-Build bzw. ein neues Tag (z. B. `v1.2.0`) auslösen — **eine Änderung am Android- oder Kotlin-Code ist dafür nicht erforderlich**, da Gradle alle WebP-Dateien aus `content/media/` automatisch in die App packt.
+Gradle bündelt die 167 Spielbilder aus `content/media/` als WebP-Ressourcen. Dadurch stehen die Porträts, Jahresbilder, Schauplätze und Ereignisszenen nach der Installation auch offline zur Verfügung. Die JPEG-Master dienen der Bildbearbeitung und bleiben im Repository. Aufbereitung und Medienprüfung sind im [Bildwelt-Leitfaden](bildwelt/PROMPT_BIBEL.md) beschrieben.

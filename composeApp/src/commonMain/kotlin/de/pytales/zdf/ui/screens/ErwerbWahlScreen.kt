@@ -101,9 +101,9 @@ fun ErwerbWahlScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
                     .widthIn(max = metrik.maxInhaltsBreite)
+                    .fillMaxWidth()
                     .padding(
                         horizontal = metrik.aussenAbstand,
                         vertical = if (kompakt) 8.dp else 14.dp,
@@ -281,7 +281,6 @@ private fun ErwerbKarte(
                     Text(
                         text = option.titel,
                         style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
