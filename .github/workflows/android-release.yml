@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.1.0)"
+        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.2.0)"
         required: false
         default: ""
       version_code:
-        description: "Numerischer versionCode (optional, Standard 10100)"
+        description: "Numerischer versionCode (optional, Standard 10200)"
         required: false
         default: ""
   push:
@@ -76,7 +76,7 @@ jobs:
             VERSION_NAME="${GITHUB_REF#refs/tags/v}"
           fi
           if [ -z "$VERSION_NAME" ]; then
-            VERSION_NAME="1.1.0"
+            VERSION_NAME="1.2.0"
           fi
 
           echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
