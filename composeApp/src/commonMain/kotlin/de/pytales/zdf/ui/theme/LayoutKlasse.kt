@@ -36,6 +36,32 @@ enum class LayoutKlasse(
 }
 
 /**
+ * Automatische Anzeige-Skalierung für große Bildschirme (PC-Monitore, Beamer, große Tablets).
+ *
+ * Bezugsgröße ist eine Spielfläche von [REFERENZ_BREITE_DP] × [REFERENZ_HOEHE_DP]. Ist das Fenster in
+ * beiden Richtungen größer, wächst die gesamte Oberfläche (Schrift, Abstände, Bilder) gleichmäßig mit,
+ * statt in einer kleinen Insel in der Bildschirmmitte zu bleiben. Weil Compose dabei in voller
+ * Auflösung neu zeichnet, bleibt alles gestochen scharf – anders als beim Browser-Zoom.
+ *
+ * Kleinere Fenster (Smartphones, kompakte Tablets) werden nie verkleinert (Faktor 1).
+ */
+object AnzeigeSkalierung {
+    const val REFERENZ_BREITE_DP: Float = 1120f
+    const val REFERENZ_HOEHE_DP: Float = 680f
+    const val MAX_FAKTOR: Float = 1.75f
+
+    /** Schrittweite, damit kleine Fensteränderungen nicht ständig neu skalieren. */
+    private const val SCHRITTE_JE_EINHEIT: Float = 20f
+
+    fun faktorFuer(breiteDp: Float, hoeheDp: Float): Float {
+        if (breiteDp.isNaN() || hoeheDp.isNaN() || breiteDp <= 0f || hoeheDp <= 0f) return 1f
+        val roh = minOf(breiteDp / REFERENZ_BREITE_DP, hoeheDp / REFERENZ_HOEHE_DP)
+        val abgerundet = kotlin.math.floor(roh * SCHRITTE_JE_EINHEIT) / SCHRITTE_JE_EINHEIT
+        return abgerundet.coerceIn(1f, MAX_FAKTOR)
+    }
+}
+
+/**
  * Abgeleitete Abstände, Spaltenzahlen und Touch-Mindestgrößen für die aktuelle [LayoutKlasse],
  * [Schriftgroesse] und Bildschirmhöhe (optimiert für breite, aber flache Querformat-Displays).
  */

@@ -14,6 +14,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -26,6 +28,7 @@ import de.pytales.zdf.ui.theme.ArchivTheme
 /**
  * Zeichnet bei Tastaturfokus (Desktop/Web) einen klar sichtbaren, kontrastreichen
  * Archiv-Fokusrahmen (`2.5 dp`) um bedienbare Schaltflächen und Auswahlkarten.
+ * Mit der Maus (PC/Web) zeigt der Zeiger über diesen Elementen zusätzlich die Hand.
  *
  * Wichtig: In der Modifier-Kette **vor** `.clickable(...)` einfügen, damit `onFocusChanged`
  * den von `clickable` erzeugten Fokus-Knoten beobachtet.
@@ -39,6 +42,7 @@ fun Modifier.archivFokusRahmen(
     val farben = ArchivTheme.farben
     val fokusFarbe = if (aufDunkel) farben.stufenFarbeHell(2) else farben.akzent
     return this
+        .pointerHoverIcon(PointerIcon.Hand)
         .onFocusChanged { state -> fokussiert = state.isFocused }
         .then(
             if (fokussiert) {

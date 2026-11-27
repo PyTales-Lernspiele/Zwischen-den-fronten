@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -516,7 +518,9 @@ private fun MiniWerteIndikatorZeile(
             .clip(RoundedCornerShape(4.dp))
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
+                    Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable(onClick = onClick)
                 } else {
                     Modifier
                 },

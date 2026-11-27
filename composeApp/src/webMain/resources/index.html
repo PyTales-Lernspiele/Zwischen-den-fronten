@@ -13,6 +13,29 @@
     <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <link rel="manifest" href="manifest.webmanifest">
+    <script>
+        // Compose Multiplatform liest die Pixeldichte (devicePixelRatio) nur einmal beim Start.
+        // Zoomt man danach im Browser oder zieht das Fenster auf einen anderen Monitor, würde die
+        // Spielfläche in der alten Auflösung gestreckt und unscharf. Deshalb zeichnet sie von Anfang
+        // an mit Auflösungsreserve (mindestens 2-fach, begrenzt auf die Pixelmenge eines 4K-Bildes),
+        // sodass Browser-Zoom bis 200 % gestochen scharf bleibt. Geräte mit hoher Pixeldichte
+        // (Tablets, Retina-Displays) bleiben unverändert.
+        (function () {
+            try {
+                var echt = window.devicePixelRatio || 1;
+                var flaeche = Math.max(1, window.innerWidth * window.innerHeight);
+                var ziel = Math.min(2, Math.sqrt((3840 * 2160) / flaeche));
+                if (ziel > echt) {
+                    Object.defineProperty(window, "devicePixelRatio", {
+                        configurable: true,
+                        get: function () { return ziel; }
+                    });
+                }
+            } catch (e) {
+                // Ohne Reserve weiterladen
+            }
+        })();
+    </script>
     <style>
         html, body {
             width: 100%;
