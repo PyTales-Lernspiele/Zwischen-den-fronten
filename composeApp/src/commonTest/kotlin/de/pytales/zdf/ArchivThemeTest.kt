@@ -3,6 +3,7 @@ package de.pytales.zdf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.pytales.zdf.ui.theme.AnzeigeSkalierung
 import de.pytales.zdf.ui.theme.ArchivFarben
 import de.pytales.zdf.ui.theme.ArchivKontrast
 import de.pytales.zdf.ui.theme.ArchivUebergaenge
@@ -252,6 +253,36 @@ class ArchivThemeTest {
                 ArchivKontrast.erfuelltWcagAA(farbe, farben.dunkelHell),
                 "Helle Stufe $stufe verletzt WCAG AA auf dunkelHell",
             )
+        }
+    }
+
+    @Test
+    fun anzeigeSkalierungVergroessertNurGrosseBildschirmeUndBleibtBegrenzt() {
+        // Smartphones, kompakte Tablets & kleine Fenster: nie verkleinern
+        assertEquals(1f, AnzeigeSkalierung.faktorFuer(915f, 412f))
+        assertEquals(1f, AnzeigeSkalierung.faktorFuer(1080f, 810f))
+        assertEquals(1f, AnzeigeSkalierung.faktorFuer(1366f, 650f))
+        assertEquals(1f, AnzeigeSkalierung.faktorFuer(0f, 0f))
+        assertEquals(1f, AnzeigeSkalierung.faktorFuer(Float.NaN, 900f))
+
+        // Laptop mit 125 % Windows-Skalierung (ca. 1536 × 730): nur leicht größer
+        assertEquals(1.05f, AnzeigeSkalierung.faktorFuer(1536f, 730f), 0.001f)
+        // Full-HD-Browserfenster (ca. 1906 × 931): spürbar größer, begrenzt durch die Höhe
+        assertEquals(1.35f, AnzeigeSkalierung.faktorFuer(1906f, 931f), 0.001f)
+        // Großes Tablet im Querformat (iPad Pro 12,9″: 1366 × 1024)
+        assertEquals(1.20f, AnzeigeSkalierung.faktorFuer(1366f, 1024f), 0.001f)
+        // 10-Zoll-Android-Tablet im Querformat (1280 × 800 dp)
+        assertEquals(1.10f, AnzeigeSkalierung.faktorFuer(1280f, 800f), 0.001f)
+        // WQHD-Monitor (2560 × 1300) und 4K-Beamer: höchstens 1,75
+        assertEquals(1.75f, AnzeigeSkalierung.faktorFuer(2560f, 1300f), 0.001f)
+        assertEquals(AnzeigeSkalierung.MAX_FAKTOR, AnzeigeSkalierung.faktorFuer(3840f, 2000f))
+
+        // Nach der Skalierung bleibt die Spielfläche mindestens so groß wie die Referenzfläche
+        listOf(1366f to 1024f, 1906f to 931f, 2560f to 1300f).forEach { (b, h) ->
+            val f = AnzeigeSkalierung.faktorFuer(b, h)
+            assertTrue(b / f >= AnzeigeSkalierung.REFERENZ_BREITE_DP, "Breite nach Skalierung zu klein: $b/$f")
+            assertTrue(h / f >= AnzeigeSkalierung.REFERENZ_HOEHE_DP, "Höhe nach Skalierung zu klein: $h/$f")
+            assertEquals(LayoutKlasse.BREIT, LayoutKlasse.vonBreiteDp(b / f))
         }
     }
 }

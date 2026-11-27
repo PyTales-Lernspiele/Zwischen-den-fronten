@@ -11,8 +11,10 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.model.Farbwelt
 import de.pytales.zdf.resources.Res
@@ -115,12 +117,21 @@ fun ArchivPapierTheme(
         }
     } else {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val ermittelteKlasse = LayoutKlasse.vonBreite(maxWidth)
-            val hoeheDp = maxHeight.value
+            // Große Bildschirme: gesamte Oberfläche gleichmäßig und scharf vergrößern
+            val basisDichte = LocalDensity.current
+            val skalierung = AnzeigeSkalierung.faktorFuer(maxWidth.value, maxHeight.value)
+            val dichte = remember(basisDichte, skalierung) {
+                Density(density = basisDichte.density * skalierung, fontScale = basisDichte.fontScale)
+            }
+            PlattformAnzeigeSkalierung(skalierung)
+            val breiteDp = maxWidth.value / skalierung
+            val hoeheDp = maxHeight.value / skalierung
+            val ermittelteKlasse = LayoutKlasse.vonBreiteDp(breiteDp)
             val metrik = remember(ermittelteKlasse, schriftgroesse, hoeheDp) {
                 layoutMetrikFuer(ermittelteKlasse, schriftgroesse, hoeheDp = hoeheDp)
             }
             CompositionLocalProvider(
+                LocalDensity provides dichte,
                 LocalArchivFarben provides farben,
                 LocalSchriftgroesse provides schriftgroesse,
                 LocalLayoutKlasse provides ermittelteKlasse,
