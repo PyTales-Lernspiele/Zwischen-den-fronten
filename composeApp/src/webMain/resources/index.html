@@ -2,9 +2,17 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Zwischen den Fronten — Historisches Zwei-Entscheidungs-Lernspiel über den Alltag im Ersten Weltkrieg (1914–1919) für Klasse 8 Oberschule.">
+    <meta name="theme-color" content="#15130f">
+    <meta name="color-scheme" content="light">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Zwischen den Fronten (1914–1919)">
+    <meta property="og:description" content="Historisches Zwei-Entscheidungs-Lernspiel über den Alltag im Ersten Weltkrieg für Klasse 8 Oberschule.">
     <title>Zwischen den Fronten (1914–1919)</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <style>
         html, body {
             width: 100%;
@@ -14,7 +22,84 @@
             overflow: hidden;
             background-color: #efe9dc;
             color: #1f1c18;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: Georgia, "Times New Roman", serif;
+        }
+        #ladeanzeige {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+            background: radial-gradient(ellipse at center, #f7f3ea 0%, #efe9dc 60%, #e2dbca 100%);
+            transition: opacity 0.4s ease;
+        }
+        #ladeanzeige.ausgeblendet {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .ladekarte {
+            width: 100%;
+            max-width: 440px;
+            padding: 28px 32px;
+            box-sizing: border-box;
+            text-align: center;
+            background: #f7f3ea;
+            border: 1px solid #8d8578;
+            box-shadow: 0 0 0 4px #f7f3ea, 0 0 0 5px #b6ae9e;
+        }
+        .ladekarte h1 {
+            margin: 0 0 4px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .ladekarte .untertitel {
+            margin: 0 0 22px;
+            color: #57514a;
+            font-style: italic;
+        }
+        .ladebalken {
+            position: relative;
+            height: 4px;
+            overflow: hidden;
+            background: #cfc7b6;
+        }
+        .ladebalken span {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 35%;
+            background: #8a3324;
+            animation: laden 1.6s ease-in-out infinite;
+        }
+        @keyframes laden {
+            0% { left: -35%; }
+            100% { left: 100%; }
+        }
+        .ladekarte .hinweis {
+            margin: 14px 0 0;
+            font-size: 0.95rem;
+            color: #57514a;
+            line-height: 1.5;
+        }
+        .ladekarte .hinweis.fehler {
+            color: #7c1d14;
+        }
+        #ladeanzeige.fehlgeschlagen .ladebalken {
+            display: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ladebalken span {
+                animation: none;
+                left: 0;
+                width: 100%;
+                opacity: 0.6;
+            }
+            #ladeanzeige {
+                transition: none;
+            }
         }
         noscript {
             display: block;
@@ -26,11 +111,73 @@
             line-height: 1.5;
         }
     </style>
-    <script type="application/javascript" src="zwischenDenFronten.js"></script>
 </head>
 <body>
+<div id="ladeanzeige" role="status" aria-live="polite">
+    <div class="ladekarte">
+        <h1>Zwischen den Fronten</h1>
+        <p class="untertitel">Alltag im Ersten Weltkrieg 1914–1919</p>
+        <div class="ladebalken" aria-hidden="true"><span></span></div>
+        <p class="hinweis" id="ladehinweis">Das Spiel wird geladen …</p>
+    </div>
+</div>
 <noscript>
-    <strong>Zwischen den Fronten (1914–1919)</strong> benötigt aktiviertes JavaScript bzw. WebAssembly im Browser.
+    <strong>Zwischen den Fronten (1914–1919)</strong> benötigt aktiviertes JavaScript im Browser.
 </noscript>
+<script>
+    (function () {
+        var ladeanzeige = document.getElementById("ladeanzeige");
+        var hinweis = document.getElementById("ladehinweis");
+        var fertig = false;
+        var fehler = false;
+
+        // Compose hängt seine Spielfläche als Shadow-DOM an <body> (bzw. als <canvas>).
+        // attachShadow löst keine DOM-Mutation aus, daher wird kurz zyklisch geprüft.
+        function spielIstDa() {
+            if (document.body.shadowRoot) return true;
+            var knoten = document.body.children;
+            for (var i = 0; i < knoten.length; i++) {
+                var k = knoten[i];
+                if (k.tagName === "CANVAS" || k.shadowRoot) return true;
+            }
+            return false;
+        }
+
+        function ausblenden() {
+            if (fertig) return;
+            fertig = true;
+            clearInterval(pruefung);
+            ladeanzeige.classList.add("ausgeblendet");
+            ladeanzeige.setAttribute("aria-hidden", "true");
+            setTimeout(function () {
+                if (ladeanzeige.parentNode) ladeanzeige.parentNode.removeChild(ladeanzeige);
+            }, 600);
+        }
+
+        var pruefung = setInterval(function () {
+            if (spielIstDa()) ausblenden();
+        }, 200);
+
+        // Langsame Schulnetze: nach 20 Sekunden beruhigender Hinweis (überschreibt keine Fehlermeldung).
+        setTimeout(function () {
+            if (!fertig && !fehler) {
+                hinweis.textContent = "Das Spiel lädt noch. Beim ersten Start kann das in langsamen Netzen etwas dauern …";
+            }
+        }, 20000);
+
+        // Ladefehler (z. B. Browser ohne WebAssembly) verständlich anzeigen statt einer leeren Seite.
+        function ladefehler() {
+            if (!fertig) {
+                fehler = true;
+                ladeanzeige.classList.add("fehlgeschlagen");
+                hinweis.textContent = "Das Spiel konnte nicht gestartet werden. Bitte die Seite neu laden oder einen aktuellen Browser (Chrome, Edge, Firefox oder Safari) verwenden.";
+                hinweis.className = "hinweis fehler";
+            }
+        }
+        window.addEventListener("error", ladefehler);
+        window.addEventListener("unhandledrejection", ladefehler);
+    })();
+</script>
+<script type="application/javascript" src="zwischenDenFronten.js"></script>
 </body>
 </html>

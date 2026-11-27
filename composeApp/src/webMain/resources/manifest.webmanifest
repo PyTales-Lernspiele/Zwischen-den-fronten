@@ -1,0 +1,19 @@
+{
+  "name": "Zwischen den Fronten (1914–1919)",
+  "short_name": "Zwischen den Fronten",
+  "description": "Historisches Zwei-Entscheidungs-Lernspiel über den Alltag im Ersten Weltkrieg (1914–1919) für Klasse 8 Oberschule.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#efe9dc",
+  "theme_color": "#15130f",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

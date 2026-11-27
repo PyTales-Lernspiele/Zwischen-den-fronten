@@ -1,0 +1,90 @@
+name: Web — GitHub Pages (WasmJS + JS-Fallback)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Immer nur eine Veröffentlichung gleichzeitig; laufende Deployments werden nicht abgebrochen.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Webfassung bauen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python 3.12 einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spielinhalte, Vollbelege & WebP-Medien prüfen
+        run: python3 tools/validate_content.py --require-all-stufe1
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: WebApp (WasmJS + JS-Fallback) bauen
+        run: ./gradlew :composeApp:composeCompatibilityBrowserDistribution --no-daemon
+
+      - name: Website-Paket prüfen
+        shell: bash
+        run: |
+          SITE=composeApp/build/dist/composeWebCompatibility/productionExecutable
+          # Source-Maps werden im Browser nicht gebraucht und nur das Paket vergrößern
+          find "$SITE" -name '*.map' -delete
+          for f in index.html zwischenDenFronten.js manifest.webmanifest favicon.png; do
+            if [ ! -f "$SITE/$f" ]; then
+              echo "Fehler: $SITE/$f fehlt im Web-Paket." >&2
+              exit 1
+            fi
+          done
+          if ! find "$SITE" -name '*.wasm' | grep -q .; then
+            echo "Fehler: Keine .wasm-Datei im Web-Paket gefunden." >&2
+            exit 1
+          fi
+          WEBP=$(find "$SITE" -name '*.webp' | wc -l | tr -d ' ')
+          echo "Web-Paket: $(du -sh "$SITE" | cut -f1), ${WEBP} WebP-Bilder"
+          {
+            echo "## Webfassung"
+            echo ""
+            echo "- **Größe:** $(du -sh "$SITE" | cut -f1)"
+            echo "- **Bilder:** ${WEBP} WebP-Dateien"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: GitHub Pages vorbereiten
+        uses: actions/configure-pages@v5
+
+      - name: Website-Paket hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: composeApp/build/dist/composeWebCompatibility/productionExecutable
+
+  deploy:
+    name: Auf GitHub Pages veröffentlichen
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
