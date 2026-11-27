@@ -258,6 +258,8 @@ jobs:
           - **Querformat-Erlebnis (\`sensorLandscape\`):** Zweispaltige Buch-Bühne (links gerahmte 16:9-Illustration, rechts Erzählkarte & Entscheidungen), sehr schlanke einzeilige Kopfleiste (ein- und ausklappbar) sowie ruhige Erklär-Overlays ohne Seitenverschiebung.
           - **Aufgeräumte Archivpapier-Ästhetik:** Harmonische Buchdruck-Typografie passend zu den Stil-A-Illustrationen, ruhiges Einstellungs-Fenster (Schriftgröße, Ton, Animationen, Unterrichts-Direktwahl), ohne Analysemodus und Entwickler-Vorschau.
           - **Bildwelt:** ${WEBP_COUNT} Illustrationen für Figuren, Kapitel, Schauplätze und Ereignisse.
+          - **Große Bildschirme:** Auf großen Tablets wächst die gesamte Oberfläche automatisch und gestochen scharf mit.
+          - **Auch im Browser spielbar:** https://pytales-lernspiele.github.io/Zwischen-den-fronten/ (ohne Installation, für PC und Tablet).
 
           ### Enthaltene Dateien
           - **\`.apk\`**: Direkte Installation / Sideloading auf Android-Tablets und -Smartphones (Android 7.0+ / API 24+).

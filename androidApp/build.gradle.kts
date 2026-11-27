@@ -13,8 +13,8 @@ fun resolveReleaseOption(name: String): String? =
         ?: providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
 
 // Konsistente Release-Versionierung (optional über Gradle-Property oder Env-Var überschreibbar)
-val releaseVersionCode = resolveReleaseOption("ZDF_VERSION_CODE")?.toIntOrNull() ?: 10200
-val releaseVersionName = resolveReleaseOption("ZDF_VERSION_NAME") ?: "1.2.0"
+val releaseVersionCode = resolveReleaseOption("ZDF_VERSION_CODE")?.toIntOrNull() ?: 10300
+val releaseVersionName = resolveReleaseOption("ZDF_VERSION_NAME") ?: "1.3.0"
 
 // Optionale Release-Signierung über Gradle-Properties oder Umgebungsvariablen
 val releaseKeystorePath = resolveReleaseOption("ZDF_KEYSTORE_PATH")
