@@ -4,13 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts, z. B. 1.2.0)"
+        description: "Versionsname (optional, Standard aus androidApp/build.gradle.kts)"
         required: false
         default: ""
       version_code:
-        description: "Numerischer versionCode (optional, Standard 10200)"
+        description: "Numerischer versionCode (optional, Standard aus androidApp/build.gradle.kts)"
         required: false
         default: ""
+      create_release:
+        description: "GitHub-Release mit Tag v<Version> anlegen (nur auf main)"
+        type: boolean
+        required: false
+        default: false
   push:
     tags:
       - "v*"
@@ -23,6 +28,15 @@ jobs:
     name: Qualitätsprüfung (Content-CI & Kotlin-Tests)
     runs-on: ubuntu-latest
     steps:
+      - name: Release-Anfrage prüfen
+        if: inputs.create_release
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Fehler: Ein GitHub-Release per Run workflow ist nur von main aus erlaubt (gestartet auf ${GITHUB_REF})." >&2
+            exit 1
+          fi
+
       - name: Repository auschecken
         uses: actions/checkout@v4
 
@@ -68,19 +82,48 @@ jobs:
       - name: Release-Version ermitteln
         id: version
         shell: bash
+        env:
+          INPUT_VERSION_NAME: ${{ inputs.version_name }}
+          INPUT_VERSION_CODE: ${{ inputs.version_code }}
         run: |
-          VERSION_NAME="${{ inputs.version_name }}"
-          VERSION_CODE="${{ inputs.version_code }}"
+          VERSION_NAME="$INPUT_VERSION_NAME"
+          VERSION_CODE="$INPUT_VERSION_CODE"
 
           if [ -z "$VERSION_NAME" ] && [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             VERSION_NAME="${GITHUB_REF#refs/tags/v}"
           fi
           if [ -z "$VERSION_NAME" ]; then
-            VERSION_NAME="1.2.0"
+            # Standard-Versionsname direkt aus androidApp/build.gradle.kts übernehmen
+            VERSION_NAME=$(sed -n 's/.*"ZDF_VERSION_NAME") ?: "\([^"]*\)".*/\1/p' androidApp/build.gradle.kts | head -n 1)
+          fi
+          if ! [[ "$VERSION_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Fehler: Ungültiger Versionsname '${VERSION_NAME}' (erwartet z. B. 1.2.0)." >&2
+            exit 1
+          fi
+          if [ -n "$VERSION_CODE" ] && ! [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
+            echo "Fehler: versionCode '${VERSION_CODE}' ist keine Zahl." >&2
+            exit 1
           fi
 
           echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
           echo "version_code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+
+      - name: Release-Tag prüfen (Run workflow mit create_release)
+        if: inputs.create_release
+        shell: bash
+        env:
+          TAG: v${{ steps.version.outputs.version_name }}
+        run: |
+          # Ein vorhandenes Tag darf nur auf genau diesen Commit zeigen (annotierte Tags werden aufgelöst)
+          TAG_COMMIT=$(git ls-remote --tags origin "refs/tags/${TAG}^{}" | cut -f1)
+          if [ -z "$TAG_COMMIT" ]; then
+            TAG_COMMIT=$(git ls-remote --tags origin "refs/tags/${TAG}" | cut -f1)
+          fi
+          if [ -n "$TAG_COMMIT" ] && [ "$TAG_COMMIT" != "$GITHUB_SHA" ]; then
+            echo "Fehler: Tag ${TAG} existiert bereits auf ${TAG_COMMIT}, nicht auf ${GITHUB_SHA}. Bitte zuerst die Version in androidApp/build.gradle.kts erhöhen." >&2
+            exit 1
+          fi
+          echo "Release-Tag ${TAG} ist frei oder zeigt bereits auf ${GITHUB_SHA}."
 
       - name: Optionale Release-Signierung vorbereiten
         id: signing
@@ -178,13 +221,32 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: GitHub Release bei Tag (v*) erstellen oder aktualisieren
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: GitHub Release erstellen oder aktualisieren (Tag v* oder create_release)
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.create_release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            # Run workflow mit create_release: annotiertes Tag über die GitHub-API anlegen (kein git push nötig)
+            TAG="v${VERSION_NAME}"
+            if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null; then
+              echo "Tag ${TAG} existiert bereits (vorab auf ${GITHUB_SHA} geprüft)."
+            else
+              TAG_OBJECT=$(gh api "repos/${GH_REPO}/git/tags" \
+                -f tag="$TAG" \
+                -f message="Zwischen den Fronten ${TAG}" \
+                -f object="$GITHUB_SHA" \
+                -f type=commit \
+                --jq .sha)
+              gh api "repos/${GH_REPO}/git/refs" -f ref="refs/tags/${TAG}" -f sha="$TAG_OBJECT" >/dev/null
+              echo "Tag ${TAG} auf ${GITHUB_SHA} angelegt."
+            fi
+          fi
           SIGNING_MODE="${{ steps.signing.outputs.mode }}"
           WEBP_COUNT=$(find content/media -name '*.webp' | wc -l | tr -d ' ')
           NOTES=$(cat <<EOF
@@ -212,6 +274,7 @@ jobs:
             gh release upload "$TAG" release-assets/* --clobber
           else
             gh release create "$TAG" release-assets/* \
+              --verify-tag \
               --title "Zwischen den Fronten ${TAG} (Android)" \
               --notes "$NOTES"
           fi

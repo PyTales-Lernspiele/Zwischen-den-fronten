@@ -114,14 +114,20 @@ Anschließend im GitHub-Repository unter **Settings → Secrets and variables �
 
 Der Workflow [`.github/workflows/android-release.yml`](../.github/workflows/android-release.yml) prüft zuerst `tools/validate_content.py` und alle JUnit-Tests (JVM + Android Unit) und baut danach `.apk`, `.aab` sowie `SHA256SUMS.txt`:
 
+Vor jedem neuen Release werden `versionCode` und `versionName` in `androidApp/build.gradle.kts` erhöht (z. B. `10200` / `1.2.0`). Der Workflow übernimmt den Versionsnamen von dort, sofern kein Tag oder `version_name` etwas anderes vorgibt.
+
 1. **Manueller Build (`workflow_dispatch`):**
    - Im Repository unter **Actions → „Release — Android Auslieferung (.apk & .aab)“ → Run workflow** starten (optional mit abweichendem `version_name` / `version_code`).
    - Die fertigen Dateien stehen direkt als herunterladbares Workflow-Artefakt bereit.
-2. **Tag-Release (`v*`):**
+2. **Release per Knopfdruck (`workflow_dispatch` mit `create_release`):**
+   - Wie bei 1. starten, aber auf `main` und mit gesetztem Häkchen **`create_release`**.
+   - Der Workflow legt nach erfolgreichen Prüfungen das annotierte Tag `v<Version>` auf dem aktuellen `main`-Commit über die GitHub-API an und erstellt das **GitHub Release** mit `.apk`, `.aab` und `SHA256SUMS.txt`. Ein `git push` von Tags ist dafür nicht nötig.
+   - Existiert das Tag bereits auf einem anderen Commit, bricht der Workflow vor dem Build ab. Dann zuerst die Version in `androidApp/build.gradle.kts` erhöhen.
+3. **Tag-Release (`v*`):**
    - Beispiel:
      ```bash
-     git tag v1.0.0
-     git push origin v1.0.0
+     git tag -a v1.2.0 -m "Zwischen den Fronten v1.2.0"
+     git push origin v1.2.0
      ```
    - Der Workflow erstellt automatisch ein **GitHub Release** mit `.apk`, `.aab` und `SHA256SUMS.txt`.
    - Sind die vier Repository-Secrets gesetzt, erscheinen die Dateien als `*-release.apk` / `*-release.aab`; ohne Secrets greift der Test-Fallback (`*-test-signed.apk` / `*-test-signed.aab`) mit klarem Hinweis in den Release-Notes.
