@@ -171,7 +171,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "Zwischen den Fronten"
-            packageVersion = "1.2.0"
+            packageVersion = "1.3.0"
             description = "Historisches Zwei-Entscheidungs-Lernspiel (Alltag 1914–1919)"
             vendor = "PyTales Lernspiele"
         }
