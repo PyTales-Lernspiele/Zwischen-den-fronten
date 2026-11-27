@@ -170,9 +170,9 @@ private fun AuffangnetzAnsicht(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .archivInhaltsSafeArea()
                     .widthIn(max = 920.dp)
+                    .fillMaxWidth()
                     .padding(horizontal = metrik.aussenAbstand, vertical = if (kompakt) 12.dp else 20.dp)
                     .archivFokusGruppe(),
             ) {
@@ -242,7 +242,6 @@ private fun AuffangnetzAnsicht(
                                         Text(
                                             text = "Kein persönliches Versagen",
                                             style = MaterialTheme.typography.titleSmall,
-                                            fontFamily = FontFamily.Serif,
                                             color = farben.tinte,
                                         )
                                         Text(
@@ -396,9 +395,9 @@ private fun LebenslaufAnsicht(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .archivInhaltsSafeArea()
                     .widthIn(max = metrik.maxInhaltsBreite)
+                    .fillMaxWidth()
                     .padding(
                         horizontal = metrik.aussenAbstand,
                         vertical = if (kompakt) 10.dp else 18.dp,
@@ -452,7 +451,6 @@ private fun LebenslaufAnsicht(
                                         Text(
                                             text = "„${ausgang.deutung}“",
                                             style = MaterialTheme.typography.titleMedium,
-                                            fontFamily = FontFamily.Serif,
                                             fontStyle = FontStyle.Italic,
                                             color = farben.akzent,
                                         )
@@ -516,7 +514,6 @@ private fun LebenslaufAnsicht(
                                             Text(
                                                 text = person.vollerName,
                                                 style = MaterialTheme.typography.titleMedium,
-                                                fontFamily = FontFamily.Serif,
                                                 color = farben.tinte,
                                                 fontWeight = FontWeight.Bold,
                                             )
@@ -747,7 +744,6 @@ private fun LebenslaufFachKarte(
                 Text(
                     text = fach.merkmalName.orEmpty(),
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif,
                     color = farben.tinte,
                     fontWeight = FontWeight.Bold,
                 )
@@ -947,7 +943,6 @@ private fun EntscheidungsProtokollBox(
                     Text(
                         text = "Deine Entscheidungen im Überblick (${eintraege.size} Stationen)",
                         style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
                     )
                     Text(

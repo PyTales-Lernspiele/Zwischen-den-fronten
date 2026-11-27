@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -200,7 +199,6 @@ fun KopfLeiste(
                                 Text(
                                     text = jahr.toString(),
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontFamily = FontFamily.Serif,
                                     color = farben.stufenFarbeHell(2),
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(end = 4.dp),
@@ -271,7 +269,6 @@ fun KopfLeiste(
                                     Text(
                                         text = jahr.toString(),
                                         style = MaterialTheme.typography.titleSmall,
-                                        fontFamily = FontFamily.Serif,
                                         color = farben.stufenFarbeHell(2),
                                         fontWeight = FontWeight.Bold,
                                     )

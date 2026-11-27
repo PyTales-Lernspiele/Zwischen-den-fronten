@@ -67,62 +67,65 @@ enum class Schriftgroesse(
  * - Ruhige, gut lesbare Leseschrift mit großzügigem Zeilenabstand (~1,45–1,52×) für Alltagstexte
  * - Zurückhaltende, fein gesperrte Auszeichnungen für Zeit- und Ortsangaben (ohne technischen Look)
  */
-fun buildArchivTypography(groesse: Schriftgroesse): Typography {
+fun buildArchivTypography(
+    groesse: Schriftgroesse,
+    titelschrift: FontFamily = FontFamily.Serif,
+): Typography {
     val f = groesse.faktor
     return Typography(
         displayLarge = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.Bold,
             fontSize = (34f * f).sp,
             lineHeight = (42f * f).sp,
             letterSpacing = (-0.25f).sp,
         ),
         displayMedium = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.Bold,
             fontSize = (29f * f).sp,
             lineHeight = (36f * f).sp,
             letterSpacing = (-0.15f).sp,
         ),
         displaySmall = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.Bold,
             fontSize = (25f * f).sp,
             lineHeight = (32f * f).sp,
         ),
         headlineLarge = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.Bold,
             fontSize = (23f * f).sp,
             lineHeight = (30f * f).sp,
         ),
         headlineMedium = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.Bold,
             fontSize = (20.5f * f).sp,
             lineHeight = (27.5f * f).sp,
         ),
         headlineSmall = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.SemiBold,
             fontSize = (18.5f * f).sp,
             lineHeight = (25f * f).sp,
         ),
         titleLarge = TextStyle(
-            fontFamily = FontFamily.Serif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.SemiBold,
             fontSize = (17.5f * f).sp,
             lineHeight = (24f * f).sp,
         ),
         titleMedium = TextStyle(
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.SemiBold,
             fontSize = (15.5f * f).sp,
             lineHeight = (22f * f).sp,
             letterSpacing = 0.05.sp,
         ),
         titleSmall = TextStyle(
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = titelschrift,
             fontWeight = FontWeight.SemiBold,
             fontSize = (14f * f).sp,
             lineHeight = (19.5f * f).sp,

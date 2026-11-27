@@ -11,8 +11,13 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.pytales.zdf.model.Farbwelt
+import de.pytales.zdf.resources.Res
+import de.pytales.zdf.resources.spectral_semibold
+import org.jetbrains.compose.resources.Font
 
 val LocalArchivFarben = staticCompositionLocalOf { ArchivFarben.default() }
 val LocalSchriftgroesse = staticCompositionLocalOf { Schriftgroesse.MITTEL }
@@ -85,7 +90,10 @@ fun ArchivPapierTheme(
         if (farbwelt != null) ArchivFarben.fromFarbwelt(farbwelt) else ArchivFarben.default()
     }
     val colorScheme = remember(farben) { farben.toMaterialColorScheme() }
-    val typography = remember(schriftgroesse) { buildArchivTypography(schriftgroesse) }
+    val titelfont = Font(Res.font.spectral_semibold, weight = FontWeight.SemiBold)
+    val typography = remember(schriftgroesse, titelfont) {
+        buildArchivTypography(schriftgroesse, FontFamily(titelfont))
+    }
 
     if (layoutKlasseOverride != null) {
         val metrik = remember(layoutKlasseOverride, schriftgroesse) {

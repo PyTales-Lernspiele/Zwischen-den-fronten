@@ -14,6 +14,7 @@ plugins {
 // Single Source of Truth: Synchronisiere content/*.json und content/media/**/*.webp
 // in generierte Build-Ressourcen (keine Kopien in Git).
 val syncContentToComposeResources by tasks.registering(Sync::class) {
+    from(layout.projectDirectory.dir("src/commonMain/composeResources"))
     from(rootProject.layout.projectDirectory.dir("content")) {
         include("*.json")
         into("files/content")

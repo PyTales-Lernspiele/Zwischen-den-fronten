@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -83,9 +82,9 @@ fun MusterungErgebnisScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
                     .widthIn(max = metrik.maxInhaltsBreite)
+                    .fillMaxWidth()
                     .padding(
                         horizontal = metrik.aussenAbstand,
                         vertical = if (kompakt) 8.dp else 16.dp,
@@ -118,7 +117,6 @@ fun MusterungErgebnisScreen(
                                 Text(
                                     text = "Musterungsbescheid",
                                     style = MaterialTheme.typography.headlineSmall,
-                                    fontFamily = FontFamily.Serif,
                                     color = farben.tinte,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.archivUeberschrift(),

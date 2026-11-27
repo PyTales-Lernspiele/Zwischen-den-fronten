@@ -135,7 +135,6 @@ fun HerkunftWahlScreen(
                 Text(
                     text = "Geschlecht",
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif,
                     color = farben.tinte,
                     modifier = Modifier.archivUeberschrift(),
                 )
@@ -171,7 +170,6 @@ fun HerkunftWahlScreen(
                 Text(
                     text = "Alter im August $startJahr",
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif,
                     color = farben.tinte,
                     modifier = Modifier.archivUeberschrift(),
                 )
@@ -207,7 +205,6 @@ fun HerkunftWahlScreen(
                     Text(
                         text = "Lebensbereich (Unterrichts-Direktwahl)",
                         style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
                         color = farben.akzent,
                         modifier = Modifier.archivUeberschrift(),
                     )
@@ -324,9 +321,9 @@ fun HerkunftWahlScreen(
             if (querformat) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .archivInhaltsSafeArea()
                         .widthIn(max = metrik.maxInhaltsBreite)
+                        .fillMaxWidth()
                         .padding(
                             horizontal = metrik.aussenAbstand,
                             vertical = if (kompakt) 10.dp else 16.dp,
@@ -341,9 +338,9 @@ fun HerkunftWahlScreen(
             } else {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .archivInhaltsSafeArea()
                         .widthIn(max = metrik.maxInhaltsBreite)
+                        .fillMaxWidth()
                         .padding(horizontal = metrik.aussenAbstand, vertical = 14.dp)
                         .archivFokusGruppe(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -412,7 +409,6 @@ private fun HerkunftKarte(
                     Text(
                         text = herkunft.titel,
                         style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Serif,
                         color = farben.tinte,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

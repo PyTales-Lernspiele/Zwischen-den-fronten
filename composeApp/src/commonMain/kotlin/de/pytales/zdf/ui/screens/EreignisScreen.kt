@@ -169,9 +169,9 @@ fun EreignisScreen(
                 ) {
                     Row(
                         modifier = Modifier
-                            .fillMaxSize()
                             .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
                             .widthIn(max = metrik.maxInhaltsBreite)
+                            .fillMaxSize()
                             .padding(
                                 horizontal = metrik.aussenAbstand,
                                 vertical = if (metrik.kompakteHoehe) 8.dp else 14.dp,
@@ -245,9 +245,9 @@ fun EreignisScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .archivInhaltsSafeArea()
                             .widthIn(max = metrik.maxInhaltsBreite)
+                            .fillMaxWidth()
                             .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
                             .archivFokusGruppe(),
                         verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),

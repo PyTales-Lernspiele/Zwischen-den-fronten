@@ -154,9 +154,10 @@ class MediaLoaderTest {
             eintraege = plan.einzelSzenenbilder.map { it.id to it.status },
         )
 
-        assertTrue(
-            erwarteteVorhandeneIds.size >= 19,
-            "Erwartet mindestens 19 Stil-A-Kernbilder (AP 5a + AP 5b Batch 1), gefunden ${erwarteteVorhandeneIds.size}.",
+        assertEquals(
+            plan.zusammenfassung.stufe1Gesamt + plan.zusammenfassung.stufe2EinzelSzenenbilder,
+            erwarteteVorhandeneIds.size,
+            "Jedes geplante Motiv muss als WebP vorliegen.",
         )
         assertEquals(
             erwarteteVorhandeneIds,
@@ -165,14 +166,14 @@ class MediaLoaderTest {
         )
 
         // Konkrete End-to-End-Prüfung mit dem realen Register
-        val brotschlange = BildAufloeser.loeseSzene(
+        val meldung = BildAufloeser.loeseSzene(
             bildId = "einstieg_meldung",
             schauplatzBild = "schauplatz_brotschlange",
             verfuegbareIds = ComposeMedienRegister.verfuegbareIds,
         )
-        assertTrue(brotschlange.istVorhanden)
-        assertEquals("schauplatz_brotschlange", brotschlange.aufgeloesteId)
-        assertEquals(BildEbene.SCHAUPLATZ_STUFE1, brotschlange.ebene)
+        assertTrue(meldung.istVorhanden)
+        assertEquals("einstieg_meldung", meldung.aufgeloesteId)
+        assertEquals(BildEbene.EINZELSZENE_STUFE2, meldung.ebene)
 
         val arbeiterinHungrig = BildAufloeser.loesePortrait(
             portraitId = "portrait_arbeiterschaft_w_hungrig",

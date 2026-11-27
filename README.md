@@ -6,7 +6,7 @@ Das Spiel wird von Grund auf entschlackt und als moderne **Kotlin-Multiplatform-
 
 > **Archiv:** Der ursprüngliche Ren'Py-Arbeitsstand ist vollständig im Branch `archiv/renpy-2026` gesichert.
 
-## Projektstruktur (Stand `v1.1.0` — Querformat-UI & Bildwelt Batch 1)
+## Projektstruktur
 
 ```text
 content/                      Single Source of Truth für alle Spielinhalte & WebP-Medien (per Gradle Sync eingebunden)
@@ -16,7 +16,7 @@ content/                      Single Source of Truth für alle Spielinhalte & We
   merkmale.json               34 erreichbare Merkmale, 4-Fächer-Lebenslauf & Ausgänge
   ereignisse.json             104 geprüfte Zwei-Entscheidungs-Ereignisse mit 104/104 historischen Vollbelegen (Front/Etappe/Heimat)
   sprachregeln.json           Tabu- & Prüfbegriffe sowie Lesbarkeitsgrenzen (Klasse 8)
-  medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze / 104 Szenen (aktuell 19/63 Stufe 1 vorhanden)
+  medienplan.json             Bildplan (Stil A): 40 Live-Emotions-Portraits, 6 Kapitel, 17 Schauplätze und 104 individuelle Ereignisszenen
   media/                      Optimierte WebP-Assets (`portraits/`, `kapitel/`, `schauplaetze/`, `szenen/`)
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
   src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController (inkl. Zurück-Leitplanke & einklappbarer Kopfleiste), Archivpapier-Theme (Buchdruck-Optik, WCAG-Kontrast & Landscape-First-Metriken), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`) sowie alle aufgeräumten Spiel-Screens (1914–1919)
@@ -30,17 +30,16 @@ tools/
   validate_content.py         Automatische Inhalts-, Quellen-/Vollbeleg-, Referenz-, Balance-, Sprach- und WebP-Medienprüfung
   prepare_media.py            WebP-Aufbereitung (320×320 / 1280×720), Master-Sicherung & Medienplan-Abgleich
 docs/
-  ARBEITSPLAN.md              Übersicht aller Arbeitspakete (AP 1–AP 8; AP 5b Batches 2–5 & AP 7b offen)
+  ARBEITSPLAN.md              Übersicht aller Arbeitspakete (AP 1–AP 8; AP 7b offen)
   ANDROID_AUSLIEFERUNG.md     Praxisanleitung für Android-Installation (Schul-Tablets/APK), Keystore-Signierung & Play-Store-AAB
-  bildwelt/                   Stil-A-Leitfaden, Prompt-Bibel (`prompt_bibel.json`) & hochauflösende Master-Referenzen (`masters/`)
+  bildwelt/                   Stil-A-Leitfaden, Prompt-Bibel (`prompt_bibel.json`) & Master-Referenzen (`masters/`)
 ```
 
 ## Prüfen & Bauen
 
 ```bash
 # 1. JSON-Inhalte, 2-Wahl-Regel, 104/104 Vollbelege, Sprachmaß (Klasse 8) & WebP-Assets prüfen
-python3 tools/validate_content.py
-# (Für Vollabnahme aller 63 Stufe-1-Bilder nach AP 5b: python3 tools/validate_content.py --require-all-stufe1)
+python3 tools/validate_content.py --require-all-stufe1
 
 # 2. Neue Stil-A-Rohbilder als optimierte WebP-Assets aufbereiten & Medienplan abgleichen
 python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --update-plan

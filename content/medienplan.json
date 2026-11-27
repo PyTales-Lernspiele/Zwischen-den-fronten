@@ -1,5 +1,5 @@
 {
-  "hinweis": "Freigegebener Illustrationsstil (AP 5): Stil A — Tusche & Aquarell-Lavierung auf warmem Archivpapier (#efe9dc / #1f1c18 / #8a3324). Erste 8 Stil-A-Kernbilder liegen als WebP unter content/media/ (Master-Referenzen unter docs/bildwelt/masters/); uebrige 55 Stufe-1-Motive folgen in Etappen gemaess docs/bildwelt/prompt_bibel.json. Alte Ren'Py-Bilder liegen im Branch archiv/renpy-2026.",
+  "hinweis": "Tusche und Aquarell auf warmem Archivpapier. Die WebP-Spielbilder liegen unter content/media/, die JPEG-Master unter docs/bildwelt/masters/. Jedes Ereignis verweist auf seine Illustration und einen passenden Schauplatz als Ersatzmotiv.",
   "format": {
     "dateityp": "webp",
     "szenenMasse": [
@@ -129,7 +129,7 @@
       "geschlecht": "m",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_m_einsam",
@@ -137,7 +137,7 @@
       "geschlecht": "m",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_neutral",
@@ -153,7 +153,7 @@
       "geschlecht": "w",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_erschoepft",
@@ -161,7 +161,7 @@
       "geschlecht": "w",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_angst",
@@ -169,7 +169,7 @@
       "geschlecht": "w",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_buergertum_w_einsam",
@@ -177,7 +177,7 @@
       "geschlecht": "w",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_neutral",
@@ -193,7 +193,7 @@
       "geschlecht": "m",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_erschoepft",
@@ -201,7 +201,7 @@
       "geschlecht": "m",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_angst",
@@ -209,7 +209,7 @@
       "geschlecht": "m",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_m_einsam",
@@ -217,7 +217,7 @@
       "geschlecht": "m",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_neutral",
@@ -233,7 +233,7 @@
       "geschlecht": "w",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_erschoepft",
@@ -241,7 +241,7 @@
       "geschlecht": "w",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_angst",
@@ -249,7 +249,7 @@
       "geschlecht": "w",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_landbevoelkerung_w_einsam",
@@ -257,7 +257,7 @@
       "geschlecht": "w",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_m_neutral",
@@ -273,7 +273,7 @@
       "geschlecht": "m",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_m_erschoepft",
@@ -281,7 +281,7 @@
       "geschlecht": "m",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_m_angst",
@@ -289,7 +289,7 @@
       "geschlecht": "m",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_m_einsam",
@@ -297,7 +297,7 @@
       "geschlecht": "m",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_w_neutral",
@@ -313,7 +313,7 @@
       "geschlecht": "w",
       "stimmung": "hungrig",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_w_erschoepft",
@@ -321,7 +321,7 @@
       "geschlecht": "w",
       "stimmung": "erschoepft",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_w_angst",
@@ -329,7 +329,7 @@
       "geschlecht": "w",
       "stimmung": "angst",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "portrait_adel_w_einsam",
@@ -337,7 +337,7 @@
       "geschlecht": "w",
       "stimmung": "einsam",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     }
   ],
   "kapitelbilder": [
@@ -346,59 +346,59 @@
       "jahr": 1914,
       "titel": "Der Krieg beginnt",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "kapitel_1915",
       "jahr": 1915,
       "titel": "Der Krieg wird Gewohnheit",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "kapitel_1916",
       "jahr": 1916,
       "titel": "Das Jahr der Materialschlachten",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "kapitel_1917",
       "jahr": 1917,
       "titel": "Hunger, Streik und ein neuer Gegner",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "kapitel_1918",
       "jahr": 1918,
       "titel": "Das letzte Jahr",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "kapitel_1919",
       "jahr": 1919,
       "titel": "Was bleibt",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     }
   ],
   "schauplatzbilder": [
     {
       "id": "schauplatz_amt",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_bahnhof",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_bauernhof",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_brotschlange",
@@ -408,67 +408,67 @@
     {
       "id": "schauplatz_etappe",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_fabrik",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_gefangenenlager",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_graben",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_landstrasse",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_lazarett",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_nachschub",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_niemandsland",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_quartier",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_schreibstube",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_versammlung",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_wirtshaus",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "schauplatz_wohnviertel",
       "stufe": 1,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     }
   ],
   "einzelSzenenbilder": [
@@ -483,7 +483,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1914_dorf",
@@ -496,7 +496,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1914_erster_toter",
@@ -509,7 +509,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1914_schanzen",
@@ -522,7 +522,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1914_weihnachten",
@@ -535,7 +535,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_trommelfeuer",
@@ -552,7 +552,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_feldpost",
@@ -570,7 +570,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_kamerad",
@@ -585,7 +585,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_nachfrage",
@@ -602,7 +602,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_gas",
@@ -616,7 +616,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_laeuse",
@@ -632,7 +632,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_beute",
@@ -648,7 +648,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_stosstrupp",
@@ -662,7 +662,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_urlaub",
@@ -679,7 +679,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1916_verdun",
@@ -692,7 +692,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1916_hunger",
@@ -705,7 +705,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1916_gefangener",
@@ -718,7 +718,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1916_zaehlung",
@@ -732,7 +732,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_brotschlange",
@@ -749,7 +749,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1914_post",
@@ -763,7 +763,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1914_liebesgaben",
@@ -776,7 +776,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_kriegsanleihe",
@@ -793,7 +793,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_todesnachricht",
@@ -810,7 +810,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_denunziation",
@@ -826,7 +826,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1915_brotkarte",
@@ -839,7 +839,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_unterstuetzung",
@@ -853,7 +853,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_hamsterfahrt",
@@ -869,7 +869,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_verfahren",
@@ -886,7 +886,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_fabrik",
@@ -902,7 +902,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_lazarettzug",
@@ -920,7 +920,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_rueben",
@@ -933,7 +933,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_ernaehrungsamt",
@@ -946,7 +946,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_kohle",
@@ -959,7 +959,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_zensur",
@@ -972,7 +972,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_arbeitsniederlegung",
@@ -985,7 +985,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1916_kinderarbeit",
@@ -998,7 +998,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_ruhequartier",
@@ -1014,7 +1014,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_sonntag",
@@ -1031,7 +1031,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "einstieg_meldung",
@@ -1044,7 +1044,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "einstieg_offizier",
@@ -1057,7 +1057,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "einstieg_etappe",
@@ -1070,7 +1070,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "einstieg_abschied",
@@ -1083,7 +1083,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_verbruederung_nachhall",
@@ -1096,7 +1096,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_gerichtsherr",
@@ -1109,7 +1109,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_aprilstreik",
@@ -1122,7 +1122,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_hilfsdienst",
@@ -1135,7 +1135,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_ablieferung",
@@ -1148,7 +1148,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_akkord",
@@ -1161,7 +1161,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_schulspeisung",
@@ -1174,7 +1174,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_steckruebe",
@@ -1188,7 +1188,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_geruecht_osten",
@@ -1201,7 +1201,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_winterstellung",
@@ -1215,7 +1215,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1917_ablosung",
@@ -1228,7 +1228,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_unterseeboot",
@@ -1241,7 +1241,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_kohlennot",
@@ -1255,7 +1255,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1917_metallsammlung",
@@ -1269,7 +1269,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_abrechnung",
@@ -1282,7 +1282,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_liste",
@@ -1296,7 +1296,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_freiwillig_von_1914",
@@ -1309,7 +1309,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_befehl",
@@ -1322,7 +1322,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_rat",
@@ -1335,7 +1335,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_grippe",
@@ -1348,7 +1348,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "lazarett_1918_grippestation",
@@ -1363,7 +1363,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_offensive",
@@ -1376,7 +1376,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_kokarde",
@@ -1389,7 +1389,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_1918_waffenstillstand",
@@ -1402,7 +1402,7 @@
         "front"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_januarstreik",
@@ -1415,7 +1415,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_grippewelle",
@@ -1428,7 +1428,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_matrosen",
@@ -1441,7 +1441,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "heimat_1918_bekanntmachung",
@@ -1454,7 +1454,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1914_ankunft",
@@ -1467,7 +1467,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_bahnhofsdienst",
@@ -1484,7 +1484,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_verpflegungsausgabe",
@@ -1501,7 +1501,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_verwundetenzug",
@@ -1518,7 +1518,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_listen",
@@ -1534,7 +1534,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_fronturlauber",
@@ -1550,7 +1550,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_feldbaeckerei",
@@ -1567,7 +1567,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_munitionslager",
@@ -1583,7 +1583,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_fuhrpark",
@@ -1598,7 +1598,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1917_nachschubstockung",
@@ -1611,7 +1611,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_zensurstelle",
@@ -1627,7 +1627,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_brief_von_daheim",
@@ -1643,7 +1643,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1914_gefangenenlager",
@@ -1656,7 +1656,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_gefangenenarbeit",
@@ -1672,7 +1672,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1916_verschleppt",
@@ -1686,7 +1686,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_requisition",
@@ -1702,7 +1702,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1918_grippe",
@@ -1715,7 +1715,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_1918_raeumung",
@@ -1728,7 +1728,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_innendienst",
@@ -1744,7 +1744,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_quartier",
@@ -1761,7 +1761,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "etappe_abloesung",
@@ -1776,7 +1776,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_heimkehr",
@@ -1790,7 +1790,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_rueckkehrer",
@@ -1803,7 +1803,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_versorgungsamt",
@@ -1818,7 +1818,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_werktor",
@@ -1833,7 +1833,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_wahl",
@@ -1848,7 +1848,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_blockade",
@@ -1863,7 +1863,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_vertrag",
@@ -1878,7 +1878,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_1919_papiere",
@@ -1892,7 +1892,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "wirtshaus_wahl",
@@ -1907,7 +1907,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "front_tornister",
@@ -1922,7 +1922,7 @@
         "etappe"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "alltag_rotstift",
@@ -1940,7 +1940,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "alltag_acht_striche",
@@ -1958,7 +1958,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     },
     {
       "id": "epilog_versorgungsantrag",
@@ -1973,7 +1973,7 @@
         "heimat"
       ],
       "stufe": 2,
-      "status": "offen_ap5"
+      "status": "vorhanden"
     }
   ]
 }

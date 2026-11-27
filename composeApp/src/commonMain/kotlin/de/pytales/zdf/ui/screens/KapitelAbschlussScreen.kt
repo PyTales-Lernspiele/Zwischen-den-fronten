@@ -90,9 +90,9 @@ fun KapitelAbschlussScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
                     .widthIn(max = metrik.maxInhaltsBreite)
+                    .fillMaxWidth()
                     .padding(
                         horizontal = metrik.aussenAbstand,
                         vertical = if (kompakt) 8.dp else 16.dp,
