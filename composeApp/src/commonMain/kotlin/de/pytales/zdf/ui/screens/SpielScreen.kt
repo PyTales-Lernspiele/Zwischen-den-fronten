@@ -4,11 +4,17 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.pytales.zdf.audio.AudioKoordinator
+import de.pytales.zdf.audio.Klang
+import de.pytales.zdf.audio.KlangRegelwerk
+import de.pytales.zdf.audio.LocalKlangSpieler
+import de.pytales.zdf.audio.rememberKlangSpieler
+import de.pytales.zdf.engine.GameState
 import de.pytales.zdf.audio.erstellePlattformAudioAusgabe
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.ui.components.PlattformZurueckHandler
@@ -75,6 +81,57 @@ fun SpielScreen(
         }
     }
 
+    // Kurze Archiv-Klangeffekte: Spielschritte (Umblättern, Stift, Stempel, Buch) und Erklärkarten
+    val klangSpieler = rememberKlangSpieler()
+    klangSpieler.aktiv = uiState.klaengeAktiv
+    klangSpieler.imVordergrund = appImVordergrund
+    val letztePhase = remember { PhasenMerker() }
+    val phasenSchluessel = KlangRegelwerk.phasenSchluessel(uiState.gameState.phase)
+    LaunchedEffect(phasenSchluessel) {
+        val nachher = uiState.gameState
+        KlangRegelwerk.klangFuerPhasenwechsel(letztePhase.state?.phase, nachher.phase)?.let(klangSpieler::spiele)
+        letztePhase.state = nachher
+    }
+    val overlayOffen = uiState.hatOffeneErklaerKarte || uiState.einstellungenOffen ||
+        uiState.grundsaetzeOffen || uiState.verlassenDialogOffen
+    val overlayMerker = remember { BoolMerker() }
+    LaunchedEffect(overlayOffen) {
+        if (overlayOffen && !overlayMerker.wert) klangSpieler.spiele(Klang.KARTE)
+        overlayMerker.wert = overlayOffen
+    }
+
+    CompositionLocalProvider(LocalKlangSpieler provides klangSpieler) {
+        SpielScreenInhalt(
+            controller = controller,
+            modifier = modifier,
+            onAppBeenden = onAppBeenden,
+        )
+    }
+}
+
+/** Ergänzt eine Auswahl-Aktion um den kurzen Klick-Klang. */
+@Composable
+private fun <T> mitKlick(aktion: (T) -> Any?): (T) -> Unit {
+    val klang = LocalKlangSpieler.current
+    return { wert ->
+        klang?.spiele(Klang.TIPPEN)
+        aktion(wert)
+    }
+}
+
+private class PhasenMerker(var state: GameState? = null)
+
+private class BoolMerker(var wert: Boolean = false)
+
+@Composable
+private fun SpielScreenInhalt(
+    controller: SpielController,
+    modifier: Modifier,
+    onAppBeenden: (() -> Unit)?,
+) {
+    val uiState by controller.uiState.collectAsState()
+    val reduzierteAnimationen = ArchivTheme.reduzierteAnimationen
+
     val schluessel: BildschirmSchluessel = when (val phase = uiState.gameState.phase) {
         is GamePhase.Start -> BildschirmSchluessel.Start
         is GamePhase.HerkunftWahl -> BildschirmSchluessel.HerkunftWahl
@@ -103,8 +160,8 @@ fun SpielScreen(
             BildschirmSchluessel.Start -> StartScreen(
                 content = controller.content,
                 uiState = uiState,
-                onModusWaehlen = controller::waehleModus,
-                onAudioToggle = controller::toggleAudioAktiv,
+                onModusWaehlen = mitKlick(controller::waehleModus),
+                onAudioToggle = controller::toggleKlaengeAktiv,
                 onEinstellungenOeffnen = controller::einstellungenOeffnen,
                 onGrundsaetzeOeffnen = controller::grundsaetzeOeffnen,
                 onDurchgangBeginnen = controller::durchgangBeginnen,
@@ -113,12 +170,12 @@ fun SpielScreen(
             BildschirmSchluessel.HerkunftWahl -> HerkunftWahlScreen(
                 engine = controller.engine,
                 uiState = uiState,
-                onHerkunftWaehlen = controller::waehleHerkunftEntwurf,
-                onGeschlechtWaehlen = controller::waehleGeschlechtEntwurf,
-                onAlterWaehlen = controller::waehleAlterEntwurf,
-                onDirektPfadWaehlen = controller::waehleDirektPfadEntwurf,
+                onHerkunftWaehlen = mitKlick(controller::waehleHerkunftEntwurf),
+                onGeschlechtWaehlen = mitKlick(controller::waehleGeschlechtEntwurf),
+                onAlterWaehlen = mitKlick(controller::waehleAlterEntwurf),
+                onDirektPfadWaehlen = mitKlick(controller::waehleDirektPfadEntwurf),
                 onBestaetigen = controller::bestaetigePerson,
-                onAudioToggle = controller::toggleAudioAktiv,
+                onAudioToggle = controller::toggleKlaengeAktiv,
                 onEinstellungenOeffnen = controller::einstellungenOeffnen,
             )
 
@@ -129,7 +186,7 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onBestaetigen = controller::bestaetigeMusterung,
-                    onAudioToggle = controller::toggleAudioAktiv,
+                    onAudioToggle = controller::toggleKlaengeAktiv,
                     onEinstellungenOeffnen = controller::einstellungenOeffnen,
                     onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
@@ -143,9 +200,9 @@ fun SpielScreen(
                     engine = controller.engine,
                     uiState = uiState,
                     phase = phase,
-                    onErwerbMarkieren = controller::markiereErwerb,
+                    onErwerbMarkieren = mitKlick(controller::markiereErwerb),
                     onBestaetigen = controller::bestaetigeAusgewaehltenErwerb,
-                    onAudioToggle = controller::toggleAudioAktiv,
+                    onAudioToggle = controller::toggleKlaengeAktiv,
                     onEinstellungenOeffnen = controller::einstellungenOeffnen,
                     onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
@@ -160,7 +217,7 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onStarteKapitel = controller::starteKapitel,
-                    onAudioToggle = controller::toggleAudioAktiv,
+                    onAudioToggle = controller::toggleKlaengeAktiv,
                     onEinstellungenOeffnen = controller::einstellungenOeffnen,
                     onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
@@ -173,7 +230,7 @@ fun SpielScreen(
                 uiState = uiState,
                 onOptionWaehlen = controller::waehleOption,
                 onWeiterNachAusgang = controller::weiterNachAusgang,
-                onAudioToggle = controller::toggleAudioAktiv,
+                onAudioToggle = controller::toggleKlaengeAktiv,
                 onEinstellungenOeffnen = controller::einstellungenOeffnen,
                 onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                 onWertErklaerungChange = controller::waehleWertErklaerung,
@@ -187,7 +244,7 @@ fun SpielScreen(
                     uiState = uiState,
                     phase = phase,
                     onNaechstesKapitel = controller::naechstesKapitelStarten,
-                    onAudioToggle = controller::toggleAudioAktiv,
+                    onAudioToggle = controller::toggleKlaengeAktiv,
                     onEinstellungenOeffnen = controller::einstellungenOeffnen,
                     onKopfleisteToggle = controller::toggleKopfleisteEingeklappt,
                     onWertErklaerungChange = controller::waehleWertErklaerung,
@@ -205,7 +262,7 @@ fun SpielScreen(
                     phase = phase,
                     onAuffangnetzBestaetigen = controller::auffangnetzBestaetigen,
                     onNeuerDurchgang = controller::neuerDurchgang,
-                    onAudioToggle = controller::toggleAudioAktiv,
+                    onAudioToggle = controller::toggleKlaengeAktiv,
                     onEinstellungenOeffnen = controller::einstellungenOeffnen,
                 )
             }
@@ -217,9 +274,10 @@ fun SpielScreen(
         EinstellungenDialog(
             content = controller.content,
             uiState = uiState,
-            onSchriftgroesseChange = controller::setzeSchriftgroesse,
+            onSchriftgroesseChange = mitKlick(controller::setzeSchriftgroesse),
             onReduzierteAnimationenToggle = controller::toggleReduzierteAnimationen,
             onAudioToggle = controller::toggleAudioAktiv,
+            onKlaengeToggle = controller::toggleKlaengeAktiv,
             onDirektwahlChange = controller::setzeDirektwahlAktiv,
             onSchliessen = controller::einstellungenSchliessen,
         )
@@ -230,7 +288,7 @@ fun SpielScreen(
         GrundsaetzeDialog(
             grundsaetze = controller.content.konfiguration.onboarding.grundsaetze,
             aufgeklappteIds = uiState.aufgeklappteGrundsaetze,
-            onGrundsatzToggle = controller::toggleOnboardingGrundsatz,
+            onGrundsatzToggle = mitKlick(controller::toggleOnboardingGrundsatz),
             onSchliessen = controller::grundsaetzeSchliessen,
         )
     }

@@ -93,94 +93,111 @@ fun ErwerbWahlScreen(
         onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
         modifier = modifier,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            contentAlignment = Alignment.TopCenter,
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
-                    .widthIn(max = metrik.maxInhaltsBreite)
+                    .weight(1f, fill = false)
                     .fillMaxWidth()
-                    .padding(
-                        horizontal = metrik.aussenAbstand,
-                        vertical = if (kompakt) 8.dp else 14.dp,
-                    )
-                    .archivFokusGruppe(),
-                verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+                    .verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                // Schlichte Einordnung ohne Kastenrahmen
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
+                Column(
+                    modifier = Modifier
+                        .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
+                        .widthIn(max = metrik.maxInhaltsBreite)
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = metrik.aussenAbstand,
+                            vertical = if (kompakt) 8.dp else 14.dp,
+                        )
+                        .archivFokusGruppe(),
+                    verticalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    // Schlichte Einordnung ohne Kastenrahmen
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
                     ) {
-                        Text(
-                            text = "Wovon lebst du, während der Krieg beginnt?",
-                            style = if (kompakt) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
-                            color = farben.tinte,
-                            modifier = Modifier.archivUeberschrift(),
-                        )
-                        Text(
-                            text = "Viele Stellen verändern sich im August 1914. Wähle deine Aufgabe in der Heimat.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = farben.tinteMatt,
-                        )
-                    }
-                }
-
-                // Verfügbare Erwerbslagen (2-spaltiges Querformat-Raster)
-                if (zweispaltig) {
-                    optionenUi.chunked(2).forEach { paar ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Min),
-                            horizontalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
-                            paar.forEach { option ->
+                            Text(
+                                text = "Wovon lebst du, während der Krieg beginnt?",
+                                style = if (kompakt) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
+                                color = farben.tinte,
+                                modifier = Modifier.archivUeberschrift(),
+                            )
+                            Text(
+                                text = "Viele Stellen verändern sich im August 1914. Wähle deine Aufgabe in der Heimat.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = farben.tinteMatt,
+                            )
+                        }
+                    }
+
+                    // Verfügbare Erwerbslagen (2-spaltiges Querformat-Raster)
+                    if (zweispaltig) {
+                        optionenUi.chunked(2).forEach { paar ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(IntrinsicSize.Min),
+                                horizontalArrangement = Arrangement.spacedBy(if (kompakt) 10.dp else 14.dp),
+                            ) {
+                                paar.forEach { option ->
+                                    ErwerbKarte(
+                                        option = option,
+                                        ausgewaehlt = option.id == uiState.ausgewaehlterErwerbId,
+                                        kompakt = kompakt,
+                                        onClick = { onErwerbMarkieren(option.id) },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                    )
+                                }
+                                if (paar.size == 1) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            optionenUi.forEach { option ->
                                 ErwerbKarte(
                                     option = option,
                                     ausgewaehlt = option.id == uiState.ausgewaehlterErwerbId,
                                     kompakt = kompakt,
                                     onClick = { onErwerbMarkieren(option.id) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight(),
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
                             }
-                            if (paar.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
                         }
                     }
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        optionenUi.forEach { option ->
-                            ErwerbKarte(
-                                option = option,
-                                ausgewaehlt = option.id == uiState.ausgewaehlterErwerbId,
-                                kompakt = kompakt,
-                                onClick = { onErwerbMarkieren(option.id) },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                    }
-                }
 
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+
+            // Fest verankerte Bestätigung: immer sichtbar, ohne Scrollen
+            Box(
+                modifier = Modifier
+                    .archivInhaltsSafeArea(ohneRechtenRand = zeigeRandLeiste)
+                    .widthIn(max = metrik.maxInhaltsBreite)
+                    .fillMaxWidth()
+                    .padding(horizontal = metrik.aussenAbstand, vertical = if (kompakt) 6.dp else 10.dp),
+            ) {
                 // Ruhige Bestätigungszeile (Schutz vor Fehltippen bei „kein Zurück“)
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = farben.papierHell,
                     shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(0.75.dp, if (ausgewaehlt != null) farben.akzent.copy(alpha = 0.65f) else farben.linieFein),
-                    shadowElevation = 1.dp,
+                    shadowElevation = 6.dp,
                 ) {
                     Row(
                         modifier = Modifier
@@ -214,8 +231,6 @@ fun ErwerbWahlScreen(
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

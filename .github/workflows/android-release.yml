@@ -255,6 +255,8 @@ jobs:
           Historisches Zwei-Entscheidungs-Lernspiel (Alltag 1914–1919, 8. Klasse Oberschule) — optimiert für das **Querformat** auf Android-Smartphones und Schul-Tablets.
 
           ### Highlights
+          - **Klarere Bedienung:** Die beiden Entscheidungen (A/B) mit der Frage „Wie entscheidest du dich?“ und der „Weiter“-Knopf stehen in einer fest verankerten Aktionsleiste und sind auch auf kleinen Handys immer ohne Scrollen sichtbar. Eine Zeitleiste 1914–1919 zeigt den Fortschritt, die Figurenwahl führt in nummerierten Schritten.
+          - **Klangeffekte:** Leise Papier-, Stift-, Stempel- und Buchgeräusche bei jedem Schritt (CC0-Aufnahmen von Freesound.org), jederzeit über das Lautsprecher-Symbol abschaltbar. Keine Kriegsgeräusche.
           - **Querformat-Erlebnis (\`sensorLandscape\`):** Zweispaltige Buch-Bühne (links gerahmte 16:9-Illustration, rechts Erzählkarte & Entscheidungen), sehr schlanke einzeilige Kopfleiste (ein- und ausklappbar) sowie ruhige Erklär-Overlays ohne Seitenverschiebung.
           - **Aufgeräumte Archivpapier-Ästhetik:** Harmonische Buchdruck-Typografie passend zu den Stil-A-Illustrationen, ruhiges Einstellungs-Fenster (Schriftgröße, Ton, Animationen, Unterrichts-Direktwahl), ohne Analysemodus und Entwickler-Vorschau.
           - **Bildwelt:** ${WEBP_COUNT} Illustrationen für Figuren, Kapitel, Schauplätze und Ereignisse.

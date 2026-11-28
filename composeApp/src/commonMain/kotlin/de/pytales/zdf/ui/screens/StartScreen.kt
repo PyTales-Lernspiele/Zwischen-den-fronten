@@ -173,7 +173,7 @@ fun StartScreen(
                         modifier = Modifier.weight(1f).archivUeberschrift(),
                     )
                     AudioIconKnopf(
-                        audioZustand = uiState.audioZustand,
+                        tonAn = uiState.klaengeAktiv,
                         aufDunkel = false,
                         onToggle = onAudioToggle,
                     )

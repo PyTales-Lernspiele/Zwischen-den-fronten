@@ -198,16 +198,19 @@ fun KapitelStartScreen(
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    ArchivPrimaerKnopf(
-                        label = kapitelUi.aktionLabel,
-                        onClick = onStarteKapitel,
-                    )
                 }
             }
         }
+    }
+
+    // Fest verankerter Knopf: immer sichtbar, auch auf kleinen Handys
+    val weiterKnopf: @Composable () -> Unit = {
+        ArchivPrimaerKnopf(
+            label = "${kapitelUi.aktionLabel}  →",
+            onClick = onStarteKapitel,
+            akzentStil = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 
     SpielBuehnenRahmen(
@@ -248,32 +251,46 @@ fun KapitelStartScreen(
                     Column(
                         modifier = Modifier
                             .weight(0.56f)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.spacedBy(if (kompakt) 6.dp else 10.dp),
                     ) {
-                        textBlatt(Modifier.fillMaxWidth())
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Column(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState()),
+                        ) {
+                            textBlatt(Modifier.fillMaxWidth())
+                        }
+                        weiterKnopf()
                     }
                 }
             }
         } else {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                contentAlignment = Alignment.TopCenter,
+                    .archivInhaltsSafeArea(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
                     modifier = Modifier
-                        .archivInhaltsSafeArea()
+                        .weight(1f, fill = false)
                         .widthIn(max = metrik.maxInhaltsBreite)
                         .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                         .padding(horizontal = metrik.aussenAbstand, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     KapitelbildRahmen(kapitelbild = kapitelUi.kapitelbild)
                     textBlatt(Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                Box(
+                    modifier = Modifier
+                        .widthIn(max = metrik.maxInhaltsBreite)
+                        .fillMaxWidth()
+                        .padding(horizontal = metrik.aussenAbstand, vertical = 8.dp),
+                ) {
+                    weiterKnopf()
                 }
             }
         }

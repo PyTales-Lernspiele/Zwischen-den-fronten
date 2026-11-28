@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -79,6 +80,7 @@ fun EntscheidungsKarte(
     modifier: Modifier = Modifier,
     ausgewaehlteOptionIndex: Int? = null,
     optionenAktiv: Boolean = true,
+    mitOptionen: Boolean = true,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
@@ -150,15 +152,17 @@ fun EntscheidungsKarte(
                     text = karte.text,
                 )
 
-                ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
+                if (mitOptionen) {
+                    ArchivTrennlinie(farbe = farben.linieFein.copy(alpha = 0.65f))
 
-                EntscheidungsOptionenGruppe(
-                    optionen = karte.optionen,
-                    ausgewaehlteOptionIndex = ausgewaehlteOptionIndex,
-                    aktiv = optionenAktiv,
-                    nebeneinanderErlaubt = metrik.optionenNebeneinander,
-                    onOptionWaehlen = onOptionWaehlen,
-                )
+                    EntscheidungsOptionenGruppe(
+                        optionen = karte.optionen,
+                        ausgewaehlteOptionIndex = ausgewaehlteOptionIndex,
+                        aktiv = optionenAktiv,
+                        nebeneinanderErlaubt = metrik.optionenNebeneinander,
+                        onOptionWaehlen = onOptionWaehlen,
+                    )
+                }
 
                 QuellenEinordnungBox(
                     quelle = karte.quelle,
@@ -516,15 +520,15 @@ fun EntscheidungsOptionButton(
     val flaeche = when {
         istAusgewaehlt -> farben.papierDunkel.copy(alpha = 0.85f)
         !aktiv -> farben.papier.copy(alpha = 0.52f)
-        else -> farben.papier
+        else -> farben.papierHell
     }
     val rahmen = when {
         istAusgewaehlt -> farben.akzent
         !aktiv -> farben.linieFein.copy(alpha = 0.55f)
-        else -> farben.linieFein
+        else -> farben.linie
     }
     val semantik = buildString {
-        append("Entscheidung ${option.index + 1}: ${option.titel}. ")
+        append("Entscheidung ${'A' + option.index}: ${option.titel}. ")
         if (option.hinweis != null) {
             append("Hinweis: ${option.hinweis}. ")
         }
@@ -569,6 +573,30 @@ fun EntscheidungsOptionButton(
                         },
                     ),
             )
+
+            // Klarer Buchstabe A/B: macht sofort sichtbar, dass hier gewählt wird
+            Box(
+                modifier = Modifier
+                    .padding(start = if (kompakt) 10.dp else 12.dp)
+                    .align(Alignment.CenterVertically)
+                    .size(if (kompakt) 30.dp else 34.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            istAusgewaehlt -> farben.akzent
+                            aktiv -> farben.tinte
+                            else -> farben.linieFein
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = ('A' + option.index).toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = farben.papierHell,
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -748,6 +776,7 @@ fun EreignisAusgangKarte(
     weiterLabel: String,
     onWeiter: () -> Unit,
     modifier: Modifier = Modifier,
+    mitWeiterKnopf: Boolean = true,
 ) {
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
@@ -823,9 +852,9 @@ fun EreignisAusgangKarte(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(2.dp))
+                if (mitWeiterKnopf) Spacer(modifier = Modifier.height(2.dp))
 
-                Surface(
+                if (mitWeiterKnopf) Surface(
                     modifier = Modifier
                         .defaultMinSize(minWidth = metrik.minTouchHoehe, minHeight = metrik.minTouchHoehe)
                         .clip(RoundedCornerShape(6.dp))

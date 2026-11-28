@@ -67,6 +67,8 @@ data class SpielUiState(
     val reduzierteAnimationen: Boolean = false,
     val audioAktiv: Boolean = false,
     val audioLautstaerke: Float = AudioRegelwerk.STANDARD_LAUTSTAERKE,
+    /** Kurze Archiv-Klangeffekte (Papier, Stift, Stempel); unabhängig von der Hintergrundmusik. */
+    val klaengeAktiv: Boolean = true,
     val kopfleisteEingeklappt: Boolean = false,
     val einstellungenOffen: Boolean = false,
     val grundsaetzeOffen: Boolean = false,
@@ -192,6 +194,14 @@ class SpielController(
 
     fun toggleAudioAktiv() {
         _uiState.update { it.copy(audioAktiv = !it.audioAktiv) }
+    }
+
+    fun setzeKlaengeAktiv(aktiv: Boolean) {
+        _uiState.update { it.copy(klaengeAktiv = aktiv) }
+    }
+
+    fun toggleKlaengeAktiv() {
+        _uiState.update { it.copy(klaengeAktiv = !it.klaengeAktiv) }
     }
 
     fun setzeAudioLautstaerke(lautstaerke: Float) {

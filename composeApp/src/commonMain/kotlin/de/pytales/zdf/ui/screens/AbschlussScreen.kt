@@ -156,7 +156,7 @@ private fun AuffangnetzAnsicht(
             marke = "Jahr ${hartesEnde.jahr}",
             titel = "Dein Weg endet vor 1919",
             untertitel = listOfNotNull(person?.vollerName, pfadMarke).joinToString(" · "),
-            audioZustand = uiState.audioZustand,
+            tonAn = uiState.klaengeAktiv,
             onAudioToggle = onAudioToggle,
             onEinstellungenOeffnen = onEinstellungenOeffnen,
         )
@@ -381,7 +381,7 @@ private fun LebenslaufAnsicht(
                 person?.let { "Jg. ${it.jahrgang}" },
                 pfadMarke,
             ).joinToString(" · "),
-            audioZustand = uiState.audioZustand,
+            tonAn = uiState.klaengeAktiv,
             onAudioToggle = onAudioToggle,
             onEinstellungenOeffnen = onEinstellungenOeffnen,
         )
