@@ -20,7 +20,8 @@ content/                      Single Source of Truth für alle Spielinhalte & We
   media/                      Optimierte WebP-Assets (`portraits/`, `kapitel/`, `schauplaetze/`, `szenen/`)
 composeApp/                   Kotlin-Multiplatform- & Compose-Multiplatform-Kernmodul
   src/commonMain/             Datenmodelle, ContentLoader, GameEngine, SpielController (inkl. Zurück-Leitplanke & einklappbarer Kopfleiste), Archivpapier-Theme (Buchdruck-Optik, WCAG-Kontrast & Landscape-First-Metriken), Multiplatform-Bild-Loader (`ui.media`), Klassenzimmer-Export/Druckaufbereitung (`ui.export`), dezentes Audio-Regelwerk mit harter Musiksperre an Front & Etappe (`audio`) sowie alle aufgeräumten Spiel-Screens (1914–1919)
-  src/commonTest/             55 JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Landscape, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export & Audio-Musiksperre/Hintergrund-Pause)
+  src/commonMain/composeResources/files/klaenge/  8 kurze CC0-Klangeffekte (Papier, Stift, Stempel, Buch) – Quellen in docs/KLAENGE.md
+  src/commonTest/             JUnit-Tests (Deserialisierung, Engine, Balance, Theme/WCAG/Landscape, UI-Mapping, Spieldurchläufe, Zurück-Leitplanke, WebP-Loader, Lebenslauf-Export, Audio-Musiksperre/Hintergrund-Pause & Klangeffekte/WAV-Dekoder)
   src/androidMain/            Android-Plattformbrücken (PrintManager/Share/Clipboard, BackHandler & AudioTrack mit Hintergrund-Pause)
   src/desktopMain/            Windows/Desktop-Einstieg (JVM) inkl. Browser-Druckansicht/Speichern & dezentes Sound-Audio
   src/webMain/                WebApp-Einstieg (WasmJS + JS-Fallback) inkl. Startseite mit Ladeanzeige, Favicon & Web-Manifest
@@ -31,6 +32,7 @@ tools/
   prepare_media.py            WebP-Aufbereitung (320×320 / 1280×720), Master-Sicherung & Medienplan-Abgleich
 docs/
   ARBEITSPLAN.md              Übersicht aller Arbeitspakete (AP 1–AP 8; AP 7b offen)
+  KLAENGE.md                  Klangeffekte: Einsatz, Technik, Quellen & Lizenzen (alle CC0, Freesound.org)
   ANDROID_AUSLIEFERUNG.md     Praxisanleitung für Android-Installation (Schul-Tablets/APK), Keystore-Signierung & Play-Store-AAB
   bildwelt/                   Stil-A-Leitfaden, Prompt-Bibel (`prompt_bibel.json`) & Master-Referenzen (`masters/`)
 ```
@@ -44,7 +46,7 @@ python3 tools/validate_content.py --require-all-stufe1
 # 2. Neue Stil-A-Rohbilder als optimierte WebP-Assets aufbereiten & Medienplan abgleichen
 python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --update-plan
 
-# 3. Alle 55 Kotlin-Tests, Export-/Audio-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
+# 3. Alle Kotlin-Tests, Export-/Audio-Tests & Monte-Carlo-Balance-Simulation ausführen (JVM + Android Unit)
 ./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest
 
 # 4. Android-Release (.apk & .aab) sowie Desktop & Web bauen
@@ -52,6 +54,11 @@ python3 tools/prepare_media.py --input <ordner_oder_dateien> --save-master --upd
 ./gradlew :composeApp:desktopJar
 ./gradlew :composeApp:composeCompatibilityBrowserDistribution
 ```
+
+### Bedienung & Klang
+- **Immer klar, was als Nächstes kommt:** Die beiden Entscheidungen (A/B) unter der Frage „Wie entscheidest du dich?“ und danach der „Weiter“-Knopf stehen in einer fest verankerten Aktionsleiste – auf PC, Tablet und kleinen Handys ohne Scrollen sichtbar. Dasselbe gilt für Berufswahl, Kapitelstart und Kapitelrückblick.
+- **Orientierung:** Eine Zeitleiste 1914–1919 zeigt das aktuelle Kapitel, die Figurenwahl führt in nummerierten Schritten (1 Herkunft · 2 Geschlecht · 3 Alter) mit Haken.
+- **Klangeffekte:** Leise Papier-, Stift-, Stempel- und Buchgeräusche bei jedem Schritt (standardmäßig an, Lautsprecher-Symbol oben rechts schaltet sie aus). Die ruhige Hintergrundmusik bleibt separat in den Einstellungen (standardmäßig aus, an Front und Etappe gesperrt). Details: [`docs/KLAENGE.md`](docs/KLAENGE.md).
 
 ### Android-Auslieferung (Schul-Tablets & Play Store)
 - **Querformat & Bedienung:** Auf Smartphones und Schul-Tablets läuft die App fest im beidseitig drehbaren Querformat (`sensorLandscape`) mit sehr schlanker, ein- und ausklappbarer Kopfleiste, zweispaltiger Spielbühne und ruhigen Overlay-Erklärkarten.

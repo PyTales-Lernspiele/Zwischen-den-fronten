@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -92,11 +93,10 @@ fun HerkunftWahlScreen(
             modifier = mod,
             verticalArrangement = Arrangement.spacedBy(if (kompakt) 8.dp else 10.dp),
         ) {
-            Text(
-                text = "Soziale Herkunft",
-                style = MaterialTheme.typography.titleLarge,
-                color = farben.tinte,
-                modifier = Modifier.archivUeberschrift(),
+            SchrittUeberschrift(
+                nummer = 1,
+                titel = "Woher kommst du?",
+                erledigt = entwurf.herkunftId != null,
             )
 
             herkuenfte.chunked(2).forEach { paar ->
@@ -132,11 +132,10 @@ fun HerkunftWahlScreen(
         ) {
             // Geschlecht
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = "Geschlecht",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = farben.tinte,
-                    modifier = Modifier.archivUeberschrift(),
+                SchrittUeberschrift(
+                    nummer = 2,
+                    titel = "Geschlecht",
+                    erledigt = entwurf.geschlecht != null,
                 )
                 Row(
                     modifier = Modifier
@@ -167,11 +166,10 @@ fun HerkunftWahlScreen(
 
             // Jahrgang
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = "Alter im August $startJahr",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = farben.tinte,
-                    modifier = Modifier.archivUeberschrift(),
+                SchrittUeberschrift(
+                    nummer = 3,
+                    titel = "Alter im August $startJahr",
+                    erledigt = entwurf.alter != null,
                 )
                 Row(
                     modifier = Modifier
@@ -202,11 +200,10 @@ fun HerkunftWahlScreen(
             // Optional: Unterrichts-Direktwahl
             if (direktwahlAktiv) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "Lebensbereich (Unterrichts-Direktwahl)",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = farben.akzent,
-                        modifier = Modifier.archivUeberschrift(),
+                    SchrittUeberschrift(
+                        nummer = 4,
+                        titel = "Lebensbereich (Unterricht)",
+                        erledigt = entwurf.direktwahlPfad != null,
                     )
                     Row(
                         modifier = Modifier
@@ -306,7 +303,7 @@ fun HerkunftWahlScreen(
             marke = "August $startJahr",
             titel = "Wer bist du zu Beginn des Krieges?",
             untertitel = if (direktwahlAktiv) "Direktwahl aktiv" else "Ausgangslage wählen",
-            audioZustand = uiState.audioZustand,
+            tonAn = uiState.klaengeAktiv,
             onAudioToggle = onAudioToggle,
             onEinstellungenOeffnen = onEinstellungenOeffnen,
         )
@@ -545,4 +542,46 @@ private fun baueAuswahlZusammenfassung(
         teile += pfadMarke
     }
     return teile.joinToString(" · ")
+}
+
+/**
+ * Nummerierte Schritt-Überschrift (①②③) mit Haken, sobald der Schritt erledigt ist –
+ * so ist sofort klar, was noch fehlt und in welcher Reihenfolge gewählt wird.
+ */
+@Composable
+private fun SchrittUeberschrift(
+    nummer: Int,
+    titel: String,
+    erledigt: Boolean,
+) {
+    val farben = ArchivTheme.farben
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.archivUeberschrift(),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(if (erledigt) farben.akzent else farben.tinte),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (erledigt) {
+                HakenIcon(farbe = farben.papierHell, groesse = 13.dp)
+            } else {
+                Text(
+                    text = nummer.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = farben.papierHell,
+                )
+            }
+        }
+        Text(
+            text = titel,
+            style = MaterialTheme.typography.titleMedium,
+            color = farben.tinte,
+        )
+    }
 }

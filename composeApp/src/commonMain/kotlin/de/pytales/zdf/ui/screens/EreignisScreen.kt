@@ -22,7 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
@@ -33,7 +40,10 @@ import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
 import de.pytales.zdf.engine.TextResolver
 import de.pytales.zdf.model.WertSchluessel
+import de.pytales.zdf.ui.components.AktionsLeiste
 import de.pytales.zdf.ui.components.EntscheidungsKarte
+import de.pytales.zdf.ui.components.EntscheidungsOptionenGruppe
+import de.pytales.zdf.ui.components.ZeitleistenFortschritt
 import de.pytales.zdf.ui.components.EreignisAusgangKarte
 import de.pytales.zdf.ui.components.SzenenbildRahmen
 import de.pytales.zdf.ui.components.archivFokusGruppe
@@ -124,6 +134,8 @@ fun EreignisScreen(
         UiStateMapper.mapKopfKapitelTitel(engine.content, gameState)
     }
 
+    val jahre = remember(engine.content) { engine.content.kapitel.kapitel.map { it.jahr }.distinct().sorted() }
+
     val rechterScroll = rememberScrollState()
     val einzelScroll = rememberScrollState()
 
@@ -133,14 +145,24 @@ fun EreignisScreen(
         einzelScroll.scrollTo(0)
     }
 
-    // Nach Wahl einer Option sanft zur Ausgangskarte scrollen (mit Respekt für reduzierte Animationen)
+    // Nach Wahl einer Option zur Ausgangskarte scrollen: Ihr Anfang soll oben sichtbar sein,
+    // auch wenn sie erst noch aufklappt (mit Respekt für reduzierte Animationen).
+    val ausgangOben = remember { mutableIntStateOf(-1) }
     LaunchedEffect(phase is GamePhase.EreignisAusgang, metrik.zweispaltigeBuehne, uebergangsProfil.sanftScrollen) {
         if (phase is GamePhase.EreignisAusgang) {
             val zielScroll = if (metrik.zweispaltigeBuehne) rechterScroll else einzelScroll
+            // Warten, bis die Ausgangskarte aufgeklappt und vermessen ist
+            withTimeoutOrNull(2_000) {
+                snapshotFlow { ausgangOben.intValue to zielScroll.maxValue }
+                    .first { (oben, max) -> oben > 0 && max > 0 }
+            }
+            delay(uebergangsProfil.aufklappDauerMs.toLong().coerceAtLeast(0L))
+            val oben = ausgangOben.intValue
+            val ziel = if (oben > 0) minOf(oben, zielScroll.maxValue) else zielScroll.maxValue
             if (uebergangsProfil.sanftScrollen) {
-                zielScroll.animateScrollTo(zielScroll.maxValue)
+                zielScroll.animateScrollTo(ziel)
             } else {
-                zielScroll.scrollTo(zielScroll.maxValue)
+                zielScroll.scrollTo(ziel)
             }
         }
     }
@@ -161,8 +183,63 @@ fun EreignisScreen(
             label = "ereignisKartenWechsel",
             modifier = Modifier.fillMaxSize(),
         ) { _ ->
+            val ausgewaehlt = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex
+
+            // Fest verankerte Aktionsleiste: zuerst die beiden Entscheidungen, danach „Weiter“
+            val aktionsLeiste: @Composable () -> Unit = {
+                AktionsLeiste(
+                    frage = if (ausgangUi == null) "Wie entscheidest du dich?" else null,
+                ) {
+                    if (ausgangUi == null) {
+                        EntscheidungsOptionenGruppe(
+                            optionen = kartenUi.optionen,
+                            ausgewaehlteOptionIndex = ausgewaehlt,
+                            aktiv = phase is GamePhase.EreignisAnzeige,
+                            nebeneinanderErlaubt = true,
+                            onOptionWaehlen = onOptionWaehlen,
+                        )
+                    } else {
+                        ArchivPrimaerKnopf(
+                            label = "$weiterLabel  →",
+                            onClick = onWeiterNachAusgang,
+                            akzentStil = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+            }
+
+            // Erzählung, Quelle und (nach der Wahl) der Ausgang – frei scrollbar
+            val erzaehlung: @Composable () -> Unit = {
+                EntscheidungsKarte(
+                    karte = kartenUi,
+                    ausgewaehlteOptionIndex = ausgewaehlt,
+                    optionenAktiv = phase is GamePhase.EreignisAnzeige,
+                    onOptionWaehlen = onOptionWaehlen,
+                    mitOptionen = false,
+                )
+
+                AnimatedVisibility(
+                    visible = ausgangUi != null,
+                    enter = ArchivUebergaenge.aufklappEnter(reduziert),
+                    exit = ArchivUebergaenge.aufklappExit(reduziert),
+                    modifier = Modifier.onPlaced { lage ->
+                        ausgangOben.intValue = lage.positionInParent().y.toInt()
+                    },
+                ) {
+                    if (ausgangUi != null) {
+                        EreignisAusgangKarte(
+                            ausgang = ausgangUi,
+                            weiterLabel = weiterLabel,
+                            onWeiter = onWeiterNachAusgang,
+                            mitWeiterKnopf = false,
+                        )
+                    }
+                }
+            }
+
             if (metrik.zweispaltigeBuehne) {
-                // Echte zweispaltige Querformat-Bühne: links ruhendes 16:9-Motiv, rechts Erzählkarte
+                // Querformat: links Bild & Zeitleiste, rechts Erzählung mit fester Aktionsleiste darunter
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.TopCenter,
@@ -180,14 +257,15 @@ fun EreignisScreen(
                         horizontalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 12.dp else 18.dp),
                         verticalAlignment = Alignment.Top,
                     ) {
-                        // Linke Bildspalte (bleibt beim Lesen rechts ruhig stehen, bei Bedarf selbst scrollbar)
                         Column(
                             modifier = Modifier
-                                .weight(0.43f)
+                                .weight(if (metrik.kompakteHoehe) 0.36f else 0.42f)
                                 .fillMaxHeight()
                                 .verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
+                            ZeitleistenFortschritt(jahre = jahre, aktuellesJahr = gameState.jahr)
+
                             SzenenbildRahmen(szenenbild = kartenUi.szenenbild)
 
                             if (!kapitelHinweis.isNullOrBlank()) {
@@ -202,82 +280,65 @@ fun EreignisScreen(
                             BefindensNotizFluestern(zustandssatz = zustandssatz)
                         }
 
-                        // Rechte Erzähl- & Entscheidungsspalte (unabhängig ruhig scrollbar)
                         Column(
                             modifier = Modifier
-                                .weight(0.57f)
-                                .fillMaxHeight()
-                                .verticalScroll(rechterScroll),
-                            verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                                .weight(if (metrik.kompakteHoehe) 0.64f else 0.58f)
+                                .fillMaxHeight(),
+                            verticalArrangement = Arrangement.spacedBy(if (metrik.kompakteHoehe) 6.dp else 10.dp),
                         ) {
-                            EntscheidungsKarte(
-                                karte = kartenUi,
-                                ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
-                                optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                                onOptionWaehlen = onOptionWaehlen,
-                            )
-
-                            AnimatedVisibility(
-                                visible = ausgangUi != null,
-                                enter = ArchivUebergaenge.aufklappEnter(reduziert),
-                                exit = ArchivUebergaenge.aufklappExit(reduziert),
+                            // `fill = false`: Die Aktionsleiste folgt direkt auf kurze Texte und bleibt
+                            // bei langen Texten trotzdem sichtbar am unteren Rand verankert.
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f, fill = false)
+                                    .fillMaxWidth()
+                                    .verticalScroll(rechterScroll),
+                                verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
                             ) {
-                                if (ausgangUi != null) {
-                                    EreignisAusgangKarte(
-                                        ausgang = ausgangUi,
-                                        weiterLabel = weiterLabel,
-                                        onWeiter = onWeiterNachAusgang,
-                                    )
-                                }
+                                erzaehlung()
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
-
-                            Spacer(modifier = Modifier.height(8.dp))
+                            aktionsLeiste()
                         }
                     }
                 }
             } else {
-                // Schmale Fenster (< 600 dp): sauberer vertikaler Lesefluss
-                Box(
+                // Hochformat / schmale Fenster: Lesefluss oben, feste Aktionsleiste unten
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(einzelScroll),
-                    contentAlignment = Alignment.TopCenter,
+                        .archivInhaltsSafeArea(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Column(
                         modifier = Modifier
-                            .archivInhaltsSafeArea()
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(einzelScroll),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .widthIn(max = metrik.maxInhaltsBreite)
+                                .fillMaxWidth()
+                                .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
+                                .archivFokusGruppe(),
+                            verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                        ) {
+                            ZeitleistenFortschritt(jahre = jahre, aktuellesJahr = gameState.jahr)
+                            SzenenbildRahmen(szenenbild = kartenUi.szenenbild)
+                            erzaehlung()
+                            BefindensNotizFluestern(zustandssatz = zustandssatz)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
                             .widthIn(max = metrik.maxInhaltsBreite)
                             .fillMaxWidth()
-                            .padding(horizontal = metrik.aussenAbstand, vertical = metrik.elementAbstand)
-                            .archivFokusGruppe(),
-                        verticalArrangement = Arrangement.spacedBy(metrik.elementAbstand),
+                            .padding(horizontal = metrik.aussenAbstand, vertical = 8.dp),
                     ) {
-                        SzenenbildRahmen(szenenbild = kartenUi.szenenbild)
-
-                        EntscheidungsKarte(
-                            karte = kartenUi,
-                            ausgewaehlteOptionIndex = (phase as? GamePhase.EreignisAusgang)?.gewaehlteOptionIndex,
-                            optionenAktiv = phase is GamePhase.EreignisAnzeige,
-                            onOptionWaehlen = onOptionWaehlen,
-                        )
-
-                        AnimatedVisibility(
-                            visible = ausgangUi != null,
-                            enter = ArchivUebergaenge.aufklappEnter(reduziert),
-                            exit = ArchivUebergaenge.aufklappExit(reduziert),
-                        ) {
-                            if (ausgangUi != null) {
-                                EreignisAusgangKarte(
-                                    ausgang = ausgangUi,
-                                    weiterLabel = weiterLabel,
-                                    onWeiter = onWeiterNachAusgang,
-                                )
-                            }
-                        }
-
-                        BefindensNotizFluestern(zustandssatz = zustandssatz)
-
-                        Spacer(modifier = Modifier.height(12.dp))
+                        aktionsLeiste()
                     }
                 }
             }

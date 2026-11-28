@@ -55,7 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import de.pytales.zdf.audio.AudioZustand
+import de.pytales.zdf.audio.Klang
+import de.pytales.zdf.audio.LocalKlangSpieler
 import de.pytales.zdf.content.GameContent
 import de.pytales.zdf.engine.GameEngine
 import de.pytales.zdf.engine.GamePhase
@@ -131,7 +132,7 @@ internal fun SpielBuehnenRahmen(
             onEmotionDetailsOffenChange = onEmotionDetailsOffenChange,
             zusatzAktionen = {
                 AudioIconKnopf(
-                    audioZustand = uiState.audioZustand,
+                    tonAn = uiState.klaengeAktiv,
                     aufDunkel = true,
                     onToggle = onAudioToggle,
                 )
@@ -162,7 +163,7 @@ internal fun SpielBuehnenRahmen(
                     onEmotionTippen = { onEmotionDetailsOffenChange(true) },
                     zusatzAktionenVertikal = {
                         AudioIconKnopf(
-                            audioZustand = uiState.audioZustand,
+                            tonAn = uiState.klaengeAktiv,
                             aufDunkel = true,
                             onToggle = onAudioToggle,
                         )
@@ -186,7 +187,7 @@ internal fun SpielBuehnenRahmen(
 internal fun ArchivKopfBand(
     marke: String,
     titel: String,
-    audioZustand: AudioZustand,
+    tonAn: Boolean,
     onAudioToggle: () -> Unit,
     onEinstellungenOeffnen: () -> Unit,
     untertitel: String? = null,
@@ -265,7 +266,7 @@ internal fun ArchivKopfBand(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AudioIconKnopf(
-                        audioZustand = audioZustand,
+                        tonAn = tonAn,
                         aufDunkel = true,
                         onToggle = onAudioToggle,
                     )
@@ -286,76 +287,59 @@ internal fun ArchivKopfBand(
 }
 
 /**
- * Dezenter Ton-Umschalter als 48×48-dp-Icon-Button (auf dunkler Leiste oder hellem Archivpapier).
- * Zeigt bei aktiver Musiksperre (Front, Etappe, Auffangnetz) respektvolle Stille an.
+ * Klar beschrifteter Ton-Umschalter (Lautsprecher) für die Klangeffekte.
+ * Durchgestrichen = Ton aus. Die leise Hintergrundmusik wird separat in den Einstellungen geschaltet.
  */
 @Composable
 internal fun AudioIconKnopf(
-    audioZustand: AudioZustand,
+    tonAn: Boolean,
     aufDunkel: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val farben = ArchivTheme.farben
     val minTouch = ArchivTheme.metrik.minTouchHoehe
-    val gesperrt = audioZustand.musikGesperrt
-    val spielt = audioZustand.spieltGerade
+    val klang = LocalKlangSpieler.current
 
     val iconFarbe = when {
-        gesperrt -> if (aufDunkel) farben.textHell.copy(alpha = 0.58f) else farben.tinteMatt.copy(alpha = 0.7f)
-        spielt -> if (aufDunkel) farben.stufenFarbeHell(0) else farben.stufenFarbe(0)
-        else -> if (aufDunkel) farben.textHell.copy(alpha = 0.88f) else farben.tinteMatt
+        tonAn -> if (aufDunkel) farben.textHell else farben.tinte
+        else -> if (aufDunkel) farben.textHell.copy(alpha = 0.62f) else farben.tinteMatt
     }
-    val kapselFlaeche = when {
-        spielt && aufDunkel -> farben.stufenFarbe(0).copy(alpha = 0.30f)
-        spielt && !aufDunkel -> farben.stufenFarbe(0).copy(alpha = 0.12f)
-        aufDunkel -> farben.dunkelHell.copy(alpha = 0.78f)
-        else -> farben.papierHell.copy(alpha = 0.88f)
-    }
-    val kapselRahmen = when {
-        spielt -> iconFarbe.copy(alpha = 0.55f)
-        aufDunkel -> farben.segmentDunkel
-        else -> farben.linieFein
-    }
-
-    val statusText = when {
-        gesperrt -> audioZustand.sperrGrund?.hinweis ?: "Respektvolle Stille."
-        spielt -> "Dezenter Ton eingeschaltet."
-        else -> "Stummgeschaltet."
-    }
-    val beschreibung = when {
-        gesperrt -> "$statusText Tippen, um die allgemeine Ton-Einstellung umzuschalten."
-        spielt -> "$statusText Tippen zum Stummschalten."
-        else -> "$statusText Tippen, um dezenten Ton für Startmenü und Heimat einzuschalten."
-    }
+    val kapselFlaeche = if (aufDunkel) farben.dunkelHell.copy(alpha = 0.78f) else farben.papierHell.copy(alpha = 0.88f)
+    val kapselRahmen = if (aufDunkel) farben.segmentDunkel else farben.linieFein
+    val statusText = if (tonAn) "Ton an" else "Ton aus"
 
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = minTouch, minHeight = minTouch)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = aufDunkel)
-            .clickable(onClick = onToggle)
+            .clickable {
+                onToggle()
+                // Beim Einschalten kurz hörbar bestätigen
+                if (!tonAn) klang?.let { it.aktiv = true; it.spiele(Klang.TIPPEN) }
+            }
             .clearAndSetSemantics {
                 role = Role.Switch
-                selected = audioZustand.audioAktiv && !gesperrt
+                selected = tonAn
                 stateDescription = statusText
-                contentDescription = beschreibung
+                contentDescription = if (tonAn) "Ton an. Tippen zum Stummschalten." else "Ton aus. Tippen zum Einschalten."
             },
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(38.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(kapselFlaeche)
                 .border(0.75.dp, kapselRahmen, RoundedCornerShape(6.dp)),
             contentAlignment = Alignment.Center,
         ) {
             TonIcon(
-                aktiv = spielt,
-                gesperrt = gesperrt,
+                aktiv = tonAn,
+                gesperrt = false,
                 farbe = iconFarbe,
-                groesse = 18.dp,
+                groesse = 22.dp,
             )
         }
     }
@@ -425,6 +409,7 @@ internal fun EinstellungenDialog(
     onSchriftgroesseChange: (Schriftgroesse) -> Unit,
     onReduzierteAnimationenToggle: () -> Unit,
     onAudioToggle: () -> Unit,
+    onKlaengeToggle: () -> Unit,
     onDirektwahlChange: (Boolean) -> Unit,
     onSchliessen: () -> Unit,
 ) {
@@ -524,13 +509,23 @@ internal fun EinstellungenDialog(
 
                         ArchivTrennlinie()
 
-                        // 2. Dezenter Ton
+                        // 2. Klangeffekte
                         ArchivSchalterZeile(
-                            titel = "Dezenter Ton",
+                            titel = "Klangeffekte",
+                            beschreibung = "Leise Papier-, Stift- und Stempelgeräusche bei jedem Schritt.",
+                            aktiv = uiState.klaengeAktiv,
+                            onToggle = onKlaengeToggle,
+                        )
+
+                        ArchivTrennlinie()
+
+                        // 3. Leise Musik
+                        ArchivSchalterZeile(
+                            titel = "Leise Musik",
                             beschreibung = if (uiState.audioZustand.musikGesperrt) {
                                 "An Front, Etappe und bei Einschnitt herrscht Stille."
                             } else {
-                                "Leise Begleitung im Startmenü und in der Heimat."
+                                "Ruhige Begleitung im Startmenü und in der Heimat."
                             },
                             aktiv = uiState.audioAktiv,
                             onToggle = onAudioToggle,
@@ -538,7 +533,7 @@ internal fun EinstellungenDialog(
 
                         ArchivTrennlinie()
 
-                        // 3. Animationen reduzieren
+                        // 4. Animationen reduzieren
                         ArchivSchalterZeile(
                             titel = "Animationen reduzieren",
                             beschreibung = "Sofortige, ruhige Wechsel ohne Überblendungen.",
@@ -546,7 +541,7 @@ internal fun EinstellungenDialog(
                             onToggle = onReduzierteAnimationenToggle,
                         )
 
-                        // 4. Unterrichts-Direktwahl
+                        // 5. Unterrichts-Direktwahl
                         if (direktwahlOption.aktiv) {
                             ArchivTrennlinie()
                             ArchivSchalterZeile(
@@ -881,6 +876,7 @@ internal fun ArchivSchalterZeile(
     modifier: Modifier = Modifier,
     aktiviert: Boolean = true,
 ) {
+    val klangSchalter = LocalKlangSpieler.current
     val farben = ArchivTheme.farben
     val metrik = ArchivTheme.metrik
 
@@ -890,7 +886,10 @@ internal fun ArchivSchalterZeile(
             .defaultMinSize(minHeight = metrik.minTouchHoehe)
             .clip(RoundedCornerShape(6.dp))
             .archivFokusRahmen(eckRadius = 6.dp, aufDunkel = false)
-            .clickable(enabled = aktiviert, onClick = onToggle)
+            .clickable(enabled = aktiviert) {
+                klangSchalter?.spiele(Klang.TIPPEN)
+                onToggle()
+            }
             .clearAndSetSemantics {
                 role = Role.Switch
                 selected = aktiv
